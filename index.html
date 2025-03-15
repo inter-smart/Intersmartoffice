@@ -7,7 +7,7 @@
   <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
     href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&family=Work+Sans%3Awght%40400%3B500%3B700%3B900" />
   <title>Conference Room Booking</title>
-  <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+  <link rel="icon" type="image/png" href="images/fav.png" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <style>
     .calendar-day {
@@ -223,9 +223,9 @@
       style='font-family: "Work Sans", "Noto Sans", sans-serif;'>
       <div class="layout-container flex h-full grow flex-col">
         <header
-          class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] px-10 py-3">
-          <div class="flex items-center gap-4 text-[#0e141b]">
-            <img src="images/logo.png" alt="Logo" class="h-10" />
+          class="flex items-center justify-center whitespace-nowrap border-b border-solid border-b-[#e7edf3] px-10 py-3">
+          <div class="flex items-center justify-center gap-4 text-[#0e141b]">
+            <img src="images/logo2.png" alt="Logo" class="h-10" />
           </div>
           <div class="flex flex-1 justify-end gap-8">
             <div class="flex items-center gap-9"></div>
@@ -528,6 +528,16 @@
         }
 
         currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+        // Reset selectedDate to today if it's in the past
+        if (selectedDate < today.setHours(0, 0, 0, 0)) {
+          selectedDate = new Date(today);
+          selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          timeSlotContainer.classList.remove('hidden');
+          bookedSlotsContainer.classList.remove('hidden');
+          renderTimeSlots();
+          renderBookedSlots();
+        }
       }
 
       function selectDate(date) {
@@ -552,6 +562,13 @@
         const endTime = 18.5;
         const interval = 0.5;
 
+        // Get current date and time for comparison
+        const now = new Date();
+        const isToday = dateKey === now.toDateString();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeInHours = currentHour + currentMinute / 60;
+
         for (let time = startTime; time <= endTime; time += interval) {
           const hours = Math.floor(time);
           const minutes = (time % 1) * 60;
@@ -559,6 +576,11 @@
           const formattedHours = hours % 12 || 12;
           const formattedMinutes = minutes === 0 ? '00' : '30';
           const slot = `${formattedHours}:${formattedMinutes} ${period}`;
+
+          // Skip past time slots if today
+          if (isToday && time <= currentTimeInHours) {
+            continue;
+          }
 
           const slotButton = document.createElement('button');
           slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
@@ -633,13 +655,47 @@
           "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"
         ];
 
+        // Get current date and time for comparison
+        const now = new Date();
+        const isToday = dateKey === now.toDateString();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeInHours = currentHour + currentMinute / 60;
+
         try {
           const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
           const querySnapshot = await getDocs(q);
           const bookedSlots = querySnapshot.docs.map(doc => doc.data().time);
 
           let hasAvailableSlots = false;
+
+          // Validate that the selected date is not in the past
+          const selectedDateObj = new Date(newDate);
+          if (selectedDateObj < now.setHours(0, 0, 0, 0)) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Cannot reschedule to past dates';
+            option.disabled = true;
+            option.selected = true;
+            newTimeSelect.appendChild(option);
+            return;
+          }
+
           allTimeSlots.forEach(slot => {
+            // Convert slot to time in hours for comparison (e.g., "9:30 AM" -> 9.5)
+            const [timeStr, period] = slot.split(' ');
+            const [hoursStr, minutesStr] = timeStr.split(':');
+            let hours = parseInt(hoursStr);
+            const minutes = parseInt(minutesStr);
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            const slotTimeInHours = hours + minutes / 60;
+
+            // Skip past time slots if today
+            if (isToday && slotTimeInHours <= currentTimeInHours) {
+              return;
+            }
+
             if (!bookedSlots.includes(slot)) {
               const option = document.createElement('option');
               option.value = slot;
@@ -738,6 +794,10 @@
           const todayString = today.toISOString().split('T')[0];
           newDateInput.setAttribute('min', todayString);
 
+          // Reset the date and time fields to avoid invalid selections
+          newDateInput.value = todayString; // Default to today
+          newTimeSelect.innerHTML = ''; // Clear time slots until a valid date is selected
+
           newDateInput.addEventListener('change', (e) => {
             const newDate = e.target.value;
             if (newDate) {
@@ -750,6 +810,20 @@
             const token = document.getElementById('token').value;
             const newDate = document.getElementById('newDate').value;
             const newTime = document.getElementById('newTime').value;
+
+            // Validate that the selected date is not in the past
+            const now = new Date();
+            const selectedDateObj = new Date(newDate);
+            if (selectedDateObj < now.setHours(0, 0, 0, 0)) {
+              alert('Cannot reschedule to a past date. Please select a current or future date.');
+              return;
+            }
+
+            // Validate that a valid time slot is selected
+            if (!newTime || newTime === '') {
+              alert('Please select a valid time slot.');
+              return;
+            }
 
             try {
               const docSnap = await getDoc(doc(db, 'bookings', docId));
