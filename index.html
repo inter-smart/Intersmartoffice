@@ -16,15 +16,33 @@
     .calendar-day:hover {
       background-color: #e7edf3;
     }
+    .calendar-day.disabled {
+      background-color: #f0f0f0;
+      color: #a0a0a0;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .calendar-day.selected {
+      background-color: #1980e6;
+      color: white;
+      position: relative;
+    }
+    .calendar-day.selected::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      width: 80%;
+      height: 2px;
+      background-color: #ffffff;
+      transform: rotate(-45deg);
+      transform-origin: center;
+    }
     .reserve-button {
       transition: background-color 0.3s ease;
     }
     .reserve-button:hover {
       background-color: #146bb8;
-    }
-    .selected {
-      background-color: #1980e6;
-      color: white;
     }
     .modal {
       display: none;
@@ -55,6 +73,7 @@
       z-index: 1000;
       display: none;
       text-align: center;
+      min-width: 300px;
     }
     .success-message button {
       margin-top: 10px;
@@ -64,16 +83,18 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      font-weight: bold;
     }
     .close-button {
       position: absolute;
-      top: 5px;
-      right: 5px;
+      top: 10px;
+      right: 10px;
       background: none;
       border: none;
       color: white;
-      font-size: 16px;
+      font-size: 20px;
       cursor: pointer;
+      font-weight: bold;
     }
     .video-background {
       position: fixed;
@@ -106,8 +127,6 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      z-index: 1;
-      position: relative;
     }
     .home-screen button:hover {
       background-color: #146bb8;
@@ -127,10 +146,10 @@
       max-height: 500px;
     }
     .booked-slot {
-      background-color: #e0e0e0 !important; /* Ensure grey background */
-      opacity: 0.6 !important; /* Ensure greyed out */
+      background-color: #e0e0e0;
+      opacity: 0.6;
       position: relative;
-      pointer-events: none; /* Disable interaction */
+      pointer-events: none;
     }
     .booked-slot::after {
       content: '';
@@ -156,15 +175,14 @@
       background-color: #f9f9f9;
       cursor: pointer;
       transition: background-color 0.3s ease;
-      position: relative;
     }
     .time-slots button.selected {
       background-color: #1980e6;
       color: white;
     }
     .time-slots button.booked-slot {
-      background-color: #e0e0e0 !important;
-      opacity: 0.6 !important;
+      background-color: #e0e0e0;
+      opacity: 0.6;
       pointer-events: none;
       position: relative;
     }
@@ -214,7 +232,6 @@
         <header
           class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] px-10 py-3">
           <div class="flex items-center gap-4 text-[#0e141b]">
-            <!-- Logo -->
             <img src="images/logo.png" alt="Logo" class="h-10" />
           </div>
           <div class="flex flex-1 justify-end gap-8">
@@ -223,13 +240,11 @@
               <button
                 class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#e7edf3] text-[#0e141b] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
                 <div class="text-[#0e141b]" data-icon="Bell" data-size="20px" data-weight="regular">
-                  <!-- SVG Icon -->
                 </div>
               </button>
               <button
                 class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#e7edf3] text-[#0e141b] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
                 <div class="text-[#0e141b]" data-icon="Question" data-size="20px" data-weight="regular">
-                  <!-- SVG Icon -->
                 </div>
               </button>
             </div>
@@ -239,8 +254,7 @@
           <div class="layout-content-container flex flex-col w-[512px] max-w-[512px] py-5 max-w-[960px] flex-1">
             <div class="flex flex-wrap justify-between gap-3 p-4">
               <div class="flex min-w-72 flex-col gap-3">
-                <p class="text-[#0e141b] tracking-light text-[32px] font-bold leading-tight">Reserve the Main Conference
-                  Room</p>
+                <p class="text-[#0e141b] tracking-light text-[32px] font-bold leading-tight">Reserve the Main Conference Room</p>
                 <p class="text-[#4e7397] text-sm font-normal leading-normal">Seats 12 people</p>
               </div>
             </div>
@@ -250,15 +264,13 @@
                   <button id="prevMonth">
                     <div class="text-[#0e141b] flex size-10 items-center justify-center" data-icon="CaretLeft"
                       data-size="18px" data-weight="regular">
-                      <!-- SVG Icon -->
                       <
                     </div>
                   </button>
-                  <p id="currentMonth" class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center">February 2023</p>
+                  <p id="currentMonth" class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center"></p>
                   <button id="nextMonth">
                     <div class="text-[#0e141b] flex size-10 items-center justify-center" data-icon="CaretRight"
                       data-size="18px" data-weight="regular">
-                      <!-- SVG Icon -->
                       >
                     </div>
                   </button>
@@ -268,7 +280,7 @@
                 </div>
               </div>
             </div>
-            <h3 id="selectedDate" class="text-[#0e141b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Feb 22, 2023</h3>
+            <h3 id="selectedDate" class="text-[#0e141b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4"></h3>
             <div class="time-slots p-4 hidden" id="timeSlotContainer">
               <h3 class="text-[#0e141b] text-lg font-bold mb-4">Available Time Slots</h3>
               <div class="overflow-x-auto whitespace-nowrap" id="timeSlots">
@@ -361,14 +373,7 @@
         <div class="mb-4">
           <label class="block text-sm font-medium text-[#0e141b]">Select New Time Slot</label>
           <select id="newTime" class="w-full p-2 border rounded" required>
-            <option value="9:00 AM">9:00 AM</option>
-            <option value="10:00 AM">10:00 AM</option>
-            <option value="11:00 AM">11:00 AM</option>
-            <option value="12:00 PM">12:00 PM</option>
-            <option value="1:00 PM">1:00 PM</option>
-            <option value="2:00 PM">2:00 PM</option>
-            <option value="3:00 PM">3:00 PM</option>
-            <option value="4:00 PM">4:00 PM</option>
+            <!-- Dynamically populated -->
           </select>
         </div>
         <div class="flex justify-end gap-2">
@@ -380,11 +385,9 @@
   </div>
 
   <script type="module">
-    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getFirestore, collection, getDocs, query, where, addDoc, updateDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCqLBJtkFHjeJNVjAkxwnL7GSYYJ34Ee",
       authDomain: "interbook-c003c.firebaseapp.com",
@@ -394,13 +397,10 @@
       appId: "1:835157789713:web:c18b4f4ee7b9ac5b535b"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
     document.addEventListener('DOMContentLoaded', function () {
-      console.log('DOM fully loaded');
-
       const homeScreen = document.getElementById('homeScreen');
       const bookingScreen = document.getElementById('bookingScreen');
       const bookNowButton = document.getElementById('bookNowButton');
@@ -412,44 +412,25 @@
       const bookedSlotsContainer = document.getElementById('bookedSlotsContainer');
       const bookedSlots = document.getElementById('bookedSlots');
 
-      // Debug: Check if elements are found
-      console.log('homeScreen:', homeScreen);
-      console.log('bookingScreen:', bookingScreen);
-      console.log('bookNowButton:', bookNowButton);
-
-      if (!homeScreen || !bookingScreen || !bookNowButton) {
-        console.error('One or more elements not found:', {
-          homeScreen: homeScreen,
-          bookingScreen: bookingScreen,
-          bookNowButton: bookNowButton
-        });
-        return;
-      }
-
-      // Show booking screen when "Book Now" is clicked
       bookNowButton.addEventListener('click', () => {
         console.log('Book Now button clicked');
         homeScreen.classList.add('hidden');
         bookingScreen.classList.remove('hidden');
       });
 
-      // Close success message
       closeSuccessMessage.addEventListener('click', () => {
         successMessage.style.display = 'none';
       });
 
-      // Close reschedule success message
       closeRescheduleSuccessMessage.addEventListener('click', () => {
         rescheduleSuccessMessage.style.display = 'none';
       });
 
-      // Expand and collapse booked slots
       expandButton.addEventListener('click', () => {
         bookedSlotsContainer.classList.toggle('expanded');
         expandButton.textContent = bookedSlotsContainer.classList.contains('expanded') ? 'Show less' : 'Show more';
       });
 
-      // Rest of the booking screen functionality
       const calendar = document.getElementById('calendar');
       const timeSlotContainer = document.getElementById('timeSlotContainer');
       const timeSlots = document.getElementById('timeSlots');
@@ -464,10 +445,13 @@
       const rescheduleModal = document.getElementById('rescheduleModal');
       const rescheduleForm = document.getElementById('rescheduleForm');
       const cancelRescheduleButton = document.getElementById('cancelReschedule');
+      const newTimeSelect = document.getElementById('newTime');
+      const newDateInput = document.getElementById('newDate');
 
       let currentDate = new Date();
-      let selectedDate = null;
+      let selectedDate = new Date();
       let selectedTimeSlots = [];
+      let bookings = {};
 
       const departmentImages = {
         'QA': 'images/dep.jpg',
@@ -503,6 +487,7 @@
         calendar.innerHTML = '';
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
+        const today = new Date();
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         const daysInMonth = lastDay.getDate();
@@ -522,12 +507,25 @@
         }
 
         for (let i = 1; i <= daysInMonth; i++) {
+          const dateToCheck = new Date(year, month, i);
           const dayButton = document.createElement('button');
           dayButton.className = 'h-12 w-full text-[#0e141b] text-sm font-medium leading-normal calendar-day';
           dayButton.textContent = i;
-          dayButton.addEventListener('click', () => selectDate(new Date(year, month, i)));
+
+          if (dateToCheck < today) {
+            dayButton.classList.add('disabled');
+          } else {
+            dayButton.addEventListener('click', () => selectDate(new Date(year, month, i)));
+          }
+
+          if (selectedDate && selectedDate.getDate() === i && selectedDate.getMonth() === month && selectedDate.getFullYear() === year) {
+            dayButton.classList.add('selected');
+          }
+
           calendar.appendChild(dayButton);
         }
+
+        currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
       }
 
       function selectDate(date) {
@@ -535,28 +533,18 @@
         selectedDateElement.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         timeSlotContainer.classList.remove('hidden');
         bookedSlotsContainer.classList.remove('hidden');
+        renderCalendar(); // Re-render to show selected date
         renderTimeSlots();
         renderBookedSlots();
       }
 
-      async function renderTimeSlots() {
+      function renderTimeSlots() {
         timeSlots.innerHTML = '';
         const dateKey = selectedDate.toDateString();
 
-        // Fetch booked slots from Firestore
-        let bookedTimes = [];
-        try {
-          const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
-          const querySnapshot = await getDocs(q);
-          bookedTimes = querySnapshot.docs.map(doc => doc.data().time);
-          console.log('Booked times for', dateKey, ':', bookedTimes);
-        } catch (error) {
-          console.error('Error fetching booked times:', error);
-        }
-
-        const startTime = 9.5; // 9:30 AM in decimal format
-        const endTime = 18.5; // 6:30 PM in decimal format
-        const interval = 0.5; // 30 minutes
+        const startTime = 9.5;
+        const endTime = 18.5;
+        const interval = 0.5;
 
         for (let time = startTime; time <= endTime; time += interval) {
           const hours = Math.floor(time);
@@ -569,10 +557,9 @@
           const slotButton = document.createElement('button');
           slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
 
-          const isBooked = bookedTimes.includes(slot);
+          const isBooked = bookings[dateKey]?.some(booking => booking.time === slot);
           if (isBooked) {
             slotButton.classList.add('booked-slot');
-            console.log(`Slot ${slot} is booked, applying booked-slot class`);
           }
 
           slotButton.textContent = slot;
@@ -594,40 +581,36 @@
         try {
           const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
           const querySnapshot = await getDocs(q);
-          if (!querySnapshot.empty) {
-            querySnapshot.forEach((doc) => {
-              const booking = doc.data();
-              const bookingElement = document.createElement('div');
-              bookingElement.className = 'flex items-center justify-between p-4 border-b border-[#e7edf3]';
+          querySnapshot.forEach((doc) => {
+            const booking = doc.data();
+            const bookingElement = document.createElement('div');
+            bookingElement.className = 'flex items-center justify-between p-4 border-b border-[#e7edf3]';
 
-              const departmentInfo = document.createElement('div');
-              departmentInfo.className = 'flex items-center gap-4';
-              departmentInfo.innerHTML = `
-                <img src="${departmentImages[booking.department]}" alt="${booking.department}" class="w-12 h-12 rounded-full">
-                <p class="text-[#0e141b] text-sm font-medium">${booking.department}</p>
-              `;
+            const departmentInfo = document.createElement('div');
+            departmentInfo.className = 'flex items-center gap-4';
+            departmentInfo.innerHTML = `
+              <img src="${departmentImages[booking.department]}" alt="${booking.department}" class="w-12 h-12 rounded-full">
+              <p class="text-[#0e141b] text-sm font-medium">${booking.department}</p>
+            `;
 
-              const bookedTime = document.createElement('p');
-              bookedTime.className = 'text-[#0e141b] text-sm font-medium';
-              bookedTime.textContent = booking.time;
+            const bookedTime = document.createElement('p');
+            bookedTime.className = 'text-[#0e141b] text-sm font-medium';
+            bookedTime.textContent = booking.time;
 
-              const rescheduleButton = document.createElement('button');
-              rescheduleButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
-              rescheduleButton.textContent = 'Reschedule';
-              rescheduleButton.setAttribute('data-id', doc.id);
+            const rescheduleButton = document.createElement('button');
+            rescheduleButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
+            rescheduleButton.textContent = 'Reschedule';
+            rescheduleButton.setAttribute('data-id', doc.id);
 
-              bookingElement.appendChild(departmentInfo);
-              bookingElement.appendChild(bookedTime);
-              bookingElement.appendChild(rescheduleButton);
+            bookingElement.appendChild(departmentInfo);
+            bookingElement.appendChild(bookedTime);
+            bookingElement.appendChild(rescheduleButton);
 
-              bookedSlots.appendChild(bookingElement);
-            });
+            bookedSlots.appendChild(bookingElement);
+          });
 
-            if (querySnapshot.size > 2) {
-              expandButton.classList.remove('hidden');
-            } else {
-              expandButton.classList.add('hidden');
-            }
+          if (querySnapshot.size > 2) {
+            expandButton.classList.remove('hidden');
           } else {
             expandButton.classList.add('hidden');
           }
@@ -636,8 +619,47 @@
         }
       }
 
+      async function populateAvailableTimeSlots(newDate) {
+        newTimeSelect.innerHTML = '';
+        const dateKey = new Date(newDate).toDateString();
+        const allTimeSlots = [
+          "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+          "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"
+        ];
+
+        try {
+          const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+          const querySnapshot = await getDocs(q);
+          const bookedSlots = querySnapshot.docs.map(doc => doc.data().time);
+
+          allTimeSlots.forEach(slot => {
+            if (!bookedSlots.includes(slot)) {
+              const option = document.createElement('option');
+              option.value = slot;
+              option.textContent = slot;
+              newTimeSelect.appendChild(option);
+            }
+          });
+
+          if (newTimeSelect.options.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No available slots';
+            option.disabled = true;
+            newTimeSelect.appendChild(option);
+          }
+        } catch (error) {
+          console.error('Error fetching booked slots for rescheduling: ', error);
+        }
+      }
+
       reserveButton.addEventListener('click', () => {
-        bookingModal.style.display = 'flex';
+        console.log('Reserve button clicked');
+        if (selectedTimeSlots.length > 0) {
+          bookingModal.style.display = 'flex';
+        } else {
+          alert('Please select at least one time slot.');
+        }
       });
 
       bookingForm.addEventListener('submit', async (e) => {
@@ -655,25 +677,25 @@
           for (const time of selectedTimeSlots) {
             await addDoc(collection(db, 'bookings'), {
               date: dateKey,
-              time: time,
-              name: name,
-              email: email,
-              department: department,
-              role: role,
-              purpose: purpose,
-              token: token
+              department,
+              email,
+              purpose,
+              role,
+              time,
+              token
             });
           }
 
           showSuccessMessage(`Booking confirmed! Your token is: ${token}. Please save this token to reschedule later.`);
           bookingModal.style.display = 'none';
           bookingForm.reset();
-          renderBookedSlots();
-          renderTimeSlots();
+          selectedTimeSlots = [];
           reserveButton.disabled = true;
+          timeSlots.innerHTML = '';
+          renderBookedSlots();
         } catch (error) {
           console.error('Error adding booking: ', error);
-          alert('Failed to add booking. Check the console for details.');
+          alert('Failed to book. Please try again.');
         }
       });
 
@@ -686,6 +708,13 @@
         if (e.target.classList.contains('reschedule-button')) {
           const docId = e.target.getAttribute('data-id');
           rescheduleModal.style.display = 'flex';
+
+          newDateInput.addEventListener('change', (e) => {
+            const newDate = e.target.value;
+            if (newDate) {
+              populateAvailableTimeSlots(newDate);
+            }
+          });
 
           rescheduleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -710,12 +739,11 @@
               rescheduleModal.style.display = 'none';
               showRescheduleSuccessMessage();
               renderBookedSlots();
-              renderTimeSlots();
             } catch (error) {
               console.error('Error rescheduling booking: ', error);
-              alert('Failed to reschedule booking. Check the console for details.');
+              alert('Failed to reschedule. Please try again.');
             }
-          }, { once: true }); // Ensure the listener is added only once
+          }, { once: true });
         }
       });
 
@@ -725,16 +753,24 @@
 
       prevMonthButton.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
-        currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const today = new Date();
+        if (currentDate < today) {
+          currentDate.setMonth(today.getMonth());
+          currentDate.setFullYear(today.getFullYear());
+        }
         renderCalendar();
       });
 
       nextMonthButton.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() + 1);
-        currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         renderCalendar();
       });
 
+      // Initialize with current date
+      currentDate = new Date();
+      selectedDate = new Date();
+      currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       renderCalendar();
     });
   </script>
