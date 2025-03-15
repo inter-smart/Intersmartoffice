@@ -1,19 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Include Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
   <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
-    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Work+Sans%3Awght%40400%3B500%3B700%3B900" />
+    href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&family=Work+Sans%3Awght%40400%3B500%3B700%3B900" />
   <title>Conference Room Booking</title>
   <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <style>
-    /* Your existing CSS styles */
+    .calendar-day {
+      transition: background-color 0.3s ease;
+    }
+    .calendar-day:hover {
+      background-color: #e7edf3;
+    }
+    .reserve-button {
+      transition: background-color 0.3s ease;
+    }
+    .reserve-button:hover {
+      background-color: #146bb8;
+    }
+    .selected {
+      background-color: #1980e6;
+      color: white;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+    }
+    .success-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      z-index: 1000;
+      display: none;
+      text-align: center;
+    }
+    .success-message button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      background-color: #146bb8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .close-button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      object-fit: cover;
+    }
+    .home-screen {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+      text-align: center;
+    }
+    .home-screen h1 {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+    }
+    .home-screen button {
+      font-size: 1.5rem;
+      padding: 1rem 2rem;
+      background-color: #1980e6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .home-screen button:hover {
+      background-color: #146bb8;
+    }
+    .hidden {
+      display: none;
+    }
+    .booked-slots {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #e7edf3;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .booked-slots.expanded {
+      max-height: 500px;
+    }
+    .booked-slot {
+      background-color: #e0e0e0;
+      opacity: 0.6;
+      position: relative;
+      pointer-events: none;
+    }
+    .booked-slot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #ff0000;
+      transform: rotate(-45deg);
+      transform-origin: center;
+    }
+    .time-slots {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .time-slots button {
+      display: inline-block;
+      margin-right: 10px;
+      padding: 8px 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .time-slots button.selected {
+      background-color: #1980e6;
+      color: white;
+    }
+    .time-slots button.booked-slot {
+      background-color: #e0e0e0;
+      opacity: 0.6;
+      pointer-events: none;
+      position: relative;
+    }
+    .time-slots button.booked-slot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #ff0000;
+      transform: rotate(-45deg);
+      transform-origin: center;
+    }
   </style>
 </head>
 <body>
@@ -43,7 +205,93 @@
 
   <!-- Booking Screen -->
   <div id="bookingScreen" class="hidden">
-    <!-- Your existing booking screen HTML -->
+    <div class="relative flex size-full min-h-screen flex-col bg-slate-50 group/design-root overflow-x-hidden"
+      style='font-family: "Work Sans", "Noto Sans", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        <header
+          class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] px-10 py-3">
+          <div class="flex items-center gap-4 text-[#0e141b]">
+            <!-- Logo -->
+            <img src="images/logo.png" alt="Logo" class="h-10" />
+          </div>
+          <div class="flex flex-1 justify-end gap-8">
+            <div class="flex items-center gap-9"></div>
+            <div class="flex gap-2">
+              <button
+                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#e7edf3] text-[#0e141b] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+                <div class="text-[#0e141b]" data-icon="Bell" data-size="20px" data-weight="regular">
+                  <!-- SVG Icon -->
+                </div>
+              </button>
+              <button
+                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#e7edf3] text-[#0e141b] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+                <div class="text-[#0e141b]" data-icon="Question" data-size="20px" data-weight="regular">
+                  <!-- SVG Icon -->
+                </div>
+              </button>
+            </div>
+          </div>
+        </header>
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col w-[512px] max-w-[512px] py-5 max-w-[960px] flex-1">
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <div class="flex min-w-72 flex-col gap-3">
+                <p class="text-[#0e141b] tracking-light text-[32px] font-bold leading-tight">Reserve the Main Conference
+                  Room</p>
+                <p class="text-[#4e7397] text-sm font-normal leading-normal">Seats 12 people</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-6 p-4">
+              <div class="flex min-w-72 max-w-[336px] flex-1 flex-col gap-0.5">
+                <div class="flex items-center p-1 justify-between">
+                  <button id="prevMonth">
+                    <div class="text-[#0e141b] flex size-10 items-center justify-center" data-icon="CaretLeft"
+                      data-size="18px" data-weight="regular">
+                      <!-- SVG Icon -->
+                      <
+                    </div>
+                  </button>
+                  <p id="currentMonth" class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center">February 2023</p>
+                  <button id="nextMonth">
+                    <div class="text-[#0e141b] flex size-10 items-center justify-center" data-icon="CaretRight"
+                      data-size="18px" data-weight="regular">
+                      <!-- SVG Icon -->
+                      >
+                    </div>
+                  </button>
+                </div>
+                <div class="grid grid-cols-7" id="calendar">
+                  <!-- Calendar days will be populated here -->
+                </div>
+              </div>
+            </div>
+            <h3 id="selectedDate" class="text-[#0e141b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Feb 22, 2023</h3>
+            <div class="time-slots p-4 hidden" id="timeSlotContainer">
+              <h3 class="text-[#0e141b] text-lg font-bold mb-4">Available Time Slots</h3>
+              <div class="overflow-x-auto whitespace-nowrap" id="timeSlots">
+                <!-- Time slots will be populated here as a horizontal slider -->
+              </div>
+            </div>
+            <div class="booked-slots p-4" id="bookedSlotsContainer">
+              <h3 class="text-[#0e141b] text-lg font-bold mb-4">Booked Slots</h3>
+              <div id="bookedSlots">
+                <!-- Booked slots will be populated here -->
+              </div>
+              <button id="expandButton" class="text-[#1980e6] text-sm font-medium mt-2 hidden">Show more</button>
+            </div>
+            <div class="flex justify-center px-4 py-3">
+              <button
+                id="reserveButton"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#1980e6] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                <span class="truncate">Reserve Selected Slots</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modal for Booking Details -->
@@ -128,21 +376,24 @@
     </div>
   </div>
 
-  <script>
-    // Firebase configuration
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where, addDoc, updateDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSgZpOkNqEiR=eohVluvMf2A5ydMCDrcSiA",
-      authDomain: "internmartoffice-3387e.firebaseapp.com",
-      projectId: "internmartoffice-3387e",
-      storageBucket: "internmartoffice-3387e.firebasetorage.app",
-      messagingSenderId: "283844849379",
-      appId: "1:283844849379.web:c8bf9244e2818ce39510d6",
-      measurementId: "G-1TP1RJ8X19"
+      apiKey: "AIzaSyCqLBJtkFHjeJNVjAkxwnL7GSYYJ34Ee",
+      authDomain: "interbook-c003c.firebaseapp.com",
+      projectId: "interbook-c003c",
+      storageBucket: "interbook-c003c.appspot.com",
+      messagingSenderId: "835157789713",
+      appId: "1:835157789713:web:c18b4f4ee7b9ac5b535b"
     };
 
     // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     document.addEventListener('DOMContentLoaded', function () {
       const homeScreen = document.getElementById('homeScreen');
@@ -158,8 +409,13 @@
 
       // Show booking screen when "Book Now" is clicked
       bookNowButton.addEventListener('click', () => {
-        homeScreen.classList.add('hidden');
-        bookingScreen.classList.remove('hidden');
+        console.log('Book Now button clicked'); // Debugging
+        if (homeScreen && bookingScreen) {
+          homeScreen.classList.add('hidden');
+          bookingScreen.classList.remove('hidden');
+        } else {
+          console.error('Home screen or booking screen elements not found');
+        }
       });
 
       // Close success message
@@ -273,7 +529,6 @@
         timeSlots.innerHTML = '';
         const dateKey = selectedDate.toDateString();
 
-        // Generate time slots from 9:30 AM to 6:30 PM in 30-minute intervals
         const startTime = 9.5; // 9:30 AM in decimal format
         const endTime = 18.5; // 6:30 PM in decimal format
         const interval = 0.5; // 30 minutes
@@ -282,14 +537,13 @@
           const hours = Math.floor(time);
           const minutes = (time % 1) * 60;
           const period = hours >= 12 ? 'PM' : 'AM';
-          const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+          const formattedHours = hours % 12 || 12;
           const formattedMinutes = minutes === 0 ? '00' : '30';
           const slot = `${formattedHours}:${formattedMinutes} ${period}`;
 
           const slotButton = document.createElement('button');
           slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
 
-          // Check if the slot is booked
           const isBooked = bookings[dateKey]?.some(booking => booking.time === slot);
           if (isBooked) {
             slotButton.classList.add('booked-slot');
@@ -297,7 +551,7 @@
 
           slotButton.textContent = slot;
           slotButton.addEventListener('click', () => {
-            if (!isBooked) { // Only allow selection if the slot is not booked
+            if (!isBooked) {
               slotButton.classList.toggle('selected');
               selectedTimeSlots = Array.from(document.querySelectorAll('#timeSlots .selected')).map(el => el.textContent);
               reserveButton.disabled = !selectedTimeSlots.length;
@@ -307,15 +561,18 @@
         }
       }
 
-      function renderBookedSlots() {
+      async function renderBookedSlots() {
         bookedSlots.innerHTML = '';
         const dateKey = selectedDate.toDateString();
-        if (bookings[dateKey]) {
-          bookings[dateKey].forEach((booking, index) => {
+
+        try {
+          const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            const booking = doc.data();
             const bookingElement = document.createElement('div');
             bookingElement.className = 'flex items-center justify-between p-4 border-b border-[#e7edf3]';
 
-            // Department Image and Name
             const departmentInfo = document.createElement('div');
             departmentInfo.className = 'flex items-center gap-4';
             departmentInfo.innerHTML = `
@@ -323,18 +580,15 @@
               <p class="text-[#0e141b] text-sm font-medium">${booking.department}</p>
             `;
 
-            // Booked Time
             const bookedTime = document.createElement('p');
             bookedTime.className = 'text-[#0e141b] text-sm font-medium';
             bookedTime.textContent = booking.time;
 
-            // Reschedule Button
             const rescheduleButton = document.createElement('button');
             rescheduleButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
             rescheduleButton.textContent = 'Reschedule';
-            rescheduleButton.setAttribute('data-index', index);
+            rescheduleButton.setAttribute('data-id', doc.id);
 
-            // Append elements to the booking container
             bookingElement.appendChild(departmentInfo);
             bookingElement.appendChild(bookedTime);
             bookingElement.appendChild(rescheduleButton);
@@ -342,14 +596,13 @@
             bookedSlots.appendChild(bookingElement);
           });
 
-          // Show "Show more" button if there are more than 2 booked slots
-          if (bookings[dateKey].length > 2) {
+          if (querySnapshot.size > 2) {
             expandButton.classList.remove('hidden');
           } else {
             expandButton.classList.add('hidden');
           }
-        } else {
-          expandButton.classList.add('hidden');
+        } catch (error) {
+          console.error('Error fetching bookings: ', error);
         }
       }
 
@@ -357,9 +610,8 @@
         bookingModal.style.display = 'flex';
       });
 
-      document.getElementById('bookingForm').addEventListener('submit', function (e) {
+      bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const name = document.getElementById('name').value;
         const email = document.getElementById('email').value;
         const department = document.getElementById('department').value;
@@ -369,30 +621,29 @@
         const dateKey = selectedDate.toDateString();
         const token = generateToken();
 
-        // Save data to Firestore
-        selectedTimeSlots.forEach(time => {
-          db.collection('bookings').add({
-            date: dateKey,
-            time: time,
-            name: name,
-            email: email,
-            department: department,
-            role: role,
-            purpose: purpose,
-            token: token
-          })
-          .then(() => {
-            showSuccessMessage(`Booking confirmed! Your token is: ${token}. Please save this token to reschedule later.`);
-            bookingModal.style.display = 'none';
-            bookingForm.reset();
-            renderBookedSlots();
-            timeSlots.innerHTML = '';
-            reserveButton.disabled = true;
-          })
-          .catch((error) => {
-            console.error('Error saving booking: ', error);
+        try {
+          selectedTimeSlots.forEach(async (time) => {
+            await addDoc(collection(db, 'bookings'), {
+              date: dateKey,
+              time,
+              name,
+              email,
+              department,
+              role,
+              purpose,
+              token
+            });
           });
-        });
+
+          showSuccessMessage(`Booking confirmed! Your token is: ${token}. Please save this token to reschedule later.`);
+          bookingModal.style.display = 'none';
+          bookingForm.reset();
+          renderBookedSlots();
+          timeSlots.innerHTML = '';
+          reserveButton.disabled = true;
+        } catch (error) {
+          console.error('Error adding booking: ', error);
+        }
       });
 
       cancelBookingButton.addEventListener('click', () => {
@@ -402,41 +653,35 @@
 
       document.addEventListener('click', (e) => {
         if (e.target.classList.contains('reschedule-button')) {
-          const index = e.target.getAttribute('data-index');
-          const dateKey = selectedDate.toDateString();
-          const booking = bookings[dateKey][index];
+          const docId = e.target.getAttribute('data-id');
           rescheduleModal.style.display = 'flex';
 
-          rescheduleForm.addEventListener('submit', (e) => {
+          rescheduleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const token = document.getElementById('token').value;
             const newDate = document.getElementById('newDate').value;
             const newTime = document.getElementById('newTime').value;
 
-            if (token !== booking.token) {
-              alert('Invalid token!');
-              return;
+            try {
+              const docSnap = await getDoc(doc(db, 'bookings', docId));
+              const booking = docSnap.data();
+
+              if (token !== booking.token) {
+                alert('Invalid token!');
+                return;
+              }
+
+              await updateDoc(doc(db, 'bookings', docId), {
+                date: new Date(newDate).toDateString(),
+                time: newTime
+              });
+
+              rescheduleModal.style.display = 'none';
+              showRescheduleSuccessMessage();
+              renderBookedSlots();
+            } catch (error) {
+              console.error('Error rescheduling booking: ', error);
             }
-
-            const newDateKey = new Date(newDate).toDateString();
-            if (!bookings[newDateKey]) {
-              bookings[newDateKey] = [];
-            }
-
-            bookings[newDateKey].push({
-              time: newTime,
-              name: booking.name,
-              email: booking.email,
-              department: booking.department,
-              role: booking.role,
-              purpose: booking.purpose,
-              token: booking.token
-            });
-
-            bookings[dateKey].splice(index, 1);
-            rescheduleModal.style.display = 'none';
-            showRescheduleSuccessMessage();
-            renderBookedSlots();
           });
         }
       });
