@@ -42,6 +42,7 @@
       background-color: rgba(0, 0, 0, 0.5);
       justify-content: center;
       align-items: center;
+      z-index: 1000;
     }
     .modal-content {
       background-color: white;
@@ -51,18 +52,17 @@
     }
     .success-message {
       position: fixed;
-      top: 50%;
+      top: 20px;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
       background-color: #4CAF50;
       color: white;
       padding: 20px;
       border-radius: 8px;
-      z-index: 1000;
+      z-index: 2000;
       display: none;
       text-align: center;
       min-width: 300px;
-      position: relative;
     }
     .success-message button {
       margin-top: 10px;
@@ -136,10 +136,12 @@
       max-height: 500px;
     }
     .booked-slot {
-      background-color: #e0e0e0;
-      opacity: 0.6;
+      background-color: #d3d3d3;
+      color: #a0a0a0;
+      opacity: 0.8;
       position: relative;
       pointer-events: none;
+      cursor: not-allowed;
     }
     .booked-slot::after {
       content: '';
@@ -171,10 +173,12 @@
       color: white;
     }
     .time-slots button.booked-slot {
-      background-color: #e0e0e0;
-      opacity: 0.6;
+      background-color: #d3d3d3;
+      color: #a0a0a0;
+      opacity: 0.8;
       pointer-events: none;
       position: relative;
+      cursor: not-allowed;
     }
     .time-slots button.booked-slot::after {
       content: '';
@@ -190,13 +194,12 @@
   </style>
 </head>
 <body>
-  <!-- Success Message -->
+  <!-- Success Messages (Moved above everything) -->
   <div id="successMessage" class="success-message">
     Booking successful! Please save your token to reschedule later.
     <button id="closeSuccessMessage" class="close-button">X</button>
   </div>
 
-  <!-- Reschedule Success Message -->
   <div id="rescheduleSuccessMessage" class="success-message">
     Reschedule successful!
     <button id="closeRescheduleSuccessMessage" class="close-button">X</button>
@@ -441,7 +444,6 @@
       let currentDate = new Date();
       let selectedDate = new Date();
       let selectedTimeSlots = [];
-      let bookings = {};
 
       const departmentImages = {
         'QA': 'images/dep.jpg',
@@ -464,12 +466,22 @@
         return Math.random().toString(36).substr(2, 9);
       }
 
+      function hideAllSuccessMessages() {
+        successMessage.style.display = 'none';
+        rescheduleSuccessMessage.style.display = 'none';
+      }
+
       function showSuccessMessage(message) {
-        successMessage.textContent = message;
+        hideAllSuccessMessages();
+        successMessage.innerHTML = message + '<button id="closeSuccessMessageDynamic" class="close-button">X</button>';
         successMessage.style.display = 'block';
+        document.getElementById('closeSuccessMessageDynamic').addEventListener('click', () => {
+          successMessage.style.display = 'none';
+        });
       }
 
       function showRescheduleSuccessMessage() {
+        hideAllSuccessMessages();
         rescheduleSuccessMessage.style.display = 'block';
       }
 
@@ -528,9 +540,13 @@
         renderBookedSlots();
       }
 
-      function renderTimeSlots() {
+      async function renderTimeSlots() {
         timeSlots.innerHTML = '';
         const dateKey = selectedDate.toDateString();
+
+        const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+        const querySnapshot = await getDocs(q);
+        const bookedSlots = querySnapshot.docs.map(doc => doc.data().time);
 
         const startTime = 9.5;
         const endTime = 18.5;
@@ -547,7 +563,7 @@
           const slotButton = document.createElement('button');
           slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
 
-          const isBooked = bookings[dateKey]?.some(booking => booking.time === slot);
+          const isBooked = bookedSlots.includes(slot);
           if (isBooked) {
             slotButton.classList.add('booked-slot');
           }
@@ -613,8 +629,8 @@
         newTimeSelect.innerHTML = '';
         const dateKey = new Date(newDate).toDateString();
         const allTimeSlots = [
-          "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-          "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"
+          "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
+          "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"
         ];
 
         try {
@@ -622,20 +638,23 @@
           const querySnapshot = await getDocs(q);
           const bookedSlots = querySnapshot.docs.map(doc => doc.data().time);
 
+          let hasAvailableSlots = false;
           allTimeSlots.forEach(slot => {
             if (!bookedSlots.includes(slot)) {
               const option = document.createElement('option');
               option.value = slot;
               option.textContent = slot;
               newTimeSelect.appendChild(option);
+              hasAvailableSlots = true;
             }
           });
 
-          if (newTimeSelect.options.length === 0) {
+          if (!hasAvailableSlots) {
             const option = document.createElement('option');
             option.value = '';
             option.textContent = 'No available slots';
             option.disabled = true;
+            option.selected = true;
             newTimeSelect.appendChild(option);
           }
         } catch (error) {
@@ -652,6 +671,12 @@
         }
       });
 
+      async function checkIfTimeSlotBooked(dateKey, timeSlot) {
+        const q = query(collection(db, 'bookings'), where('date', '==', dateKey), where('time', '==', timeSlot));
+        const querySnapshot = await getDocs(q);
+        return !querySnapshot.empty;
+      }
+
       bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('name').value;
@@ -664,6 +689,14 @@
         const token = generateToken();
 
         try {
+          for (const time of selectedTimeSlots) {
+            const isBooked = await checkIfTimeSlotBooked(dateKey, time);
+            if (isBooked) {
+              alert(`The time slot ${time} is already booked. Please select a different time slot.`);
+              return;
+            }
+          }
+
           for (const time of selectedTimeSlots) {
             await addDoc(collection(db, 'bookings'), {
               date: dateKey,
@@ -682,6 +715,7 @@
           selectedTimeSlots = [];
           reserveButton.disabled = true;
           timeSlots.innerHTML = '';
+          renderTimeSlots();
           renderBookedSlots();
         } catch (error) {
           console.error('Error adding booking: ', error);
@@ -698,6 +732,11 @@
         if (e.target.classList.contains('reschedule-button')) {
           const docId = e.target.getAttribute('data-id');
           rescheduleModal.style.display = 'flex';
+
+          // Set the minimum date for the reschedule date picker to today
+          const today = new Date();
+          const todayString = today.toISOString().split('T')[0];
+          newDateInput.setAttribute('min', todayString);
 
           newDateInput.addEventListener('change', (e) => {
             const newDate = e.target.value;
@@ -756,7 +795,6 @@
         renderCalendar();
       });
 
-      // Initialize with current date
       currentDate = new Date();
       selectedDate = new Date();
       currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
