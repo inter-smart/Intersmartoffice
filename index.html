@@ -25,18 +25,6 @@
     .calendar-day.selected {
       background-color: #1980e6;
       color: white;
-      position: relative;
-    }
-    .calendar-day.selected::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 10%;
-      width: 80%;
-      height: 2px;
-      background-color: #ffffff;
-      transform: rotate(-45deg);
-      transform-origin: center;
     }
     .reserve-button {
       transition: background-color 0.3s ease;
@@ -74,6 +62,7 @@
       display: none;
       text-align: center;
       min-width: 300px;
+      position: relative;
     }
     .success-message button {
       margin-top: 10px;
@@ -95,6 +84,7 @@
       font-size: 20px;
       cursor: pointer;
       font-weight: bold;
+      z-index: 1001;
     }
     .video-background {
       position: fixed;
@@ -512,7 +502,7 @@
           dayButton.className = 'h-12 w-full text-[#0e141b] text-sm font-medium leading-normal calendar-day';
           dayButton.textContent = i;
 
-          if (dateToCheck < today) {
+          if (dateToCheck < today.setHours(0, 0, 0, 0)) {
             dayButton.classList.add('disabled');
           } else {
             dayButton.addEventListener('click', () => selectDate(new Date(year, month, i)));
@@ -533,7 +523,7 @@
         selectedDateElement.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         timeSlotContainer.classList.remove('hidden');
         bookedSlotsContainer.classList.remove('hidden');
-        renderCalendar(); // Re-render to show selected date
+        renderCalendar();
         renderTimeSlots();
         renderBookedSlots();
       }
