@@ -106,6 +106,8 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      z-index: 1;
+      position: relative;
     }
     .home-screen button:hover {
       background-color: #146bb8;
@@ -125,10 +127,10 @@
       max-height: 500px;
     }
     .booked-slot {
-      background-color: #e0e0e0;
-      opacity: 0.6;
+      background-color: #e0e0e0 !important; /* Ensure grey background */
+      opacity: 0.6 !important; /* Ensure greyed out */
       position: relative;
-      pointer-events: none;
+      pointer-events: none; /* Disable interaction */
     }
     .booked-slot::after {
       content: '';
@@ -154,14 +156,15 @@
       background-color: #f9f9f9;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      position: relative;
     }
     .time-slots button.selected {
       background-color: #1980e6;
       color: white;
     }
     .time-slots button.booked-slot {
-      background-color: #e0e0e0;
-      opacity: 0.6;
+      background-color: #e0e0e0 !important;
+      opacity: 0.6 !important;
       pointer-events: none;
       position: relative;
     }
@@ -396,6 +399,8 @@
     const db = getFirestore(app);
 
     document.addEventListener('DOMContentLoaded', function () {
+      console.log('DOM fully loaded');
+
       const homeScreen = document.getElementById('homeScreen');
       const bookingScreen = document.getElementById('bookingScreen');
       const bookNowButton = document.getElementById('bookNowButton');
@@ -407,15 +412,25 @@
       const bookedSlotsContainer = document.getElementById('bookedSlotsContainer');
       const bookedSlots = document.getElementById('bookedSlots');
 
+      // Debug: Check if elements are found
+      console.log('homeScreen:', homeScreen);
+      console.log('bookingScreen:', bookingScreen);
+      console.log('bookNowButton:', bookNowButton);
+
+      if (!homeScreen || !bookingScreen || !bookNowButton) {
+        console.error('One or more elements not found:', {
+          homeScreen: homeScreen,
+          bookingScreen: bookingScreen,
+          bookNowButton: bookNowButton
+        });
+        return;
+      }
+
       // Show booking screen when "Book Now" is clicked
       bookNowButton.addEventListener('click', () => {
-        console.log('Book Now button clicked'); // Debugging
-        if (homeScreen && bookingScreen) {
-          homeScreen.classList.add('hidden');
-          bookingScreen.classList.remove('hidden');
-        } else {
-          console.error('Home screen or booking screen elements not found');
-        }
+        console.log('Book Now button clicked');
+        homeScreen.classList.add('hidden');
+        bookingScreen.classList.remove('hidden');
       });
 
       // Close success message
@@ -453,7 +468,6 @@
       let currentDate = new Date();
       let selectedDate = null;
       let selectedTimeSlots = [];
-      let bookings = {};
 
       const departmentImages = {
         'QA': 'images/dep.jpg',
@@ -525,9 +539,20 @@
         renderBookedSlots();
       }
 
-      function renderTimeSlots() {
+      async function renderTimeSlots() {
         timeSlots.innerHTML = '';
         const dateKey = selectedDate.toDateString();
+
+        // Fetch booked slots from Firestore
+        let bookedTimes = [];
+        try {
+          const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+          const querySnapshot = await getDocs(q);
+          bookedTimes = querySnapshot.docs.map(doc => doc.data().time);
+          console.log('Booked times for', dateKey, ':', bookedTimes);
+        } catch (error) {
+          console.error('Error fetching booked times:', error);
+        }
 
         const startTime = 9.5; // 9:30 AM in decimal format
         const endTime = 18.5; // 6:30 PM in decimal format
@@ -544,9 +569,10 @@
           const slotButton = document.createElement('button');
           slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
 
-          const isBooked = bookings[dateKey]?.some(booking => booking.time === slot);
+          const isBooked = bookedTimes.includes(slot);
           if (isBooked) {
             slotButton.classList.add('booked-slot');
+            console.log(`Slot ${slot} is booked, applying booked-slot class`);
           }
 
           slotButton.textContent = slot;
@@ -568,36 +594,40 @@
         try {
           const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
           const querySnapshot = await getDocs(q);
-          querySnapshot.forEach((doc) => {
-            const booking = doc.data();
-            const bookingElement = document.createElement('div');
-            bookingElement.className = 'flex items-center justify-between p-4 border-b border-[#e7edf3]';
+          if (!querySnapshot.empty) {
+            querySnapshot.forEach((doc) => {
+              const booking = doc.data();
+              const bookingElement = document.createElement('div');
+              bookingElement.className = 'flex items-center justify-between p-4 border-b border-[#e7edf3]';
 
-            const departmentInfo = document.createElement('div');
-            departmentInfo.className = 'flex items-center gap-4';
-            departmentInfo.innerHTML = `
-              <img src="${departmentImages[booking.department]}" alt="${booking.department}" class="w-12 h-12 rounded-full">
-              <p class="text-[#0e141b] text-sm font-medium">${booking.department}</p>
-            `;
+              const departmentInfo = document.createElement('div');
+              departmentInfo.className = 'flex items-center gap-4';
+              departmentInfo.innerHTML = `
+                <img src="${departmentImages[booking.department]}" alt="${booking.department}" class="w-12 h-12 rounded-full">
+                <p class="text-[#0e141b] text-sm font-medium">${booking.department}</p>
+              `;
 
-            const bookedTime = document.createElement('p');
-            bookedTime.className = 'text-[#0e141b] text-sm font-medium';
-            bookedTime.textContent = booking.time;
+              const bookedTime = document.createElement('p');
+              bookedTime.className = 'text-[#0e141b] text-sm font-medium';
+              bookedTime.textContent = booking.time;
 
-            const rescheduleButton = document.createElement('button');
-            rescheduleButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
-            rescheduleButton.textContent = 'Reschedule';
-            rescheduleButton.setAttribute('data-id', doc.id);
+              const rescheduleButton = document.createElement('button');
+              rescheduleButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
+              rescheduleButton.textContent = 'Reschedule';
+              rescheduleButton.setAttribute('data-id', doc.id);
 
-            bookingElement.appendChild(departmentInfo);
-            bookingElement.appendChild(bookedTime);
-            bookingElement.appendChild(rescheduleButton);
+              bookingElement.appendChild(departmentInfo);
+              bookingElement.appendChild(bookedTime);
+              bookingElement.appendChild(rescheduleButton);
 
-            bookedSlots.appendChild(bookingElement);
-          });
+              bookedSlots.appendChild(bookingElement);
+            });
 
-          if (querySnapshot.size > 2) {
-            expandButton.classList.remove('hidden');
+            if (querySnapshot.size > 2) {
+              expandButton.classList.remove('hidden');
+            } else {
+              expandButton.classList.add('hidden');
+            }
           } else {
             expandButton.classList.add('hidden');
           }
@@ -622,27 +652,28 @@
         const token = generateToken();
 
         try {
-          selectedTimeSlots.forEach(async (time) => {
+          for (const time of selectedTimeSlots) {
             await addDoc(collection(db, 'bookings'), {
               date: dateKey,
-              time,
-              name,
-              email,
-              department,
-              role,
-              purpose,
-              token
+              time: time,
+              name: name,
+              email: email,
+              department: department,
+              role: role,
+              purpose: purpose,
+              token: token
             });
-          });
+          }
 
           showSuccessMessage(`Booking confirmed! Your token is: ${token}. Please save this token to reschedule later.`);
           bookingModal.style.display = 'none';
           bookingForm.reset();
           renderBookedSlots();
-          timeSlots.innerHTML = '';
+          renderTimeSlots();
           reserveButton.disabled = true;
         } catch (error) {
           console.error('Error adding booking: ', error);
+          alert('Failed to add booking. Check the console for details.');
         }
       });
 
@@ -679,10 +710,12 @@
               rescheduleModal.style.display = 'none';
               showRescheduleSuccessMessage();
               renderBookedSlots();
+              renderTimeSlots();
             } catch (error) {
               console.error('Error rescheduling booking: ', error);
+              alert('Failed to reschedule booking. Check the console for details.');
             }
-          });
+          }, { once: true }); // Ensure the listener is added only once
         }
       });
 
