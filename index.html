@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Work+Sans%3Awght%40400%3B500%3B700%3B900" />
+  <title>Conference Room Booking</title>
+  <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <style>
+    .calendar-day {
+      transition: background-color 0.3s ease;
+    }
+    .calendar-day:hover {
+      background-color: #e7edf3;
+    }
+    .reserve-button {
+      transition: background-color 0.3s ease;
+    }
+    .reserve-button:hover {
+      background-color: #146bb8;
+    }
+    .selected {
+      background-color: #1980e6;
+      color: white;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+    }
+    .success-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      z-index: 1000;
+      display: none;
+      text-align: center;
+    }
+    .success-message button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      background-color: #146bb8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .close-button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      object-fit: cover;
+    }
+    .home-screen {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+      text-align: center;
+    }
+    .home-screen h1 {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+    }
+    .home-screen button {
+      font-size: 1.5rem;
+      padding: 1rem 2rem;
+      background-color: #1980e6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .home-screen button:hover {
+      background-color: #146bb8;
+    }
+    .hidden {
+      display: none;
+    }
+    .booked-slots {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #e7edf3;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .booked-slots.expanded {
+      max-height: 500px;
+    }
+    .booked-slot {
+      background-color: #e0e0e0;
+      opacity: 0.6;
+      position: relative;
+      pointer-events: none;
+    }
+    .booked-slot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #ff0000;
+      transform: rotate(-45deg);
+      transform-origin: center;
+    }
+    .time-slots {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .time-slots button {
+      display: inline-block;
+      margin-right: 10px;
+      padding: 8px 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .time-slots button.selected {
+      background-color: #1980e6;
+      color: white;
+    }
+    .time-slots button.booked-slot {
+      background-color: #e0e0e0;
+      opacity: 0.6;
+      pointer-events: none;
+      position: relative;
+    }
+    .time-slots button.booked-slot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #ff0000;
+      transform: rotate(-45deg);
+      transform-origin: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Success Message -->
+  <div id="successMessage" class="success-message">
+    Booking successful! Please save your token to reschedule later.
+    <button id="closeSuccessMessage" class="close-button">X</button>
+  </div>
+
+  <!-- Reschedule Success Message -->
+  <div id="rescheduleSuccessMessage" class="success-message">
+    Reschedule successful!
+    <button id="closeRescheduleSuccessMessage" class="close-button">X</button>
+  </div>
+
+  <!-- Home Screen -->
+  <div id="homeScreen" class="home-screen">
+    <video autoplay muted loop class="video-background">
+      <source src="videos/new.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div>
+      <h1>Welcome to Conference Room Booking</h1>
+      <button id="bookNowButton">Book Now</button>
+    </div>
+  </div>
+
+  <!-- Booking Screen -->
+  <div id="bookingScreen" class="hidden">
+    <div class="relative flex size-full min-h-screen flex-col bg-slate-50 group/design-root overflow-x-hidden"
+      style='font-family: "Work Sans", "Noto Sans", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        <header
+          class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] px-10 py-3">
+          <div class="flex items-center gap-4 text-[#0e141b]">
+            <!-- Logo -->
+            <img src="images/logo.png" alt="Logo" class="h-10" />
+          </div>
+          <div class="flex flex-1 justify-end gap-8">
+            <div class="flex items-center gap-9"></div>
+            <div class="flex gap-2">
+              <button
+                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#e7edf3] text-[#0e141b] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+                <div class="text-[#0e141b]" data-icon="Bell" data-size="20px" data-weight="regular">
+                  <!-- SVG Icon -->
+                </div>
+              </button>
+              <button
+                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#e7edf3] text-[#0e141b] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+                <div class="text-[#0e141b]" data-icon="Question" data-size="20px" data-weight="regular">
+                  <!-- SVG Icon -->
+                </div>
+              </button>
+            </div>
+          </div>
+        </header>
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col w-[512px] max-w-[512px] py-5 max-w-[960px] flex-1">
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <div class="flex min-w-72 flex-col gap-3">
+                <p class="text-[#0e141b] tracking-light text-[32px] font-bold leading-tight">Reserve the Main Conference
+                  Room</p>
+                <p class="text-[#4e7397] text-sm font-normal leading-normal">Seats 12 people</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-6 p-4">
+              <div class="flex min-w-72 max-w-[336px] flex-1 flex-col gap-0.5">
+                <div class="flex items-center p-1 justify-between">
+                  <button id="prevMonth">
+                    <div class="text-[#0e141b] flex size-10 items-center justify-center" data-icon="CaretLeft"
+                      data-size="18px" data-weight="regular">
+                      <!-- SVG Icon -->
+                      &lt;
+                    </div>
+                  </button>
+                  <p id="currentMonth" class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center">February 2023</p>
+                  <button id="nextMonth">
+                    <div class="text-[#0e141b] flex size-10 items-center justify-center" data-icon="CaretRight"
+                      data-size="18px" data-weight="regular">
+                      <!-- SVG Icon -->
+                      &gt;
+                    </div>
+                  </button>
+                </div>
+                <div class="grid grid-cols-7" id="calendar">
+                  <!-- Calendar days will be populated here -->
+                </div>
+              </div>
+            </div>
+            <h3 id="selectedDate" class="text-[#0e141b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Feb 22, 2023</h3>
+            <div class="time-slots p-4 hidden" id="timeSlotContainer">
+              <h3 class="text-[#0e141b] text-lg font-bold mb-4">Available Time Slots</h3>
+              <div class="overflow-x-auto whitespace-nowrap" id="timeSlots">
+                <!-- Time slots will be populated here as a horizontal slider -->
+              </div>
+            </div>
+            <div class="booked-slots p-4" id="bookedSlotsContainer">
+              <h3 class="text-[#0e141b] text-lg font-bold mb-4">Booked Slots</h3>
+              <div id="bookedSlots">
+                <!-- Booked slots will be populated here -->
+              </div>
+              <button id="expandButton" class="text-[#1980e6] text-sm font-medium mt-2 hidden">Show more</button>
+            </div>
+            <div class="flex justify-center px-4 py-3">
+              <button
+                id="reserveButton"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#1980e6] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                <span class="truncate">Reserve Selected Slots</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Booking Details -->
+  <div id="bookingModal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-[#0e141b] text-lg font-bold mb-4">Booking Details</h3>
+      <form id="bookingForm">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Name</label>
+          <input type="text" id="name" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Email</label>
+          <input type="email" id="email" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Department</label>
+          <select id="department" class="w-full p-2 border rounded" required>
+            <option value="QA">QA</option>
+            <option value="PHP">PHP</option>
+            <option value="Project Management">Project Management</option>
+            <option value="Sales">Sales</option>
+            <option value="Management">Management</option>
+            <option value="HTML">HTML</option>
+            <option value="Digital Marketing">Digital Marketing</option>
+            <option value="SEO">SEO</option>
+            <option value="Graphic Designers">Graphic Designers</option>
+            <option value="Content Writers">Content Writers</option>
+            <option value="Project Coordinators">Project Coordinators</option>
+            <option value="Mobile App Development Team">Mobile App Development Team</option>
+            <option value="UI Designers">UI Designers</option>
+            <option value="Wordpress">Wordpress</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Role</label>
+          <input type="text" id="role" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Purpose of Meeting</label>
+          <textarea id="purpose" class="w-full p-2 border rounded" required></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelBooking" class="p-2 bg-gray-300 rounded">Cancel</button>
+          <button type="submit" class="p-2 bg-[#1980e6] text-white rounded">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Rescheduling -->
+  <div id="rescheduleModal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-[#0e141b] text-lg font-bold mb-4">Reschedule Booking</h3>
+      <form id="rescheduleForm">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Enter Token</label>
+          <input type="text" id="token" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Select New Date</label>
+          <input type="date" id="newDate" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Select New Time Slot</label>
+          <select id="newTime" class="w-full p-2 border rounded" required>
+            <option value="9:00 AM">9:00 AM</option>
+            <option value="10:00 AM">10:00 AM</option>
+            <option value="11:00 AM">11:00 AM</option>
+            <option value="12:00 PM">12:00 PM</option>
+            <option value="1:00 PM">1:00 PM</option>
+            <option value="2:00 PM">2:00 PM</option>
+            <option value="3:00 PM">3:00 PM</option>
+            <option value="4:00 PM">4:00 PM</option>
+          </select>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelReschedule" class="p-2 bg-gray-300 rounded">Cancel</button>
+          <button type="submit" class="p-2 bg-[#1980e6] text-white rounded">Reschedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const homeScreen = document.getElementById('homeScreen');
+      const bookingScreen = document.getElementById('bookingScreen');
+      const bookNowButton = document.getElementById('bookNowButton');
+      const successMessage = document.getElementById('successMessage');
+      const closeSuccessMessage = document.getElementById('closeSuccessMessage');
+      const rescheduleSuccessMessage = document.getElementById('rescheduleSuccessMessage');
+      const closeRescheduleSuccessMessage = document.getElementById('closeRescheduleSuccessMessage');
+      const expandButton = document.getElementById('expandButton');
+      const bookedSlotsContainer = document.getElementById('bookedSlotsContainer');
+      const bookedSlots = document.getElementById('bookedSlots');
+
+      // Show booking screen when "Book Now" is clicked
+      bookNowButton.addEventListener('click', () => {
+        homeScreen.classList.add('hidden');
+        bookingScreen.classList.remove('hidden');
+      });
+
+      // Close success message
+      closeSuccessMessage.addEventListener('click', () => {
+        successMessage.style.display = 'none';
+      });
+
+      // Close reschedule success message
+      closeRescheduleSuccessMessage.addEventListener('click', () => {
+        rescheduleSuccessMessage.style.display = 'none';
+      });
+
+      // Expand and collapse booked slots
+      expandButton.addEventListener('click', () => {
+        bookedSlotsContainer.classList.toggle('expanded');
+        expandButton.textContent = bookedSlotsContainer.classList.contains('expanded') ? 'Show less' : 'Show more';
+      });
+
+      // Rest of the booking screen functionality
+      const calendar = document.getElementById('calendar');
+      const timeSlotContainer = document.getElementById('timeSlotContainer');
+      const timeSlots = document.getElementById('timeSlots');
+      const reserveButton = document.getElementById('reserveButton');
+      const currentMonthElement = document.getElementById('currentMonth');
+      const selectedDateElement = document.getElementById('selectedDate');
+      const prevMonthButton = document.getElementById('prevMonth');
+      const nextMonthButton = document.getElementById('nextMonth');
+      const bookingModal = document.getElementById('bookingModal');
+      const bookingForm = document.getElementById('bookingForm');
+      const cancelBookingButton = document.getElementById('cancelBooking');
+      const rescheduleModal = document.getElementById('rescheduleModal');
+      const rescheduleForm = document.getElementById('rescheduleForm');
+      const cancelRescheduleButton = document.getElementById('cancelReschedule');
+
+      let currentDate = new Date();
+      let selectedDate = null;
+      let selectedTimeSlots = [];
+      let bookings = {};
+
+      const departmentImages = {
+        'QA': 'images/dep.jpg',
+        'PHP': 'images/dep.jpg',
+        'Project Management': 'images/deb.png',
+        'Sales': 'images/sales.png',
+        'Management': 'images/management.png',
+        'HTML': 'images/html.png',
+        'Digital Marketing': 'images/digital-marketing.png',
+        'SEO': 'images/seo.png',
+        'Graphic Designers': 'images/graphic-designers.png',
+        'Content Writers': 'images/content-writers.png',
+        'Project Coordinators': 'images/project-coordinators.png',
+        'Mobile App Development Team': 'images/mobile-app.png',
+        'UI Designers': 'images/ui-designers.png',
+        'Wordpress': 'images/wordpress.png'
+      };
+
+      function generateToken() {
+        return Math.random().toString(36).substr(2, 9);
+      }
+
+      function showSuccessMessage(message) {
+        successMessage.textContent = message;
+        successMessage.style.display = 'block';
+      }
+
+      function showRescheduleSuccessMessage() {
+        rescheduleSuccessMessage.style.display = 'block';
+      }
+
+      function renderCalendar() {
+        calendar.innerHTML = '';
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDay = firstDay.getDay();
+
+        const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        days.forEach(day => {
+          const dayElement = document.createElement('p');
+          dayElement.className = 'text-[#0e141b] text-[13px] font-bold leading-normal tracking-[0.015em] flex h-12 w-full items-center justify-center pb-0.5';
+          dayElement.textContent = day;
+          calendar.appendChild(dayElement);
+        });
+
+        for (let i = 0; i < startingDay; i++) {
+          const emptyDay = document.createElement('div');
+          calendar.appendChild(emptyDay);
+        }
+
+        for (let i = 1; i <= daysInMonth; i++) {
+          const dayButton = document.createElement('button');
+          dayButton.className = 'h-12 w-full text-[#0e141b] text-sm font-medium leading-normal calendar-day';
+          dayButton.textContent = i;
+          dayButton.addEventListener('click', () => selectDate(new Date(year, month, i)));
+          calendar.appendChild(dayButton);
+        }
+      }
+
+      function selectDate(date) {
+        selectedDate = date;
+        selectedDateElement.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        timeSlotContainer.classList.remove('hidden');
+        bookedSlotsContainer.classList.remove('hidden');
+        renderTimeSlots();
+        renderBookedSlots();
+      }
+
+      function renderTimeSlots() {
+        timeSlots.innerHTML = '';
+        const dateKey = selectedDate.toDateString();
+
+        // Generate time slots from 9:30 AM to 6:30 PM in 30-minute intervals
+        const startTime = 9.5; // 9:30 AM in decimal format
+        const endTime = 18.5; // 6:30 PM in decimal format
+        const interval = 0.5; // 30 minutes
+
+        for (let time = startTime; time <= endTime; time += interval) {
+          const hours = Math.floor(time);
+          const minutes = (time % 1) * 60;
+          const period = hours >= 12 ? 'PM' : 'AM';
+          const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+          const formattedMinutes = minutes === 0 ? '00' : '30';
+          const slot = `${formattedHours}:${formattedMinutes} ${period}`;
+
+          const slotButton = document.createElement('button');
+          slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
+
+          // Check if the slot is booked
+          const isBooked = bookings[dateKey]?.some(booking => booking.time === slot);
+          if (isBooked) {
+            slotButton.classList.add('booked-slot');
+          }
+
+          slotButton.textContent = slot;
+          slotButton.addEventListener('click', () => {
+            if (!isBooked) { // Only allow selection if the slot is not booked
+              slotButton.classList.toggle('selected');
+              selectedTimeSlots = Array.from(document.querySelectorAll('#timeSlots .selected')).map(el => el.textContent);
+              reserveButton.disabled = !selectedTimeSlots.length;
+            }
+          });
+          timeSlots.appendChild(slotButton);
+        }
+      }
+
+      function renderBookedSlots() {
+        bookedSlots.innerHTML = '';
+        const dateKey = selectedDate.toDateString();
+        if (bookings[dateKey]) {
+          bookings[dateKey].forEach((booking, index) => {
+            const bookingElement = document.createElement('div');
+            bookingElement.className = 'flex items-center justify-between p-4 border-b border-[#e7edf3]';
+
+            // Department Image and Name
+            const departmentInfo = document.createElement('div');
+            departmentInfo.className = 'flex items-center gap-4';
+            departmentInfo.innerHTML = `
+              <img src="${departmentImages[booking.department]}" alt="${booking.department}" class="w-12 h-12 rounded-full">
+              <p class="text-[#0e141b] text-sm font-medium">${booking.department}</p>
+            `;
+
+            // Booked Time
+            const bookedTime = document.createElement('p');
+            bookedTime.className = 'text-[#0e141b] text-sm font-medium';
+            bookedTime.textContent = booking.time;
+
+            // Reschedule Button
+            const rescheduleButton = document.createElement('button');
+            rescheduleButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
+            rescheduleButton.textContent = 'Reschedule';
+            rescheduleButton.setAttribute('data-index', index);
+
+            // Append elements to the booking container
+            bookingElement.appendChild(departmentInfo);
+            bookingElement.appendChild(bookedTime);
+            bookingElement.appendChild(rescheduleButton);
+
+            bookedSlots.appendChild(bookingElement);
+          });
+
+          // Show "Show more" button if there are more than 2 booked slots
+          if (bookings[dateKey].length > 2) {
+            expandButton.classList.remove('hidden');
+          } else {
+            expandButton.classList.add('hidden');
+          }
+        } else {
+          expandButton.classList.add('hidden');
+        }
+      }
+
+      reserveButton.addEventListener('click', () => {
+        bookingModal.style.display = 'flex';
+      });
+
+      bookingForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const department = document.getElementById('department').value;
+        const role = document.getElementById('role').value;
+        const purpose = document.getElementById('purpose').value;
+
+        const dateKey = selectedDate.toDateString();
+        if (!bookings[dateKey]) {
+          bookings[dateKey] = [];
+        }
+
+        const token = generateToken();
+        selectedTimeSlots.forEach(time => {
+          bookings[dateKey].push({
+            time,
+            name,
+            email,
+            department,
+            role,
+            purpose,
+            token
+          });
+        });
+
+        showSuccessMessage(`Booking confirmed! Your token is: ${token}. Please save this token to reschedule later.`);
+        bookingModal.style.display = 'none';
+        bookingForm.reset();
+        renderBookedSlots();
+        timeSlots.innerHTML = '';
+        reserveButton.disabled = true;
+      });
+
+      cancelBookingButton.addEventListener('click', () => {
+        bookingModal.style.display = 'none';
+        bookingForm.reset();
+      });
+
+      document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('reschedule-button')) {
+          const index = e.target.getAttribute('data-index');
+          const dateKey = selectedDate.toDateString();
+          const booking = bookings[dateKey][index];
+          rescheduleModal.style.display = 'flex';
+
+          rescheduleForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const token = document.getElementById('token').value;
+            const newDate = document.getElementById('newDate').value;
+            const newTime = document.getElementById('newTime').value;
+
+            if (token !== booking.token) {
+              alert('Invalid token!');
+              return;
+            }
+
+            const newDateKey = new Date(newDate).toDateString();
+            if (!bookings[newDateKey]) {
+              bookings[newDateKey] = [];
+            }
+
+            bookings[newDateKey].push({
+              time: newTime,
+              name: booking.name,
+              email: booking.email,
+              department: booking.department,
+              role: booking.role,
+              purpose: booking.purpose,
+              token: booking.token
+            });
+
+            bookings[dateKey].splice(index, 1);
+            rescheduleModal.style.display = 'none';
+            showRescheduleSuccessMessage();
+            renderBookedSlots();
+          });
+        }
+      });
+
+      cancelRescheduleButton.addEventListener('click', () => {
+        rescheduleModal.style.display = 'none';
+      });
+
+      prevMonthButton.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        renderCalendar();
+      });
+
+      nextMonthButton.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        renderCalendar();
+      });
+
+      renderCalendar();
+    });
+  </script>
+</body>
+</html>
