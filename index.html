@@ -60,12 +60,43 @@
     }
     .modal-content {
       background-color: white;
-      padding: 20px;
+      padding: 15px; /* Reduced padding */
       border-radius: 8px;
       width: 100%;
-      max-width: 300px;
-      max-height: 90vh;
+      max-width: 250px; /* Reduced max-width to make the form smaller */
+      max-height: 80vh; /* Reduced max-height */
       overflow-y: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow for better visibility */
+    }
+    .modal-content h3 {
+      font-size: 16px; /* Reduced font size for the heading */
+      margin-bottom: 12px; /* Reduced margin */
+    }
+    .modal-content label {
+      font-size: 12px; /* Reduced font size for labels */
+      margin-bottom: 4px; /* Reduced margin */
+    }
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+      font-size: 12px; /* Reduced font size for inputs */
+      padding: 6px; /* Reduced padding for inputs */
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .modal-content textarea {
+      height: 60px; /* Reduced height of textarea */
+    }
+    .modal-content .mb-4 {
+      margin-bottom: 12px; /* Reduced spacing between form fields */
+    }
+    .modal-content .flex.justify-end {
+      gap: 6px; /* Reduced gap between buttons */
+    }
+    .modal-content button {
+      padding: 6px 12px; /* Reduced padding for buttons */
+      font-size: 12px; /* Reduced font size for buttons */
     }
     .success-message {
       position: fixed;
@@ -281,13 +312,13 @@
       }
       .modal-content {
         width: 90%;
-        max-width: none;
-        padding: 15px;
+        max-width: 250px; /* Ensure it remains small on smaller screens */
+        padding: 12px; /* Slightly reduced padding for smaller screens */
       }
       .modal-content input,
       .modal-content select,
       .modal-content textarea {
-        font-size: 14px;
+        font-size: 12px;
       }
       .booked-slots {
         padding: 8px;
