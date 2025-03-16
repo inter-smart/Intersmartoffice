@@ -60,43 +60,43 @@
     }
     .modal-content {
       background-color: white;
-      padding: 15px; /* Reduced padding */
+      padding: 15px;
       border-radius: 8px;
       width: 100%;
-      max-width: 250px; /* Reduced max-width to make the form smaller */
-      max-height: 80vh; /* Reduced max-height */
+      max-width: 250px;
+      max-height: 80vh;
       overflow-y: auto;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow for better visibility */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .modal-content h3 {
-      font-size: 16px; /* Reduced font size for the heading */
-      margin-bottom: 12px; /* Reduced margin */
+      font-size: 16px;
+      margin-bottom: 12px;
     }
     .modal-content label {
-      font-size: 12px; /* Reduced font size for labels */
-      margin-bottom: 4px; /* Reduced margin */
+      font-size: 12px;
+      margin-bottom: 4px;
     }
     .modal-content input,
     .modal-content select,
     .modal-content textarea {
-      font-size: 12px; /* Reduced font size for inputs */
-      padding: 6px; /* Reduced padding for inputs */
+      font-size: 12px;
+      padding: 6px;
       border-radius: 4px;
       width: 100%;
       box-sizing: border-box;
     }
     .modal-content textarea {
-      height: 60px; /* Reduced height of textarea */
+      height: 60px;
     }
     .modal-content .mb-4 {
-      margin-bottom: 12px; /* Reduced spacing between form fields */
+      margin-bottom: 12px;
     }
     .modal-content .flex.justify-end {
-      gap: 6px; /* Reduced gap between buttons */
+      gap: 6px;
     }
     .modal-content button {
-      padding: 6px 12px; /* Reduced padding for buttons */
-      font-size: 12px; /* Reduced font size for buttons */
+      padding: 6px 12px;
+      font-size: 12px;
     }
     .success-message {
       position: fixed;
@@ -194,8 +194,12 @@
       color: #a0a0a0;
       opacity: 0.8;
       position: relative;
-      pointer-events: none;
-      cursor: not-allowed;
+      cursor: pointer; /* Make the slot clickable */
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    .booked-slot:hover {
+      background-color: #c0c0c0; /* Slight hover effect for better UX */
     }
     .time-slots {
       overflow-x: auto;
@@ -245,13 +249,18 @@
     }
     .details {
       transition: all 0.3s ease;
+      margin-top: 8px;
+      padding: 8px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+      width: 100%;
     }
     .details.hidden {
       display: none;
     }
     .details p {
-      margin: 5px 0;
-      font-size: 14px;
+      margin: 4px 0;
+      font-size: 12px;
       color: #0e141b;
     }
     /* Responsive adjustments */
@@ -312,8 +321,8 @@
       }
       .modal-content {
         width: 90%;
-        max-width: 250px; /* Ensure it remains small on smaller screens */
-        padding: 12px; /* Slightly reduced padding for smaller screens */
+        max-width: 250px;
+        padding: 12px;
       }
       .modal-content input,
       .modal-content select,
@@ -381,7 +390,7 @@
                 </div>
               </button>
               <button
-                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#e7edf3] text-[#0e141b] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#e7edf3] text-[#0e141b] gap-2 text-sm font-medium leading-normal tracking-[0.015em] min-w-0 px-2.5">
                 <div class="text-[#0e141b]" data-icon="Question" data-size="20px" data-weight="regular">
                 </div>
               </button>
@@ -754,44 +763,52 @@
           querySnapshot.forEach((doc) => {
             const booking = doc.data();
             const bookingElement = document.createElement('div');
-            bookingElement.className = 'booked-slot flex items-center justify-between p-4 border-b border-[#e7edf3]';
+            bookingElement.className = 'booked-slot flex flex-col p-4 border-b border-[#e7edf3]'; // Changed to flex-col for details stacking
             bookingElement.setAttribute('data-id', doc.id);
 
+            // Booking summary (image, name, department, time)
             const bookingSummary = document.createElement('div');
-            bookingSummary.className = 'flex items-center gap-4';
+            bookingSummary.className = 'flex items-center gap-4 w-full'; // Ensure full width for layout
             bookingSummary.innerHTML = `
               <img src="${departmentImages[booking.department]}" alt="${booking.department}" class="w-12 h-12 rounded-full">
-              <div>
+              <div class="flex-1">
                 <p class="text-[#0e141b] text-sm font-medium">${booking.name || 'Unknown'}</p>
+                <p class="text-[#0e141b] text-sm font-medium">${booking.department || 'N/A'}</p>
                 <p class="text-[#0e141b] text-sm font-medium">${booking.time}</p>
               </div>
             `;
 
-            const expandButton = document.createElement('button');
-            expandButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
-            expandButton.textContent = 'Details';
-            expandButton.addEventListener('click', () => toggleDetails(bookingElement, booking));
-
+            // Reschedule button
             const rescheduleButton = document.createElement('button');
             rescheduleButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
             rescheduleButton.textContent = 'Reschedule';
             rescheduleButton.setAttribute('data-id', doc.id);
 
-            bookingElement.appendChild(bookingSummary);
-            bookingElement.appendChild(expandButton);
-            bookingElement.appendChild(rescheduleButton);
+            // Container for summary and reschedule button
+            const summaryContainer = document.createElement('div');
+            summaryContainer.className = 'flex items-center justify-between w-full';
+            summaryContainer.appendChild(bookingSummary);
+            summaryContainer.appendChild(rescheduleButton);
 
+            // Details section (hidden by default)
             const detailsElement = document.createElement('div');
-            detailsElement.className = 'details hidden mt-4 p-4 bg-[#f9f9f9] rounded';
+            detailsElement.className = 'details hidden';
             detailsElement.innerHTML = `
               <p><strong>Email:</strong> ${booking.email || 'N/A'}</p>
-              <p><strong>Department:</strong> ${booking.department || 'N/A'}</p>
               <p><strong>Role:</strong> ${booking.role || 'N/A'}</p>
               <p><strong>Purpose:</strong> ${booking.purpose || 'N/A'}</p>
             `;
 
+            bookingElement.appendChild(summaryContainer);
             bookingElement.appendChild(detailsElement);
             bookedSlots.appendChild(bookingElement);
+
+            // Add click event to toggle details (excluding reschedule button clicks)
+            bookingElement.addEventListener('click', (e) => {
+              if (!e.target.classList.contains('reschedule-button')) {
+                detailsElement.classList.toggle('hidden');
+              }
+            });
           });
 
           if (querySnapshot.size > 2) {
@@ -801,18 +818,6 @@
           }
         } catch (error) {
           console.error('Error fetching bookings: ', error);
-        }
-      }
-
-      function toggleDetails(element, booking) {
-        const details = element.querySelector('.details');
-        const button = element.querySelector('button');
-        if (details.classList.contains('hidden')) {
-          details.classList.remove('hidden');
-          button.textContent = 'Hide Details';
-        } else {
-          details.classList.add('hidden');
-          button.textContent = 'Details';
         }
       }
 
