@@ -185,21 +185,26 @@
     }
     .booked-slot {
       display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
       padding: 8px;
       margin-bottom: 8px;
       background-color: #d3d3d3;
       color: #a0a0a0;
       opacity: 0.8;
-      position: relative;
-      cursor: pointer; /* Make the slot clickable */
       border-radius: 4px;
+    }
+    .details-button {
+      padding: 8px 12px;
+      background-color: #1980e6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
       transition: background-color 0.3s ease;
     }
-    .booked-slot:hover {
-      background-color: #c0c0c0; /* Slight hover effect for better UX */
+    .details-button:hover {
+      background-color: #146bb8;
     }
     .time-slots {
       overflow-x: auto;
@@ -240,7 +245,16 @@
     }
     .reschedule-button {
       padding: 8px 12px;
+      background-color: #1980e6;
+      color: white;
+      border: none;
+      border-radius: 4px;
       font-size: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .reschedule-button:hover {
+      background-color: #146bb8;
     }
     .layout-content-container {
       width: 100%;
@@ -262,6 +276,12 @@
       margin: 4px 0;
       font-size: 12px;
       color: #0e141b;
+    }
+    .buttons-container {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
     }
     /* Responsive adjustments */
     @media (max-width: 640px) {
@@ -315,7 +335,8 @@
         width: 100%;
         font-size: 16px;
       }
-      .reschedule-button {
+      .reschedule-button,
+      .details-button {
         width: 100px;
         font-size: 12px;
       }
@@ -333,9 +354,7 @@
         padding: 8px;
       }
       .booked-slot {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+        padding: 6px;
       }
       .booked-slot img {
         width: 40px;
@@ -344,11 +363,16 @@
       .booked-slot p {
         font-size: 12px;
       }
+      .buttons-container {
+        flex-direction: row;
+        justify-content: flex-end;
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Success Messages (Moved above everything) -->
+  <!-- Success Messages -->
   <div id="successMessage" class="success-message">
     Booking successful! Please save your token to reschedule later.
     <button id="closeSuccessMessage" class="close-button">X</button>
@@ -632,11 +656,19 @@
         document.getElementById('closeSuccessMessageDynamic').addEventListener('click', () => {
           successMessage.style.display = 'none';
         });
+        // Auto-hide after 30 seconds
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 30000);
       }
 
       function showRescheduleSuccessMessage() {
         hideAllSuccessMessages();
         rescheduleSuccessMessage.style.display = 'block';
+        // Auto-hide after 30 seconds
+        setTimeout(() => {
+          rescheduleSuccessMessage.style.display = 'none';
+        }, 30000);
       }
 
       function renderCalendar() {
@@ -763,12 +795,12 @@
           querySnapshot.forEach((doc) => {
             const booking = doc.data();
             const bookingElement = document.createElement('div');
-            bookingElement.className = 'booked-slot flex flex-col p-4 border-b border-[#e7edf3]'; // Changed to flex-col for details stacking
+            bookingElement.className = 'booked-slot flex flex-col p-4 border-b border-[#e7edf3]';
             bookingElement.setAttribute('data-id', doc.id);
 
             // Booking summary (image, name, department, time)
             const bookingSummary = document.createElement('div');
-            bookingSummary.className = 'flex items-center gap-4 w-full'; // Ensure full width for layout
+            bookingSummary.className = 'flex items-center gap-4 w-full';
             bookingSummary.innerHTML = `
               <img src="${departmentImages[booking.department]}" alt="${booking.department}" class="w-12 h-12 rounded-full">
               <div class="flex-1">
@@ -778,17 +810,23 @@
               </div>
             `;
 
+            // Buttons container (Details and Reschedule)
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'buttons-container';
+
+            // Details button
+            const detailsButton = document.createElement('button');
+            detailsButton.className = 'details-button';
+            detailsButton.textContent = 'Details';
+
             // Reschedule button
             const rescheduleButton = document.createElement('button');
-            rescheduleButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
+            rescheduleButton.className = 'reschedule-button';
             rescheduleButton.textContent = 'Reschedule';
             rescheduleButton.setAttribute('data-id', doc.id);
 
-            // Container for summary and reschedule button
-            const summaryContainer = document.createElement('div');
-            summaryContainer.className = 'flex items-center justify-between w-full';
-            summaryContainer.appendChild(bookingSummary);
-            summaryContainer.appendChild(rescheduleButton);
+            buttonsContainer.appendChild(detailsButton);
+            buttonsContainer.appendChild(rescheduleButton);
 
             // Details section (hidden by default)
             const detailsElement = document.createElement('div');
@@ -799,14 +837,19 @@
               <p><strong>Purpose:</strong> ${booking.purpose || 'N/A'}</p>
             `;
 
-            bookingElement.appendChild(summaryContainer);
+            bookingElement.appendChild(bookingSummary);
+            bookingElement.appendChild(buttonsContainer);
             bookingElement.appendChild(detailsElement);
             bookedSlots.appendChild(bookingElement);
 
-            // Add click event to toggle details (excluding reschedule button clicks)
-            bookingElement.addEventListener('click', (e) => {
-              if (!e.target.classList.contains('reschedule-button')) {
-                detailsElement.classList.toggle('hidden');
+            // Add click event to the Details button to toggle details
+            detailsButton.addEventListener('click', () => {
+              if (detailsElement.classList.contains('hidden')) {
+                detailsElement.classList.remove('hidden');
+                detailsButton.textContent = 'Hide Details';
+              } else {
+                detailsElement.classList.add('hidden');
+                detailsButton.textContent = 'Details';
               }
             });
           });
