@@ -414,8 +414,26 @@
       .text-32px {
         font-size: 24px !important;
       }
+      /* Fix for selected date alignment */
+      #selectedDate {
+        text-align: center !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      /* Fix for bottom buttons alignment */
+      .bottom-buttons {
+        flex-direction: column !important;
+        gap: 12px !important;
+        align-items: center !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
       #reserveButton, .for-meeting-room-button {
-        width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
         font-size: 16px;
       }
       .reschedule-button,
@@ -562,7 +580,7 @@
               </div>
               <button id="expandButton" class="text-[#1980e6] text-sm font-medium mt-2 hidden">Show more</button>
             </div>
-            <div class="flex justify-center px-4 py-3 gap-4">
+            <div class="flex justify-center px-4 py-3 gap-4 bottom-buttons">
               <button
                 id="reserveButton"
                 class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#1980e6] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1000,7 +1018,6 @@
             ...doc.data()
           }));
 
-          // Sort bookings by date and time
           allBookings.sort((a, b) => {
             const dateA = new Date(a.date);
             const dateB = new Date(b.date);
@@ -1048,7 +1065,6 @@
         }
 
         if (!currentBooking) {
-          // If no current booking, find the next upcoming booking
           for (let i = 0; i < allBookings.length; i++) {
             const booking = allBookings[i];
             const bookingDate = new Date(booking.date);
@@ -1079,7 +1095,6 @@
           currentBookingDate.textContent = '';
         }
 
-        // Disable buttons if at the start or end of the bookings array
         previousBookingButton.disabled = currentBookingIndex === 0;
         nextBookingButton.disabled = currentBookingIndex === allBookings.length - 1;
       }
