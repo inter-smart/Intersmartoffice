@@ -16,43 +16,35 @@
       padding: 4px;
       text-align: center;
       min-height: 40px;
-
     }
     .calendar-day:hover {
       background-color: #e7edf3;
     }
-
     .calendar-day.disabled {
       background-color: #f0f0f0;
       color: #a0a0a0;
       cursor: not-allowed;
       pointer-events: none;
     }
-
     .calendar-day.selected {
       background-color: #1980e6;
       color: white;
     }
-
     #calendar {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 2px;
     }
-
     #calendar p {
       font-size: 10px;
       padding: 2px;
     }
-
     .reserve-button {
       transition: background-color 0.3s ease;
     }
-
     .reserve-button:hover {
       background-color: #146bb8;
     }
-
     .modal {
       display: none;
       position: fixed;
@@ -66,7 +58,6 @@
       z-index: 1000;
       padding: 10px;
     }
-
     .modal-content {
       background-color: white;
       padding: 20px;
@@ -76,7 +67,6 @@
       max-height: 90vh;
       overflow-y: auto;
     }
-
     .success-message {
       position: fixed;
       top: 20px;
@@ -91,7 +81,6 @@
       text-align: center;
       min-width: 300px;
     }
-
     .success-message button {
       margin-top: 10px;
       padding: 5px 10px;
@@ -102,7 +91,6 @@
       cursor: pointer;
       font-weight: bold;
     }
-
     .close-button {
       position: absolute;
       top: 10px;
@@ -115,7 +103,6 @@
       font-weight: bold;
       z-index: 1001;
     }
-
     .video-background {
       position: fixed;
       top: 0;
@@ -125,7 +112,6 @@
       z-index: -1;
       object-fit: cover;
     }
-
     .home-screen {
       position: relative;
       display: flex;
@@ -135,13 +121,11 @@
       color: white;
       text-align: center;
     }
-
     .home-screen h1 {
       font-size: 3rem;
       font-weight: bold;
       margin-bottom: 2rem;
     }
-
     .home-screen button {
       font-size: 1.5rem;
       padding: 1rem 2rem;
@@ -151,15 +135,12 @@
       border-radius: 8px;
       cursor: pointer;
     }
-
     .home-screen button:hover {
       background-color: #146bb8;
     }
-
     .hidden {
       display: none;
     }
-
     .booked-slots {
       max-height: 200px;
       overflow-y: auto;
@@ -168,11 +149,9 @@
       border-radius: 8px;
       background-color: #f9f9f9;
     }
-
     .booked-slots.expanded {
       max-height: 500px;
     }
-
     .booked-slot {
       display: flex;
       flex-direction: row;
@@ -187,25 +166,11 @@
       pointer-events: none;
       cursor: not-allowed;
     }
-
-    .booked-slot::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: #ff0000;
-      transform: rotate(-45deg);
-      transform-origin: center;
-    }
-
     .time-slots {
       overflow-x: auto;
       white-space: nowrap;
       display: flex;
     }
-
     .time-slots button {
       display: inline-block;
       margin-right: 10px;
@@ -218,12 +183,10 @@
       min-width: 100px;
       text-align: center;
     }
-
     .time-slots button.selected {
       background-color: #1980e6;
       color: white;
     }
-
     .time-slots button.booked-slot {
       background-color: #d3d3d3;
       color: #a0a0a0;
@@ -232,40 +195,34 @@
       position: relative;
       cursor: not-allowed;
     }
-
-    .time-slots button.booked-slot::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: #ff0000;
-      transform: rotate(-45deg);
-      transform-origin: center;
-    }
-
     button {
       min-height: 44px;
       min-width: 44px;
       padding: 8px 16px;
     }
-
     #reserveButton {
       padding: 10px 20px;
     }
-
     .reschedule-button {
       padding: 8px 12px;
       font-size: 12px;
     }
-
     .layout-content-container {
       width: 100%;
       max-width: 960px;
       padding: 0 20px;
     }
-
+    .details {
+      transition: all 0.3s ease;
+    }
+    .details.hidden {
+      display: none;
+    }
+    .details p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #0e141b;
+    }
     /* Responsive adjustments */
     @media (max-width: 640px) {
       .layout-content-container {
@@ -273,26 +230,21 @@
         max-width: 100% !important;
         padding: 0 10px !important;
       }
-
       .px-40 {
         padding-left: 10px !important;
         padding-right: 10px !important;
       }
-
       .flex-wrap {
         flex-direction: column;
         align-items: center;
       }
-
       .calendar-day {
         font-size: 10px;
         min-height: 36px;
       }
-
       #calendar p {
         font-size: 8px;
       }
-
       .time-slots {
         overflow-x: hidden;
         white-space: normal;
@@ -300,7 +252,6 @@
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         gap: 8px;
       }
-
       .time-slots button {
         margin-right: 0;
         margin-bottom: 0;
@@ -308,65 +259,52 @@
         padding: 6px 12px;
         min-width: 0;
       }
-
-        .text-base {
-          font-size: 14px;
-        }
+      .text-base {
+        font-size: 14px;
       }
-
       .text-sm {
         font-size: 12px;
       }
-
       .text-lg {
         font-size: 16px;
       }
-
       .text-32px {
         font-size: 24px !important;
       }
-
       #reserveButton {
         width: 100%;
         font-size: 16px;
       }
-
       .reschedule-button {
         width: 100px;
         font-size: 12px;
       }
-
       .modal-content {
         width: 90%;
         max-width: none;
         padding: 15px;
       }
-
       .modal-content input,
       .modal-content select,
       .modal-content textarea {
         font-size: 14px;
       }
-
       .booked-slots {
         padding: 8px;
       }
-
       .booked-slot {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
       }
-
       .booked-slot img {
         width: 40px;
         height: 40px;
       }
-
       .booked-slot p {
         font-size: 12px;
       }
-    
+    }
   </style>
 </head>
 <body>
@@ -705,7 +643,6 @@
 
         currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-        // Reset selectedDate to today if it's in the past
         if (selectedDate < today.setHours(0, 0, 0, 0)) {
           selectedDate = new Date(today);
           selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -738,7 +675,6 @@
         const endTime = 18.5;
         const interval = 0.5;
 
-        // Get current date and time for comparison
         const now = new Date();
         const isToday = dateKey === now.toDateString();
         const currentHour = now.getHours();
@@ -753,7 +689,6 @@
           const formattedMinutes = minutes === 0 ? '00' : '30';
           const slot = `${formattedHours}:${formattedMinutes} ${period}`;
 
-          // Skip past time slots if today
           if (isToday && time <= currentTimeInHours) {
             continue;
           }
@@ -788,28 +723,43 @@
           querySnapshot.forEach((doc) => {
             const booking = doc.data();
             const bookingElement = document.createElement('div');
-            bookingElement.className = 'flex items-center justify-between p-4 border-b border-[#e7edf3]';
+            bookingElement.className = 'booked-slot flex items-center justify-between p-4 border-b border-[#e7edf3]';
+            bookingElement.setAttribute('data-id', doc.id);
 
-            const departmentInfo = document.createElement('div');
-            departmentInfo.className = 'flex items-center gap-4';
-            departmentInfo.innerHTML = `
+            const bookingSummary = document.createElement('div');
+            bookingSummary.className = 'flex items-center gap-4';
+            bookingSummary.innerHTML = `
               <img src="${departmentImages[booking.department]}" alt="${booking.department}" class="w-12 h-12 rounded-full">
-              <p class="text-[#0e141b] text-sm font-medium">${booking.department}</p>
+              <div>
+                <p class="text-[#0e141b] text-sm font-medium">${booking.name || 'Unknown'}</p>
+                <p class="text-[#0e141b] text-sm font-medium">${booking.time}</p>
+              </div>
             `;
 
-            const bookedTime = document.createElement('p');
-            bookedTime.className = 'text-[#0e141b] text-sm font-medium';
-            bookedTime.textContent = booking.time;
+            const expandButton = document.createElement('button');
+            expandButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
+            expandButton.textContent = 'Details';
+            expandButton.addEventListener('click', () => toggleDetails(bookingElement, booking));
 
             const rescheduleButton = document.createElement('button');
             rescheduleButton.className = 'p-2 bg-[#1980e6] text-white rounded text-sm font-medium reschedule-button';
             rescheduleButton.textContent = 'Reschedule';
             rescheduleButton.setAttribute('data-id', doc.id);
 
-            bookingElement.appendChild(departmentInfo);
-            bookingElement.appendChild(bookedTime);
+            bookingElement.appendChild(bookingSummary);
+            bookingElement.appendChild(expandButton);
             bookingElement.appendChild(rescheduleButton);
 
+            const detailsElement = document.createElement('div');
+            detailsElement.className = 'details hidden mt-4 p-4 bg-[#f9f9f9] rounded';
+            detailsElement.innerHTML = `
+              <p><strong>Email:</strong> ${booking.email || 'N/A'}</p>
+              <p><strong>Department:</strong> ${booking.department || 'N/A'}</p>
+              <p><strong>Role:</strong> ${booking.role || 'N/A'}</p>
+              <p><strong>Purpose:</strong> ${booking.purpose || 'N/A'}</p>
+            `;
+
+            bookingElement.appendChild(detailsElement);
             bookedSlots.appendChild(bookingElement);
           });
 
@@ -823,6 +773,18 @@
         }
       }
 
+      function toggleDetails(element, booking) {
+        const details = element.querySelector('.details');
+        const button = element.querySelector('button');
+        if (details.classList.contains('hidden')) {
+          details.classList.remove('hidden');
+          button.textContent = 'Hide Details';
+        } else {
+          details.classList.add('hidden');
+          button.textContent = 'Details';
+        }
+      }
+
       async function populateAvailableTimeSlots(newDate) {
         newTimeSelect.innerHTML = '';
         const dateKey = new Date(newDate).toDateString();
@@ -831,7 +793,6 @@
           "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"
         ];
 
-        // Get current date and time for comparison
         const now = new Date();
         const isToday = dateKey === now.toDateString();
         const currentHour = now.getHours();
@@ -845,7 +806,6 @@
 
           let hasAvailableSlots = false;
 
-          // Validate that the selected date is not in the past
           const selectedDateObj = new Date(newDate);
           if (selectedDateObj < now.setHours(0, 0, 0, 0)) {
             const option = document.createElement('option');
@@ -858,7 +818,6 @@
           }
 
           allTimeSlots.forEach(slot => {
-            // Convert slot to time in hours for comparison (e.g., "9:30 AM" -> 9.5)
             const [timeStr, period] = slot.split(' ');
             const [hoursStr, minutesStr] = timeStr.split(':');
             let hours = parseInt(hoursStr);
@@ -867,7 +826,6 @@
             if (period === 'AM' && hours === 12) hours = 0;
             const slotTimeInHours = hours + minutes / 60;
 
-            // Skip past time slots if today
             if (isToday && slotTimeInHours <= currentTimeInHours) {
               return;
             }
@@ -937,7 +895,8 @@
               purpose,
               role,
               time,
-              token
+              token,
+              name
             });
           }
 
@@ -961,18 +920,16 @@
       });
 
       document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('reschedule-button')) {
+        if (e.target.classList.contains('reschedule-button') && e.target.textContent === 'Reschedule') {
           const docId = e.target.getAttribute('data-id');
           rescheduleModal.style.display = 'flex';
 
-          // Set the minimum date for the reschedule date picker to today
           const today = new Date();
           const todayString = today.toISOString().split('T')[0];
           newDateInput.setAttribute('min', todayString);
 
-          // Reset the date and time fields to avoid invalid selections
-          newDateInput.value = todayString; // Default to today
-          newTimeSelect.innerHTML = ''; // Clear time slots until a valid date is selected
+          newDateInput.value = todayString;
+          newTimeSelect.innerHTML = '';
 
           newDateInput.addEventListener('change', (e) => {
             const newDate = e.target.value;
@@ -987,7 +944,6 @@
             const newDate = document.getElementById('newDate').value;
             const newTime = document.getElementById('newTime').value;
 
-            // Validate that the selected date is not in the past
             const now = new Date();
             const selectedDateObj = new Date(newDate);
             if (selectedDateObj < now.setHours(0, 0, 0, 0)) {
@@ -995,7 +951,6 @@
               return;
             }
 
-            // Validate that a valid time slot is selected
             if (!newTime || newTime === '') {
               alert('Please select a valid time slot.');
               return;
