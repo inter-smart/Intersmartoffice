@@ -12,26 +12,47 @@
   <style>
     .calendar-day {
       transition: background-color 0.3s ease;
+      font-size: 12px;
+      padding: 4px;
+      text-align: center;
+      min-height: 40px;
+
     }
     .calendar-day:hover {
       background-color: #e7edf3;
     }
+
     .calendar-day.disabled {
       background-color: #f0f0f0;
       color: #a0a0a0;
       cursor: not-allowed;
       pointer-events: none;
     }
+
     .calendar-day.selected {
       background-color: #1980e6;
       color: white;
     }
+
+    #calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 2px;
+    }
+
+    #calendar p {
+      font-size: 10px;
+      padding: 2px;
+    }
+
     .reserve-button {
       transition: background-color 0.3s ease;
     }
+
     .reserve-button:hover {
       background-color: #146bb8;
     }
+
     .modal {
       display: none;
       position: fixed;
@@ -43,13 +64,19 @@
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      padding: 10px;
     }
+
     .modal-content {
       background-color: white;
       padding: 20px;
       border-radius: 8px;
-      width: 300px;
+      width: 100%;
+      max-width: 300px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
+
     .success-message {
       position: fixed;
       top: 20px;
@@ -64,6 +91,7 @@
       text-align: center;
       min-width: 300px;
     }
+
     .success-message button {
       margin-top: 10px;
       padding: 5px 10px;
@@ -74,6 +102,7 @@
       cursor: pointer;
       font-weight: bold;
     }
+
     .close-button {
       position: absolute;
       top: 10px;
@@ -86,6 +115,7 @@
       font-weight: bold;
       z-index: 1001;
     }
+
     .video-background {
       position: fixed;
       top: 0;
@@ -95,6 +125,7 @@
       z-index: -1;
       object-fit: cover;
     }
+
     .home-screen {
       position: relative;
       display: flex;
@@ -104,11 +135,13 @@
       color: white;
       text-align: center;
     }
+
     .home-screen h1 {
       font-size: 3rem;
       font-weight: bold;
       margin-bottom: 2rem;
     }
+
     .home-screen button {
       font-size: 1.5rem;
       padding: 1rem 2rem;
@@ -118,12 +151,15 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
     .home-screen button:hover {
       background-color: #146bb8;
     }
+
     .hidden {
       display: none;
     }
+
     .booked-slots {
       max-height: 200px;
       overflow-y: auto;
@@ -132,10 +168,18 @@
       border-radius: 8px;
       background-color: #f9f9f9;
     }
+
     .booked-slots.expanded {
       max-height: 500px;
     }
+
     .booked-slot {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      margin-bottom: 8px;
       background-color: #d3d3d3;
       color: #a0a0a0;
       opacity: 0.8;
@@ -143,6 +187,7 @@
       pointer-events: none;
       cursor: not-allowed;
     }
+
     .booked-slot::after {
       content: '';
       position: absolute;
@@ -154,10 +199,13 @@
       transform: rotate(-45deg);
       transform-origin: center;
     }
+
     .time-slots {
       overflow-x: auto;
       white-space: nowrap;
+      display: flex;
     }
+
     .time-slots button {
       display: inline-block;
       margin-right: 10px;
@@ -167,11 +215,15 @@
       background-color: #f9f9f9;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      min-width: 100px;
+      text-align: center;
     }
+
     .time-slots button.selected {
       background-color: #1980e6;
       color: white;
     }
+
     .time-slots button.booked-slot {
       background-color: #d3d3d3;
       color: #a0a0a0;
@@ -180,6 +232,7 @@
       position: relative;
       cursor: not-allowed;
     }
+
     .time-slots button.booked-slot::after {
       content: '';
       position: absolute;
@@ -191,6 +244,129 @@
       transform: rotate(-45deg);
       transform-origin: center;
     }
+
+    button {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 8px 16px;
+    }
+
+    #reserveButton {
+      padding: 10px 20px;
+    }
+
+    .reschedule-button {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
+    .layout-content-container {
+      width: 100%;
+      max-width: 960px;
+      padding: 0 20px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .layout-content-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 10px !important;
+      }
+
+      .px-40 {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+      }
+
+      .flex-wrap {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .calendar-day {
+        font-size: 10px;
+        min-height: 36px;
+      }
+
+      #calendar p {
+        font-size: 8px;
+      }
+
+      .time-slots {
+        overflow-x: hidden;
+        white-space: normal;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
+      }
+
+      .time-slots button {
+        margin-right: 0;
+        margin-bottom: 0;
+        font-size: 12px;
+        padding: 6px 12px;
+        min-width: 0;
+      }
+
+        .text-base {
+          font-size: 14px;
+        }
+      }
+
+      .text-sm {
+        font-size: 12px;
+      }
+
+      .text-lg {
+        font-size: 16px;
+      }
+
+      .text-32px {
+        font-size: 24px !important;
+      }
+
+      #reserveButton {
+        width: 100%;
+        font-size: 16px;
+      }
+
+      .reschedule-button {
+        width: 100px;
+        font-size: 12px;
+      }
+
+      .modal-content {
+        width: 90%;
+        max-width: none;
+        padding: 15px;
+      }
+
+      .modal-content input,
+      .modal-content select,
+      .modal-content textarea {
+        font-size: 14px;
+      }
+
+      .booked-slots {
+        padding: 8px;
+      }
+
+      .booked-slot {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .booked-slot img {
+        width: 40px;
+        height: 40px;
+      }
+
+      .booked-slot p {
+        font-size: 12px;
+      }
+    
   </style>
 </head>
 <body>
