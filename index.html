@@ -611,8 +611,7 @@
 
       bookNowButton.addEventListener('click', () => {
         if (!currentUser) {
-          signInModal.style.display = 'flex';
-          alert('Please sign in to book a conference room.');
+          signUpModal.style.display = 'flex'; // Show sign-up modal directly
         } else {
           homeScreen.classList.add('hidden');
           bookingScreen.classList.remove('hidden');
@@ -718,7 +717,7 @@
 
         try {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await updateProfile(userCredential.user, { displayName: name });
+          await updateProfile(userCredential.user, { displayName: name }); // Set display name
           signUpModal.style.display = 'none';
           signUpForm.reset();
           alert('Signup successful!');
@@ -1196,7 +1195,9 @@
               role,
               time,
               name,
-              userId: currentUser.uid
+              userId: currentUser.uid,
+              userEmail: currentUser.email,
+              userDisplayName: currentUser.displayName || name
             });
           }
 
