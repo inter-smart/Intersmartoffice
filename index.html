@@ -112,7 +112,7 @@
     .booked-slot.completed { background-color: #d3d3d3; opacity: 0.6; }
     .details-button { padding: 8px 12px; background-color: #1980e6; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: background-color 0.3s ease; text-align: center; }
     .details-button:hover { background-color: #146bb8; }
-    .time-slots { overflow-x: auto; white-space: nowrap; display: flex; margin-bottom: 20px; }
+    .time-slots { overflow-x: auto; white-space: nowrap; display: flex; margin-bottom: 20px; gap: 10px; }
     .time-slots button { display: inline-block; margin-right: 10px; padding: 8px 16px; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9; cursor: pointer; transition: background-color 0.3s ease; min-width: 100px; text-align: center; }
     .time-slots button.selected { background-color: #1980e6; color: white; }
     .time-slots button.booked-slot { background-color: #d3d3d3; color: #a0a0a0; opacity: 0.8; pointer-events: none; position: relative; cursor: not-allowed; }
@@ -149,13 +149,13 @@
     .ticker-content {
       display: inline-block;
       padding-right: 100%;
-      animation: ticker 35s linear infinite running;
+      animation: ticker 35s linear infinite;
     }
     .ticker .completed { color: red; }
     .ticker .ongoing { color: green; }
     .ticker .upcoming { color: blue; }
     @keyframes ticker {
-      0% { transform: translateX(0); }
+      0% { transform: translateX(100%); }
       100% { transform: translateX(-100%); }
     }
     .success-message { padding: 20px; position: relative; }
@@ -632,43 +632,35 @@
 
         if (!email || !password) {
           alert('Please enter both email and password.');
-          if (!email) document.getElementById('signInEmail').focus();
-          else document.getElementById('signInPassword').focus();
           return;
         }
 
         if (!email.endsWith('@intersmart.in')) {
           alert('Only emails ending with @intersmart.in are allowed.');
-          document.getElementById('signInEmail').focus();
           return;
         }
 
         try {
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          await signInWithEmailAndPassword(auth, email, password);
           signInModal.style.display = 'none';
           signInForm.reset();
-          document.getElementById('signInEmail').focus();
         } catch (error) {
-          console.error('Sign in error: ', error.code, error.message);
           let errorMessage = 'Sign in failed. Please try again.';
           switch (error.code) {
             case 'auth/invalid-credential':
-              errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+              errorMessage = 'Invalid email or password.';
               break;
             case 'auth/user-not-found':
-              errorMessage = 'No account found with this email. Please sign up or check your email.';
+              errorMessage = 'No account found with this email.';
               break;
             case 'auth/wrong-password':
-              errorMessage = 'Incorrect password. Please try again or reset your password.';
+              errorMessage = 'Incorrect password.';
               break;
             case 'auth/too-many-requests':
-              errorMessage = 'Too many attempts. Please try again later or reset your password.';
+              errorMessage = 'Too many attempts. Please try again later.';
               break;
-            default:
-              errorMessage = 'An unexpected error occurred. Please try again later.';
           }
           alert(errorMessage);
-          document.getElementById('signInEmail').focus();
         }
       });
 
@@ -682,13 +674,8 @@
         const email = prompt('Please enter your email address to reset your password:');
         if (email) {
           sendPasswordResetEmail(auth, email)
-            .then(() => {
-              alert('Password reset email sent. Check your inbox.');
-            })
-            .catch((error) => {
-              console.error('Password reset error: ', error.code, error.message);
-              alert('Failed to send reset email: ' + error.message);
-            });
+            .then(() => alert('Password reset email sent. Check your inbox.'))
+            .catch((error) => alert('Failed to send reset email: ' + error.message));
         }
       });
 
@@ -714,9 +701,8 @@
           signUpForm.reset();
           alert('Signup successful!');
         } catch (error) {
-          console.error('Signup error: ', error.code, error.message);
           if (error.code === 'auth/email-already-in-use') {
-            alert('This email is already registered. Please use a different email or sign in.');
+            alert('This email is already registered.');
           } else {
             alert('Signup failed: ' + error.message);
           }
@@ -746,7 +732,6 @@
         try {
           await signOut(auth);
         } catch (error) {
-          console.error('Sign out error: ', error.code, error.message);
           alert('Sign out failed: ' + error.message);
         }
       });
@@ -754,14 +739,12 @@
       function showSuccessMessage(message) {
         bookingSuccessMessage.textContent = message;
         bookingSuccessMessage.classList.remove('hidden');
-        setTimeout(() => {
-          bookingSuccessMessage.classList.add('hidden');
-        }, 5000);
+        setTimeout(() => bookingSuccessMessage.classList.add('hidden'), 5000);
       }
 
       function initializeBookingInterface() {
         renderCalendar();
-        selectDate(new Date()); // Automatically select the current date on load
+        selectDate(new Date());
         renderTimeSlots();
         renderBookedSlots();
         updateTicker();
@@ -842,7 +825,9 @@
         
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+        const isToday = dateKey === today.toDateString();
+        const currentTimeInHours = today.getHours() + today.getMinutes() / 60;
+
         if (new Date(dateKey) < today) {
           timeSlots.innerHTML = '<p>Cannot book past dates.</p>';
           return;
@@ -857,8 +842,9 @@
         const interval = 0.5;
 
         const now = new Date();
-        const isToday = dateKey === now.toDateString();
-        const currentTimeInHours = now.getHours() + now.getMinutes() / 60;
+        const currentTime = now.getHours() + now.getMinutes() / 60;
+        let availableSlots = 0;
+        const totalSlots = ((endTime - startTime) / interval) + 1;
 
         for (let time = startTime; time <= endTime; time += interval) {
           const hours = Math.floor(time);
@@ -869,21 +855,27 @@
           const slot = `${formattedHours}:${formattedMinutes} ${period}`;
 
           const slotTimeInHours = hours + minutes / 60;
-          if (isToday && slotTimeInHours <= currentTimeInHours) continue;
+          if (isToday && slotTimeInHours <= currentTime) continue;
 
           const slotButton = document.createElement('button');
           slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
           const isBooked = bookedSlots.includes(slot);
-          if (isBooked) slotButton.classList.add('booked-slot');
-          slotButton.textContent = slot;
-          slotButton.addEventListener('click', () => {
-            if (!isBooked) {
+          if (isBooked) {
+            slotButton.classList.add('booked-slot');
+          } else {
+            availableSlots++;
+            slotButton.addEventListener('click', () => {
               slotButton.classList.toggle('selected');
               selectedTimeSlots = Array.from(document.querySelectorAll('#timeSlots .selected')).map(el => el.textContent);
               reserveButton.disabled = !selectedTimeSlots.length;
-            }
-          });
+            });
+          }
+          slotButton.textContent = slot;
           timeSlots.appendChild(slotButton);
+        }
+
+        if (availableSlots === 0) {
+          timeSlots.innerHTML = '<p>No slots available for the day / All slots booked</p>';
         }
       }
 
@@ -1085,7 +1077,6 @@
           const querySnapshot = await getDocs(q);
           const bookedSlots = querySnapshot.docs.map(doc => doc.data().time);
 
-          let hasAvailableSlots = false;
           const selectedDateObj = new Date(newDate);
           if (selectedDateObj < now.setHours(0, 0, 0, 0)) {
             const option = document.createElement('option');
@@ -1097,6 +1088,7 @@
             return;
           }
 
+          let hasAvailableSlots = false;
           allTimeSlots.forEach(slot => {
             const slotTimeInHours = parseTime(slot) / 60;
             if (isToday && slotTimeInHours <= currentTimeInHours) return;
@@ -1128,8 +1120,11 @@
           alert('Please sign in to reserve slots.');
           return;
         }
-        if (selectedTimeSlots.length > 0) bookingModal.style.display = 'flex';
-        else alert('Please select at least one time slot.');
+        if (selectedTimeSlots.length > 0) {
+          bookingModal.style.display = 'flex';
+        } else {
+          alert('Please select at least one time slot.');
+        }
       });
 
       async function checkIfTimeSlotBooked(dateKey, timeSlot) {
@@ -1152,28 +1147,43 @@
         const dateKey = selectedDate.toDateString();
 
         const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        if (new Date(dateKey) < now) {
+        const isToday = dateKey === now.toDateString();
+        const currentTimeInHours = now.getHours() + now.getMinutes() / 60;
+
+        if (new Date(dateKey) < now.setHours(0, 0, 0, 0)) {
           alert('Cannot book past dates.');
           return;
         }
 
         try {
-          for (const time of selectedTimeSlots) {
-            if (await checkIfTimeSlotBooked(dateKey, time)) {
-              alert(`The time slot ${time} is already booked. Please select a different time slot.`);
-              return;
-            }
-          }
+          let bookingFailed = false;
+          const bookedSlots = [];
 
           for (const time of selectedTimeSlots) {
             const slotTimeInHours = parseTime(time) / 60;
-            const isToday = dateKey === now.toDateString();
-            const currentTimeInHours = now.getHours() + now.getMinutes() / 60;
             if (isToday && slotTimeInHours <= currentTimeInHours) {
               alert(`Cannot book past time slot: ${time}`);
+              bookingFailed = true;
+              break;
+            }
+            if (await checkIfTimeSlotBooked(dateKey, time)) {
+              bookedSlots.push(time);
+              bookingFailed = true;
+            }
+          }
+
+          if (bookingFailed) {
+            if (bookedSlots.length > 0) {
+              alert(`The following slots are already booked: ${bookedSlots.join(', ')}. Please select different time slots.`);
+              bookingModal.style.display = 'none';
+              bookingForm.reset();
+              renderTimeSlots();
               return;
             }
+            return;
+          }
+
+          for (const time of selectedTimeSlots) {
             await addDoc(collection(db, 'bookings'), {
               date: dateKey,
               department,
@@ -1193,9 +1203,8 @@
           bookingForm.reset();
           selectedTimeSlots = [];
           reserveButton.disabled = true;
-          timeSlots.innerHTML = '';
-          renderTimeSlots();
-          renderBookedSlots();
+          await renderTimeSlots();
+          setTimeout(() => renderBookedSlots(), 500);
         } catch (error) {
           console.error('Error adding booking: ', error);
           alert('Failed to book. Please try again.');
@@ -1271,17 +1280,16 @@
               alert('Booking rescheduled successfully!');
               rescheduleModal.style.display = 'none';
               rescheduleForm.reset();
-              // Refresh the booked slots for both old and new dates
               const oldDateKey = selectedDate.toDateString();
               if (oldDateKey !== newDateKey) {
-                renderBookedSlots(); // Refresh current date's booked slots
-                selectedDate = new Date(newDate); // Update selectedDate to new date
+                renderBookedSlots();
+                selectedDate = new Date(newDate);
                 selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                renderCalendar(); // Re-render calendar to highlight new date
-                renderTimeSlots(); // Refresh time slots for new date
-                renderBookedSlots(); // Refresh booked slots for new date
+                renderCalendar();
+                renderTimeSlots();
+                setTimeout(() => renderBookedSlots(), 500);
               } else {
-                renderBookedSlots(); // Refresh only if same date
+                setTimeout(() => renderBookedSlots(), 500);
               }
             } catch (error) {
               console.error('Error rescheduling booking: ', error);
@@ -1337,9 +1345,6 @@
         }).join(' | ');
 
         tickerContent.innerHTML = tickerItems || '<span>No bookings today</span>';
-        tickerContent.style.animation = 'none';
-        tickerContent.offsetHeight;
-        tickerContent.style.animation = 'ticker 55s linear infinite';
       }
 
       setInterval(() => {
