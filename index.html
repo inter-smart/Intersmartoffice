@@ -440,6 +440,9 @@
           <button type="submit" class="p-2 bg-[#1980e6] text-white rounded">Sign In</button>
         </div>
       </form>
+      <p class="text-sm text-[#0e141b] mt-2 text-center">
+        <a href="#" id="forgotPassword" class="text-[#1980e6] font-medium">Forgot Password?</a>
+      </p>
       <p class="text-sm text-[#0e141b] mt-4 text-center">
         Don't have an account? 
         <a href="#" id="switchToSignUp" class="text-[#1980e6] font-medium">Sign Up</a>
@@ -483,18 +486,18 @@
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
     import { 
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
-      signOut, onAuthStateChanged, updateProfile 
+      signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail 
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyCqLBJtkkFHJejNVjAKxwnL7G5YYJ3l4eE",
-  authDomain: "interbook-c003c.firebaseapp.com",
-  projectId: "interbook-c003c",
-  storageBucket: "interbook-c003c.firebasestorage.app",
-  messagingSenderId: "835157789713",
-  appId: "1:835157789713:web:1c48fd4ee7b9ac9bc535b0",
-  measurementId: "G-00H9J6GP5C"
-};
+      apiKey: "AIzaSyCqLBJtkkFHJejNVjAKxwnL7G5YYJ3l4eE",
+      authDomain: "interbook-c003c.firebaseapp.com",
+      projectId: "interbook-c003c",
+      storageBucket: "interbook-c003c.firebasestorage.app",
+      messagingSenderId: "835157789713",
+      appId: "1:835157789713:web:1c48fd4ee7b9ac9bc535b0",
+      measurementId: "G-00H9J6GP5C"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -533,6 +536,7 @@
       const signUpForm = document.getElementById('signUpForm');
       const cancelSignIn = document.getElementById('cancelSignIn');
       const cancelSignUp = document.getElementById('cancelSignUp');
+      const forgotPassword = document.getElementById('forgotPassword');
 
       let allBookings = [];
       let currentBookingIndex = 0;
@@ -627,21 +631,73 @@
 
       signInForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('signInEmail').value;
-        const password = document.getElementById('signInPassword').value;
+        const email = document.getElementById('signInEmail').value.trim();
+        const password = document.getElementById('signInPassword').value.trim();
+
+        // Basic validation
+        if (!email || !password) {
+          alert('Please enter both email and password.');
+          if (!email) document.getElementById('signInEmail').focus();
+          else document.getElementById('signInPassword').focus();
+          return;
+        }
+
+        if (!email.endsWith('@intersmart.in')) {
+          alert('Only emails ending with @intersmart.in are allowed.');
+          document.getElementById('signInEmail').focus();
+          return;
+        }
+
         try {
-          await signInWithEmailAndPassword(auth, email, password);
+          console.log('Attempting sign-in with email:', email);
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          console.log('Sign-in successful for user:', userCredential.user.uid);
           signInModal.style.display = 'none';
           signInForm.reset();
+          document.getElementById('signInEmail').focus(); // Prepare for next use
         } catch (error) {
           console.error('Sign in error: ', error.code, error.message);
-          alert('Sign in failed: ' + error.message);
+          let errorMessage = 'Sign in failed. Please try again.';
+          switch (error.code) {
+            case 'auth/invalid-credential':
+              errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+              break;
+            case 'auth/user-not-found':
+              errorMessage = 'No account found with this email. Please sign up or check your email.';
+              break;
+            case 'auth/wrong-password':
+              errorMessage = 'Incorrect password. Please try again or reset your password.';
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = 'Too many attempts. Please try again later or reset your password.';
+              break;
+            default:
+              errorMessage = 'An unexpected error occurred. Please try again later.';
+          }
+          alert(errorMessage);
+          document.getElementById('signInEmail').focus(); // Focus on email for re-entry
         }
       });
 
       cancelSignIn.addEventListener('click', () => {
         signInModal.style.display = 'none';
         signInForm.reset();
+      });
+
+      // Forgot Password
+      forgotPassword.addEventListener('click', (e) => {
+        e.preventDefault();
+        const email = prompt('Please enter your email address to reset your password:');
+        if (email) {
+          sendPasswordResetEmail(auth, email)
+            .then(() => {
+              alert('Password reset email sent. Check your inbox.');
+            })
+            .catch((error) => {
+              console.error('Password reset error: ', error.code, error.message);
+              alert('Failed to send reset email: ' + error.message);
+            });
+        }
       });
 
       // Sign Up
@@ -683,18 +739,18 @@
 
       // Switch from Sign In to Sign Up
       document.getElementById('switchToSignUp').addEventListener('click', (e) => {
-        e.preventDefault(); // Prevent default link behavior
-        signInModal.style.display = 'none'; // Hide sign-in modal
-        signUpModal.style.display = 'flex'; // Show sign-up modal
-        signInForm.reset(); // Reset sign-in form fields
+        e.preventDefault();
+        signInModal.style.display = 'none';
+        signUpModal.style.display = 'flex';
+        signInForm.reset();
       });
 
       // Switch from Sign Up to Sign In
       document.getElementById('switchToSignIn').addEventListener('click', (e) => {
-        e.preventDefault(); // Prevent default link behavior
-        signUpModal.style.display = 'none'; // Hide sign-up modal
-        signInModal.style.display = 'flex'; // Show sign-in modal
-        signUpForm.reset(); // Reset sign-up form fields
+        e.preventDefault();
+        signUpModal.style.display = 'none';
+        signInModal.style.display = 'flex';
+        signUpForm.reset();
       });
 
       // Sign Out
