@@ -185,6 +185,7 @@
       color: #4e7397;
       font-style: italic;
     }
+    .no-slots-message { color: red; }
     .auth-modal {
       display: none;
       position: fixed;
@@ -829,7 +830,7 @@
         const currentTimeInHours = today.getHours() + today.getMinutes() / 60;
 
         if (new Date(dateKey) < today) {
-          timeSlots.innerHTML = '<p>Cannot book past dates.</p>';
+          timeSlots.innerHTML = '<p class="no-slots-message">Cannot book past dates.</p>';
           return;
         }
 
@@ -875,7 +876,7 @@
         }
 
         if (availableSlots === 0) {
-          timeSlots.innerHTML = '<p>No slots available for the day / All slots booked</p>';
+          timeSlots.innerHTML = '<p class="no-slots-message">No slots available for this day / All slots booked</p>';
         }
       }
 
@@ -1061,24 +1062,34 @@
         }
       });
 
-      async function populateAvailableTimeSlots(newDate) {
+      async function populateAvailableTimeSlots(newDate, currentBookingId) {
         if (!currentUser) return;
-        newTimeSelect.innerHTML = '';
+        newTimeSelect.innerHTML = ''; // Clear previous options
+        
         const dateKey = new Date(newDate).toDateString();
-        const allTimeSlots = ["9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
-          "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"];
+        const allTimeSlots = [
+          "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", 
+          "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", 
+          "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"
+        ];
 
         const now = new Date();
         const isToday = dateKey === now.toDateString();
-        const currentTimeInHours = now.getHours() + now.getMinutes() / 60;
+        const currentTimeInHours = now.getHours() + (now.getMinutes() / 60);
+        const selectedDate = new Date(newDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
         try {
+          // Fetch booked slots for the selected date
           const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
           const querySnapshot = await getDocs(q);
-          const bookedSlots = querySnapshot.docs.map(doc => doc.data().time);
+          const bookedSlots = querySnapshot.docs
+            .filter(doc => doc.id !== currentBookingId) // Exclude the current booking being rescheduled
+            .map(doc => doc.data().time);
 
-          const selectedDateObj = new Date(newDate);
-          if (selectedDateObj < now.setHours(0, 0, 0, 0)) {
+          // Check if date is in the past
+          if (selectedDate < today) {
             const option = document.createElement('option');
             option.value = '';
             option.textContent = 'Cannot reschedule to past dates';
@@ -1089,9 +1100,17 @@
           }
 
           let hasAvailableSlots = false;
+          
+          // Populate time slots
           allTimeSlots.forEach(slot => {
             const slotTimeInHours = parseTime(slot) / 60;
-            if (isToday && slotTimeInHours <= currentTimeInHours) return;
+            
+            // Skip past times for today
+            if (isToday && slotTimeInHours <= currentTimeInHours) {
+              return;
+            }
+
+            // Only add slot if it's not booked
             if (!bookedSlots.includes(slot)) {
               const option = document.createElement('option');
               option.value = slot;
@@ -1101,16 +1120,25 @@
             }
           });
 
+          // If no slots are available, show message
           if (!hasAvailableSlots) {
             const option = document.createElement('option');
             option.value = '';
-            option.textContent = 'No slots available for the day';
+            option.className = 'no-slots-message';
+            option.textContent = 'No slots available for this day';
             option.disabled = true;
             option.selected = true;
             newTimeSelect.appendChild(option);
           }
         } catch (error) {
           console.error('Error fetching booked slots: ', error);
+          const option = document.createElement('option');
+          option.value = '';
+          option.className = 'no-slots-message';
+          option.textContent = 'Error loading slots';
+          option.disabled = true;
+          option.selected = true;
+          newTimeSelect.appendChild(option);
         }
       }
 
@@ -1229,10 +1257,14 @@
           const today = new Date().toISOString().split('T')[0];
           newDateInput.setAttribute('min', today);
 
+          // Remove any existing listeners to prevent duplicates
+          newDateInput.onchange = null;
           newDateInput.addEventListener('change', (e) => {
-            populateAvailableTimeSlots(e.target.value);
+            populateAvailableTimeSlots(e.target.value, docId);
           }, { once: true });
 
+          // Remove any existing submit listeners
+          rescheduleForm.onsubmit = null;
           rescheduleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newDate = document.getElementById('newDate').value;
