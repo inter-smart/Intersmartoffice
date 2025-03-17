@@ -112,8 +112,8 @@
     .booked-slot.completed { background-color: #d3d3d3; opacity: 0.6; }
     .details-button { padding: 8px 12px; background-color: #1980e6; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: background-color 0.3s ease; text-align: center; }
     .details-button:hover { background-color: #146bb8; }
-    .time-slots { overflow-x: auto; white-space: nowrap; display: flex; margin-bottom: 20px; gap: 10px; }
-    .time-slots button { display: inline-block; margin-right: 10px; padding: 8px 16px; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9; cursor: pointer; transition: background-color 0.3s ease; min-width: 100px; text-align: center; }
+    .time-slots { overflow-x: auto; white-space: nowrap; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: nowrap; align-items: center; }
+    .time-slots button { display: inline-block; padding: 8px 16px; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9; cursor: pointer; transition: background-color 0.3s ease; min-width: 100px; text-align: center; margin: 0; }
     .time-slots button.selected { background-color: #1980e6; color: white; }
     .time-slots button.booked-slot { background-color: #d3d3d3; color: #a0a0a0; opacity: 0.8; pointer-events: none; position: relative; cursor: not-allowed; }
     button { min-height: 44px; min-width: 44px; padding: 8px 16px; }
@@ -172,19 +172,9 @@
       font-size: 14px;
       color: #0e141b;
     }
-    .past-booking-entry:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-    }
-    .past-booking-entry:hover {
-      background-color: #e7edf3;
-    }
-    .no-bookings {
-      padding: 10px;
-      text-align: center;
-      color: #4e7397;
-      font-style: italic;
-    }
+    .past-booking-entry:last-child { border-bottom: none; margin-bottom: 0; }
+    .past-booking-entry:hover { background-color: #e7edf3; }
+    .no-bookings { padding: 10px; text-align: center; color: #4e7397; font-style: italic; }
     .no-slots-message { color: red; }
     .auth-modal {
       display: none;
@@ -207,17 +197,54 @@
       max-width: 350px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    #signOutButton { margin-bottom: 10px; } /* Added margin to separate from ticker */
+    #signOutButton { margin-bottom: 10px; }
+    header { position: sticky; top: 0; z-index: 20; background-color: #fff; }
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #1980e6;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
     @media (max-width: 640px) {
+      .video-background { display: none; }
+      .home-screen { background-color: #000; }
       .layout-content-container { width: 100% !important; max-width: 100% !important; padding: 0 10px !important; }
       .px-40 { padding-left: 10px !important; padding-right: 10px !important; }
       .flex-wrap { flex-direction: column; align-items: center; }
       .calendar-day { font-size: 10px; min-height: 36px; }
       #calendar p { font-size: 8px; }
-      .time-slots { overflow-x: hidden; white-space: normal; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-bottom: 15px; }
-      .time-slots h3 { display: block; }
-      .time-slots #timeSlots { margin-top: 10px; }
-      .time-slots button { margin-right: 0; margin-bottom: 0; font-size: 12px; padding: 6px 12px; min-width: 0; }
+      .time-slots { 
+        display: block; 
+        overflow-x: hidden; 
+        white-space: normal; 
+        width: 100%; 
+        margin-bottom: 15px; 
+      }
+      .time-slots h3 { 
+        display: block; 
+        width: 100%; 
+        text-align: left; 
+        margin-bottom: 10px; 
+      }
+      .time-slots #timeSlots { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); 
+        gap: 8px; 
+        width: 100%; 
+      }
+      .time-slots button { 
+        margin: 0; 
+        font-size: 12px; 
+        padding: 6px 12px; 
+        min-width: 90px; 
+      }
       .text-base { font-size: 14px; }
       .text-sm { font-size: 12px; }
       .text-lg { font-size: 16px; }
@@ -230,7 +257,7 @@
       .modal-content input, .modal-content select, .modal-content textarea { font-size: 12px; }
       .booked-slots { padding: 8px; }
       .booked-slot { padding: 6px; }
-      .booked-slot img { width: 40px; height: 40px; }
+      .booked-slot img, .booked-slot .profile-pic { width: 40px; height: 40px; }
       .booked-slot p { font-size: 12px; }
       .buttons-container { flex-direction: row; justify-content: flex-end; width: 100%; }
       .booking-info-modal-content { max-width: 90%; padding: 20px; }
@@ -565,23 +592,6 @@
       let selectedDate = new Date();
       let selectedTimeSlots = [];
 
-      const departmentImages = {
-        'QA': 'images/dep.jpg',
-        'PHP': 'images/dep.jpg',
-        'Project Management': 'images/dep.jpg',
-        'Sales': 'images/dep.jpg',
-        'Management': 'images/dep.jpg',
-        'HTML': 'images/dep.jpg',
-        'Digital Marketing': 'images/dep.jpg',
-        'SEO': 'images/dep.jpg',
-        'Graphic Designers': 'images/dep.jpg',
-        'Content Writers': 'images/dep.jpg',
-        'Project Coordinators': 'images/dep.jpg',
-        'Mobile App Development Team': 'images/dep.jpg',
-        'UI Designers': 'images/dep.jpg',
-        'Wordpress': 'images/dep.jpg'
-      };
-
       const bookingSuccessMessage = document.createElement('p');
       bookingSuccessMessage.className = 'text-green-600 text-sm mt-2 hidden';
       document.querySelector('.bottom-buttons').appendChild(bookingSuccessMessage);
@@ -909,13 +919,14 @@
             bookingElement.setAttribute('data-id', booking.id);
 
             const showReschedule = currentUser && currentUser.uid === booking.userId && !isCompleted;
+            const userInitial = (booking.name || 'U')[0].toUpperCase();
 
             bookingElement.innerHTML = `
               <div class="flex items-center gap-4 w-full">
-                <img src="${departmentImages[booking.department] || 'images/dep.jpg'}" alt="${booking.department || 'N/A'}" class="w-12 h-12 rounded-full">
+                <div class="profile-pic">${userInitial}</div>
                 <div class="flex-1">
-                  <p class="text-[#0e141b] text-sm font-medium">${booking.name || 'Unknown'}</p>
-                  <p class="text-[#0e141b] text-sm font-medium">${booking.department || 'N/A'}</p>
+                  <p class="text-[#0e141b] text-sm font-bold">${booking.name || 'Unknown'}</p>
+                  <p class="text-[#0e141b] text-sm font-normal">${booking.department || 'N/A'}</p>
                   <p class="text-[#0e141b] text-sm font-medium">${booking.time}</p>
                 </div>
               </div>
@@ -1401,7 +1412,11 @@
 
       function populateDepartments() {
         if (!currentUser) return;
-        const departments = Object.keys(departmentImages);
+        const departments = [
+          'QA', 'PHP', 'Project Management', 'Sales', 'Management', 'HTML', 
+          'Digital Marketing', 'SEO', 'Graphic Designers', 'Content Writers', 
+          'Project Coordinators', 'Mobile App Development Team', 'UI Designers', 'Wordpress'
+        ];
         pastBookingsDepartment.innerHTML = '<option value="">All Departments</option>' + 
           departments.map(dep => `<option value="${dep}">${dep}</option>`).join('');
       }
@@ -1415,34 +1430,49 @@
         const department = pastBookingsDepartment.value;
         const now = new Date();
         now.setHours(0, 0, 0, 0);
-        const q = query(collection(db, 'bookings'), where('date', '<=', now.toDateString()));
-        const querySnapshot = await getDocs(q);
-        let bookings = querySnapshot.docs.map(doc => doc.data());
+        let q = query(collection(db, 'bookings'), where('date', '<=', now.toDateString()));
+        
+        try {
+          const querySnapshot = await getDocs(q);
+          let bookings = querySnapshot.docs.map(doc => doc.data());
 
-        if (date) {
-          const selectedDate = new Date(date).toDateString();
-          bookings = bookings.filter(b => b.date === selectedDate);
+          if (date) {
+            const selectedDate = new Date(date).toDateString();
+            bookings = bookings.filter(b => b.date === selectedDate);
+          }
+
+          if (department) {
+            bookings = bookings.filter(b => b.department === department);
+          }
+
+          bookings.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            if (dateA.getTime() !== dateB.getTime()) return dateB - dateA;
+            return parseTime(b.time) - parseTime(a.time);
+          });
+
+          pastBookingsList.innerHTML = '';
+          if (bookings.length === 0) {
+            pastBookingsList.innerHTML = '<div class="no-bookings">No past bookings found</div>';
+            return;
+          }
+
+          bookings.forEach(booking => {
+            const bookingElement = document.createElement('div');
+            bookingElement.className = 'past-booking-entry';
+            bookingElement.innerHTML = `
+              <p><strong>${booking.name || 'Unknown'}</strong> (${booking.department || 'N/A'})</p>
+              <p>${booking.date} at ${booking.time}</p>
+              <p>Purpose: ${booking.purpose || 'N/A'}</p>
+            `;
+            pastBookingsList.appendChild(bookingElement);
+          });
+        } catch (error) {
+          console.error('Error fetching past bookings: ', error);
+          pastBookingsList.innerHTML = '<div class="no-bookings">Error loading past bookings</div>';
         }
-        if (department) {
-          bookings = bookings.filter(b => b.department === department);
-        }
-
-        bookings.sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
-          return parseTime(a.time) - parseTime(b.time);
-        });
-
-        pastBookingsList.innerHTML = bookings.length ? 
-          bookings.map(b => `<div class="past-booking-entry">${b.date} - ${b.time} - ${b.name || 'Unknown'} (${b.department || 'N/A'})</div>`).join('') : 
-          '<div class="no-bookings">No past bookings found.</div>';
       }
-
-      currentDate = new Date();
-      selectedDate = new Date();
-      currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     });
   </script>
 </body>
