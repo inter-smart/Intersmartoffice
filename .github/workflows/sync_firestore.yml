@@ -1,7 +1,7 @@
 name: Sync Firestore to Google Sheets
 
 on:
-  workflow_dispatch: # Manually trigger the workflow
+  workflow_dispatch: # Allows manual triggering from GitHub UI
   schedule:
     - cron: "*/10 * * * *" # Runs every 10 minutes
 
@@ -24,4 +24,4 @@ jobs:
         env:
           FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
-        run: node index.js
+        run: node sync.js  # Changed from index.js to sync.js
