@@ -185,6 +185,27 @@
       color: #4e7397;
       font-style: italic;
     }
+    .auth-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 10px;
+    }
+    .auth-modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 350px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
     @media (max-width: 640px) {
       .layout-content-container { width: 100% !important; max-width: 100% !important; padding: 0 10px !important; }
       .px-40 { padding-left: 10px !important; padding-right: 10px !important; }
@@ -221,17 +242,6 @@
   </style>
 </head>
 <body>
-  <!-- Success Messages -->
-  <div id="successMessage" class="success-message">
-    Booking successful! Please save your token to reschedule later.
-    <button id="copyTokenButton" class="copy-button">Copy Token</button>
-    <button id="closeSuccessMessage" class="close-button">X</button>
-  </div>
-  <div id="rescheduleSuccessMessage" class="success-message">
-    Reschedule successful!
-    <button id="closeRescheduleSuccessMessage" class="close-button">X</button>
-  </div>
-
   <!-- Home Screen -->
   <div id="homeScreen" class="home-screen">
     <video autoplay muted loop class="video-background">
@@ -250,8 +260,15 @@
       style='font-family: "Work Sans", "Noto Sans", sans-serif;'>
       <div class="layout-container flex h-full grow flex-col">
         <header class="flex flex-col items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] px-10 py-3 relative min-h-[80px] z-10">
-          <div class="flex items-center justify-center gap-4 text-[#0e141b]">
-            <img src="images/logo2.png" alt="Logo" class="h-10" />
+          <div class="flex items-center justify-between w-full gap-4 text-[#0e141b]">
+            <div class="flex items-center gap-4">
+              <img src="images/logo2.png" alt="Logo" class="h-10" />
+            </div>
+            <div class="flex gap-4">
+              <button id="signInButton" class="p-2 bg-[#1980e6] text-white rounded">Sign In</button>
+              <button id="signUpButton" class="p-2 bg-[#1980e6] text-white rounded">Sign Up</button>
+              <button id="signOutButton" class="p-2 bg-[#1980e6] text-white rounded hidden">Sign Out</button>
+            </div>
           </div>
           <div class="ticker" id="ticker">
             <div class="ticker-content" id="tickerContent"></div>
@@ -352,10 +369,6 @@
       <h3 class="text-[#0e141b] text-lg font-bold mb-4">Reschedule Booking</h3>
       <form id="rescheduleForm">
         <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Enter Token</label>
-          <input type="text" id="token" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="mb-4">
           <label class="block text-sm font-medium text-[#0e141b]">Select New Date</label>
           <input type="date" id="newDate" class="w-full p-2 border rounded" required />
         </div>
@@ -409,31 +422,88 @@
     </div>
   </div>
 
+  <!-- Sign In Modal -->
+  <div id="signInModal" class="auth-modal">
+    <div class="auth-modal-content">
+      <h3 class="text-[#0e141b] text-lg font-bold mb-4">Sign In</h3>
+      <form id="signInForm">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Email</label>
+          <input type="email" id="signInEmail" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Password</label>
+          <input type="password" id="signInPassword" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelSignIn" class="p-2 bg-gray-300 rounded">Cancel</button>
+          <button type="submit" class="p-2 bg-[#1980e6] text-white rounded">Sign In</button>
+        </div>
+      </form>
+      <p class="text-sm text-[#0e141b] mt-4 text-center">
+        Don't have an account? 
+        <a href="#" id="switchToSignUp" class="text-[#1980e6] font-medium">Sign Up</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Sign Up Modal -->
+  <div id="signUpModal" class="auth-modal">
+    <div class="auth-modal-content">
+      <h3 class="text-[#0e141b] text-lg font-bold mb-4">Sign Up</h3>
+      <form id="signUpForm">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Email</label>
+          <input type="email" id="signUpEmail" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Password</label>
+          <input type="password" id="signUpPassword" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-[#0e141b]">Name</label>
+          <input type="text" id="signUpName" class="w-full p-2 border rounded" required />
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelSignUp" class="p-2 bg-gray-300 rounded">Cancel</button>
+          <button type="submit" class="p-2 bg-[#1980e6] text-white rounded">Sign Up</button>
+        </div>
+      </form>
+      <p class="text-sm text-[#0e141b] mt-4 text-center">
+        Already have an account? 
+        <a href="#" id="switchToSignIn" class="text-[#1980e6] font-medium">Sign In</a>
+      </p>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where, addDoc, updateDoc, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    import { 
+      getFirestore, collection, getDocs, query, where, addDoc, updateDoc, getDoc, doc 
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    import { 
+      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
+      signOut, onAuthStateChanged, updateProfile 
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCqLBJtkFHjeJNVjAkxwnL7GSYYJ34Ee",
-      authDomain: "interbook-c003c.firebaseapp.com",
-      projectId: "interbook-c003c",
-      storageBucket: "interbook-c003c.appspot.com",
-      messagingSenderId: "835157789713",
-      appId: "1:835157789713:web:c18b4f4ee7b9ac5b535b"
-    };
+  apiKey: "AIzaSyCqLBJtkkFHJejNVjAKxwnL7G5YYJ3l4eE",
+  authDomain: "interbook-c003c.firebaseapp.com",
+  projectId: "interbook-c003c",
+  storageBucket: "interbook-c003c.firebasestorage.app",
+  messagingSenderId: "835157789713",
+  appId: "1:835157789713:web:1c48fd4ee7b9ac9bc535b0",
+  measurementId: "G-00H9J6GP5C"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     document.addEventListener('DOMContentLoaded', function () {
       const homeScreen = document.getElementById('homeScreen');
       const bookingScreen = document.getElementById('bookingScreen');
       const bookNowButton = document.getElementById('bookNowButton');
-      const successMessage = document.getElementById('successMessage');
-      const copyTokenButton = document.getElementById('copyTokenButton');
-      const closeSuccessMessage = document.getElementById('closeSuccessMessage');
-      const rescheduleSuccessMessage = document.getElementById('rescheduleSuccessMessage');
-      const closeRescheduleSuccessMessage = document.getElementById('closeRescheduleSuccessMessage');
       const expandButton = document.getElementById('expandButton');
       const bookedSlotsContainer = document.getElementById('bookedSlotsContainer');
       const bookedSlots = document.getElementById('bookedSlots');
@@ -454,27 +524,19 @@
       const pastBookingsDepartment = document.getElementById('pastBookingsDepartment');
       const pastBookingsList = document.getElementById('pastBookingsList');
       const closePastBookings = document.getElementById('closePastBookings');
+      const signInButton = document.getElementById('signInButton');
+      const signUpButton = document.getElementById('signUpButton');
+      const signOutButton = document.getElementById('signOutButton');
+      const signInModal = document.getElementById('signInModal');
+      const signUpModal = document.getElementById('signUpModal');
+      const signInForm = document.getElementById('signInForm');
+      const signUpForm = document.getElementById('signUpForm');
+      const cancelSignIn = document.getElementById('cancelSignIn');
+      const cancelSignUp = document.getElementById('cancelSignUp');
 
       let allBookings = [];
       let currentBookingIndex = 0;
-
-      bookNowButton.addEventListener('click', () => {
-        homeScreen.classList.add('hidden');
-        bookingScreen.classList.remove('hidden');
-      });
-
-      closeSuccessMessage.addEventListener('click', () => {
-        successMessage.style.display = 'none';
-      });
-
-      closeRescheduleSuccessMessage.addEventListener('click', () => {
-        rescheduleSuccessMessage.style.display = 'none';
-      });
-
-      expandButton.addEventListener('click', () => {
-        bookedSlotsContainer.classList.toggle('expanded');
-        expandButton.textContent = bookedSlotsContainer.classList.contains('expanded') ? 'Show less' : 'Show more';
-      });
+      let currentUser = null;
 
       const calendar = document.getElementById('calendar');
       const timeSlotContainer = document.getElementById('timeSlotContainer');
@@ -514,53 +576,147 @@
         'Wordpress': 'images/dep.jpg'
       };
 
-      function generateToken() {
-        const token = Math.random().toString(36).substr(2, 9);
-        const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // Expires in 24 hours
-        return { token, expiry: expiry.toISOString() };
-      }
+      const bookingSuccessMessage = document.createElement('p');
+      bookingSuccessMessage.className = 'text-green-600 text-sm mt-2 hidden';
+      document.querySelector('.bottom-buttons').appendChild(bookingSuccessMessage);
 
-      function isTokenExpired(expiry) {
-        const now = new Date();
-        return new Date(expiry) < now;
-      }
+      // Auth state listener
+      onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if (user) {
+          signInButton.classList.add('hidden');
+          signUpButton.classList.add('hidden');
+          signOutButton.classList.remove('hidden');
+          homeScreen.classList.add('hidden');
+          bookingScreen.classList.remove('hidden');
+          renderCalendar();
+          renderTimeSlots();
+          renderBookedSlots();
+          updateTicker();
+        } else {
+          signInButton.classList.remove('hidden');
+          signUpButton.classList.remove('hidden');
+          signOutButton.classList.add('hidden');
+          homeScreen.classList.remove('hidden');
+          bookingScreen.classList.add('hidden');
+          timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
+          bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
+          tickerContent.innerHTML = '<span>Please sign in to view bookings</span>';
+        }
+      });
 
-      function hideAllSuccessMessages() {
-        successMessage.style.display = 'none';
-        rescheduleSuccessMessage.style.display = 'none';
-      }
+      bookNowButton.addEventListener('click', () => {
+        if (!currentUser) {
+          signInModal.style.display = 'flex';
+          alert('Please sign in to book a conference room.');
+        } else {
+          homeScreen.classList.add('hidden');
+          bookingScreen.classList.remove('hidden');
+        }
+      });
 
-      function copyToken(token) {
-        navigator.clipboard.writeText(token).then(() => {
-          alert('Token copied to clipboard!');
-        }).catch(err => {
-          console.error('Failed to copy token: ', err);
-          alert('Failed to copy token. Please copy it manually.');
-        });
-      }
+      expandButton.addEventListener('click', () => {
+        bookedSlotsContainer.classList.toggle('expanded');
+        expandButton.textContent = bookedSlotsContainer.classList.contains('expanded') ? 'Show less' : 'Show more';
+      });
 
-      function showSuccessMessage(message, token) {
-        hideAllSuccessMessages();
-        successMessage.innerHTML = `${message} Your token is: ${token.token} (Expires: ${new Date(token.expiry).toLocaleString()})` +
-          `<button id="copyTokenButton" class="copy-button">Copy Token</button>` +
-          `<button id="closeSuccessMessage" class="close-button">X</button>`;
-        successMessage.style.display = 'block';
-        
-        document.getElementById('copyTokenButton').addEventListener('click', () => copyToken(token.token));
-        document.getElementById('closeSuccessMessage').addEventListener('click', () => {
-          successMessage.style.display = 'none';
-        });
+      // Sign In
+      signInButton.addEventListener('click', () => {
+        signInModal.style.display = 'flex';
+      });
 
-        setTimeout(() => { successMessage.style.display = 'none'; }, 30000);
-      }
+      signInForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signInEmail').value;
+        const password = document.getElementById('signInPassword').value;
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          signInModal.style.display = 'none';
+          signInForm.reset();
+        } catch (error) {
+          console.error('Sign in error: ', error.code, error.message);
+          alert('Sign in failed: ' + error.message);
+        }
+      });
 
-      function showRescheduleSuccessMessage() {
-        hideAllSuccessMessages();
-        rescheduleSuccessMessage.style.display = 'block';
-        setTimeout(() => { rescheduleSuccessMessage.style.display = 'none'; }, 30000);
+      cancelSignIn.addEventListener('click', () => {
+        signInModal.style.display = 'none';
+        signInForm.reset();
+      });
+
+      // Sign Up
+      signUpButton.addEventListener('click', () => {
+        signUpModal.style.display = 'flex';
+      });
+
+      signUpForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signUpEmail').value;
+        const password = document.getElementById('signUpPassword').value;
+        const name = document.getElementById('signUpName').value;
+
+        if (!email.endsWith('@intersmart.in')) {
+          alert('Only emails ending with @intersmart.in are allowed.');
+          return;
+        }
+
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          await updateProfile(userCredential.user, { displayName: name });
+          signUpModal.style.display = 'none';
+          signUpForm.reset();
+          alert('Signup successful!');
+        } catch (error) {
+          console.error('Signup error: ', error.code, error.message);
+          if (error.code === 'auth/email-already-in-use') {
+            alert('This email is already registered. Please use a different email or sign in.');
+          } else {
+            alert('Signup failed: ' + error.message);
+          }
+        }
+      });
+
+      cancelSignUp.addEventListener('click', () => {
+        signUpModal.style.display = 'none';
+        signUpForm.reset();
+      });
+
+      // Switch from Sign In to Sign Up
+      document.getElementById('switchToSignUp').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent default link behavior
+        signInModal.style.display = 'none'; // Hide sign-in modal
+        signUpModal.style.display = 'flex'; // Show sign-up modal
+        signInForm.reset(); // Reset sign-in form fields
+      });
+
+      // Switch from Sign Up to Sign In
+      document.getElementById('switchToSignIn').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent default link behavior
+        signUpModal.style.display = 'none'; // Hide sign-up modal
+        signInModal.style.display = 'flex'; // Show sign-in modal
+        signUpForm.reset(); // Reset sign-up form fields
+      });
+
+      // Sign Out
+      signOutButton.addEventListener('click', async () => {
+        try {
+          await signOut(auth);
+        } catch (error) {
+          console.error('Sign out error: ', error.code, error.message);
+          alert('Sign out failed: ' + error.message);
+        }
+      });
+
+      function showSuccessMessage(message) {
+        bookingSuccessMessage.textContent = message;
+        bookingSuccessMessage.classList.remove('hidden');
+        setTimeout(() => {
+          bookingSuccessMessage.classList.add('hidden');
+        }, 5000);
       }
 
       function renderCalendar() {
+        if (!currentUser) return;
         calendar.innerHTML = '';
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
@@ -616,6 +772,7 @@
       }
 
       function selectDate(date) {
+        if (!currentUser) return;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
@@ -634,6 +791,10 @@
       }
 
       async function renderTimeSlots() {
+        if (!currentUser) {
+          timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
+          return;
+        }
         timeSlots.innerHTML = '';
         const dateKey = selectedDate.toDateString();
         
@@ -685,6 +846,10 @@
       }
 
       async function renderBookedSlots() {
+        if (!currentUser) {
+          bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
+          return;
+        }
         bookedSlots.innerHTML = '';
         const dateKey = selectedDate.toDateString();
         const now = new Date();
@@ -702,6 +867,8 @@
             bookingElement.className = `booked-slot flex flex-col p-4 border-b border-[#e7edf3] ${isCompleted ? 'completed' : ''}`;
             bookingElement.setAttribute('data-id', booking.id);
 
+            const showReschedule = currentUser && currentUser.uid === booking.userId && !isCompleted;
+
             bookingElement.innerHTML = `
               <div class="flex items-center gap-4 w-full">
                 <img src="${departmentImages[booking.department] || 'images/dep.jpg'}" alt="${booking.department || 'N/A'}" class="w-12 h-12 rounded-full">
@@ -713,7 +880,7 @@
               </div>
               <div class="buttons-container">
                 <button class="details-button">Details</button>
-                ${!isCompleted ? '<button class="reschedule-button" data-id="' + booking.id + '">Reschedule</button>' : ''}
+                ${showReschedule ? '<button class="reschedule-button" data-id="' + booking.id + '">Reschedule</button>' : ''}
               </div>
               <div class="details hidden">
                 <p><strong>Email:</strong> ${booking.email || 'N/A'}</p>
@@ -740,6 +907,7 @@
       }
 
       async function fetchAllBookings() {
+        if (!currentUser) return;
         try {
           const q = query(collection(db, 'bookings'));
           const querySnapshot = await getDocs(q);
@@ -821,6 +989,11 @@
       }
 
       forMeetingRoomButton.addEventListener('click', async () => {
+        if (!currentUser) {
+          signInModal.style.display = 'flex';
+          alert('Please sign in to view booking info.');
+          return;
+        }
         await fetchAllBookings();
         if (allBookings.length === 0) {
           currentBookingName.textContent = 'No Bookings Available';
@@ -855,6 +1028,7 @@
       });
 
       async function populateAvailableTimeSlots(newDate) {
+        if (!currentUser) return;
         newTimeSelect.innerHTML = '';
         const dateKey = new Date(newDate).toDateString();
         const allTimeSlots = ["9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
@@ -907,6 +1081,11 @@
       }
 
       reserveButton.addEventListener('click', () => {
+        if (!currentUser) {
+          signInModal.style.display = 'flex';
+          alert('Please sign in to reserve slots.');
+          return;
+        }
         if (selectedTimeSlots.length > 0) bookingModal.style.display = 'flex';
         else alert('Please select at least one time slot.');
       });
@@ -919,13 +1098,16 @@
 
       bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (!currentUser) {
+          alert('Please sign in to make a booking.');
+          return;
+        }
         const name = document.getElementById('name').value;
         const email = document.getElementById('email').value;
         const department = document.getElementById('department').value;
         const role = document.getElementById('role').value;
         const purpose = document.getElementById('purpose').value;
         const dateKey = selectedDate.toDateString();
-        const tokenData = generateToken();
 
         const now = new Date();
         now.setHours(0, 0, 0, 0);
@@ -957,13 +1139,12 @@
               purpose,
               role,
               time,
-              token: tokenData.token,
-              expiry: tokenData.expiry,
-              name
+              name,
+              userId: currentUser.uid
             });
           }
 
-          showSuccessMessage(`Booking confirmed!`, tokenData);
+          showSuccessMessage(`Booking confirmed!`);
           bookingModal.style.display = 'none';
           bookingForm.reset();
           selectedTimeSlots = [];
@@ -984,6 +1165,11 @@
 
       document.addEventListener('click', (e) => {
         if (e.target.classList.contains('reschedule-button')) {
+          if (!currentUser) {
+            signInModal.style.display = 'flex';
+            alert('Please sign in to reschedule.');
+            return;
+          }
           const docId = e.target.getAttribute('data-id');
           rescheduleModal.style.display = 'flex';
           newTimeSelect.innerHTML = '<option value="">Select a date first</option>';
@@ -996,7 +1182,6 @@
 
           rescheduleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const token = document.getElementById('token').value;
             const newDate = document.getElementById('newDate').value;
             const newTime = document.getElementById('newTime').value;
 
@@ -1013,20 +1198,35 @@
             }
 
             try {
-              const docSnap = await getDoc(doc(db, 'bookings', docId));
-              const booking = docSnap.data();
-              if (token !== booking.token) {
-                alert('Invalid token!');
-                return;
-              }
-              if (isTokenExpired(booking.expiry)) {
-                alert('Token has expired!');
+              const docRef = doc(db, 'bookings', docId);
+              const docSnap = await getDoc(docRef);
+              
+              if (!docSnap.exists()) {
+                alert('Booking not found!');
                 return;
               }
 
-              await updateDoc(doc(db, 'bookings', docId), { date: new Date(newDate).toDateString(), time: newTime });
+              const booking = docSnap.data();
+              
+              if (booking.userId !== currentUser.uid) {
+                alert('You can only reschedule your own bookings!');
+                return;
+              }
+
+              const newDateKey = new Date(newDate).toDateString();
+              if (await checkIfTimeSlotBooked(newDateKey, newTime)) {
+                alert('Selected time slot is already booked!');
+                return;
+              }
+
+              await updateDoc(docRef, { 
+                date: newDateKey, 
+                time: newTime 
+              });
+              
+              alert('Booking rescheduled successfully!');
               rescheduleModal.style.display = 'none';
-              showRescheduleSuccessMessage();
+              rescheduleForm.reset();
               renderBookedSlots();
             } catch (error) {
               console.error('Error rescheduling booking: ', error);
@@ -1041,6 +1241,7 @@
       });
 
       prevMonthButton.addEventListener('click', () => {
+        if (!currentUser) return;
         currentDate.setMonth(currentDate.getMonth() - 1);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -1052,11 +1253,16 @@
       });
 
       nextMonthButton.addEventListener('click', () => {
+        if (!currentUser) return;
         currentDate.setMonth(currentDate.getMonth() + 1);
         renderCalendar();
       });
 
       async function updateTicker() {
+        if (!currentUser) {
+          tickerContent.innerHTML = '<span>Please sign in to view bookings</span>';
+          return;
+        }
         const today = new Date().toDateString();
         const q = query(collection(db, 'bookings'), where('date', '==', today));
         const querySnapshot = await getDocs(q);
@@ -1081,10 +1287,16 @@
         tickerContent.style.animation = 'ticker 45s linear infinite';
       }
 
-      updateTicker();
-      setInterval(updateTicker, 60000);
+      setInterval(() => {
+        if (currentUser) updateTicker();
+      }, 60000);
 
       pastBookingsButton.addEventListener('click', () => {
+        if (!currentUser) {
+          signInModal.style.display = 'flex';
+          alert('Please sign in to view past bookings.');
+          return;
+        }
         pastBookingsModal.style.display = 'flex';
         populateDepartments();
         renderPastBookings();
@@ -1098,12 +1310,17 @@
       pastBookingsDepartment.addEventListener('change', renderPastBookings);
 
       function populateDepartments() {
+        if (!currentUser) return;
         const departments = Object.keys(departmentImages);
         pastBookingsDepartment.innerHTML = '<option value="">All Departments</option>' + 
           departments.map(dep => `<option value="${dep}">${dep}</option>`).join('');
       }
 
       async function renderPastBookings() {
+        if (!currentUser) {
+          pastBookingsList.innerHTML = '<div class="no-bookings">Please sign in to view past bookings.</div>';
+          return;
+        }
         const date = pastBookingsDate.value;
         const department = pastBookingsDepartment.value;
         const now = new Date();
@@ -1136,7 +1353,6 @@
       selectedDate = new Date();
       currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
       selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      renderCalendar();
     });
   </script>
 </body>
