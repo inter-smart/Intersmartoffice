@@ -3,7 +3,7 @@ name: Sync Firestore to Google Sheets
 on:
   workflow_dispatch: # Manually trigger the workflow
   schedule:
-    - cron: "0 * * * *" # Runs every hour
+    - cron: "*/10 * * * *" # Runs every 10 minutes
 
 jobs:
   sync_firestore:
