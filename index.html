@@ -121,18 +121,18 @@
       position: sticky;
       bottom: 0;
       z-index: 10;
-      min-height: 30px; /* Ensure minimum height for visibility */
+      min-height: 30px;
     }
     .ticker-content {
       display: inline-block;
-      animation: ticker 35s linear infinite;
-      padding: 0 20px;
+      padding-right: 100%;
+      animation: ticker 35s linear infinite running;
     }
     .ticker .completed { color: red; }
     .ticker .ongoing { color: green; }
     .ticker .upcoming { color: blue; }
     @keyframes ticker {
-      0% { transform: translateX(100%); }
+      0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
     .success-message { padding: 20px; position: relative; }
@@ -348,7 +348,7 @@
       <h3 class="text-[#0e141b] text-lg font-bold mb-4">Past Bookings</h3>
       <div class="mb-4">
         <label class="block text-sm font-medium text-[#0e141b]">Select Date</label>
-        <input type="date" id="pastBookingsDate" class="w-full p-2 border rounded" />
+        <input type="date" id="pastBookingsDate" class="w-full p-2 border rounded" max="${new Date().toISOString().split('T')[0]}" />
       </div>
       <div class="mb-4">
         <label class="block text-sm font-medium text-[#0e141b]">Department</label>
@@ -1002,16 +1002,19 @@
           const bookingTimeInMinutes = parseTime(booking.time);
           const status = bookingTimeInMinutes < currentTimeInMinutes ? 'completed' : 
                         (bookingTimeInMinutes === currentTimeInMinutes ? 'ongoing' : 'upcoming');
-          const name = (booking.name || 'Unknown').replace(/[^a-zA-Z0-9\s]/g, ''); // Sanitize name
-          const department = (booking.department || 'N/A').replace(/[^a-zA-Z0-9\s]/g, ''); // Sanitize department
+          const name = (booking.name || 'Unknown').replace(/[^a-zA-Z0-9\s]/g, '');
+          const department = (booking.department || 'N/A').replace(/[^a-zA-Z0-9\s]/g, '');
           return `<span class="${status}">${booking.time} - ${name} (${department})</span>`;
         }).join(' | ');
 
         tickerContent.innerHTML = tickerItems || '<span>No bookings today</span>';
+        tickerContent.style.animation = 'none';
+        tickerContent.offsetHeight;
+        tickerContent.style.animation = 'ticker 35s linear infinite';
       }
 
-      setInterval(updateTicker, 60000);
       updateTicker();
+      setInterval(updateTicker, 60000);
 
       pastBookingsButton.addEventListener('click', () => {
         pastBookingsModal.style.display = 'flex';
@@ -1036,15 +1039,28 @@
         const date = pastBookingsDate.value;
         const department = pastBookingsDepartment.value;
         const now = new Date();
-        const q = query(collection(db, 'bookings'), where('date', '<', now.toDateString()));
+        now.setHours(0, 0, 0, 0);
+        const q = query(collection(db, 'bookings'), where('date', '<=', now.toDateString()));
         const querySnapshot = await getDocs(q);
         let bookings = querySnapshot.docs.map(doc => doc.data());
 
-        if (date) bookings = bookings.filter(b => b.date === new Date(date).toDateString());
-        if (department) bookings = bookings.filter(b => b.department === department);
+        if (date) {
+          const selectedDate = new Date(date).toDateString();
+          bookings = bookings.filter(b => b.date === selectedDate);
+        }
+        if (department) {
+          bookings = bookings.filter(b => b.department === department);
+        }
+
+        bookings.sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
+          return parseTime(a.time) - parseTime(b.time);
+        });
 
         pastBookingsList.innerHTML = bookings.length ? 
-          bookings.map(b => `<p>${b.date} - ${b.time} - ${b.name} (${b.department})</p>`).join('') : 
+          bookings.map(b => `<p>${b.date} - ${b.time} - ${b.name || 'Unknown'} (${b.department || 'N/A'})</p>`).join('') : 
           '<p>No past bookings found.</p>';
       }
 
