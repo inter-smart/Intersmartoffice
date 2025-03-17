@@ -19,11 +19,11 @@
     }
     .calendar-day:hover { background-color: #e7edf3; }
     .calendar-day.disabled { background-color: #f0f0f0; color: #a0a0a0; cursor: not-allowed; pointer-events: none; }
-    .calendar-day.selected { background-color: #1980e6; color: white; }
+    .calendar-day.selected { background-color: #fbd103; color: black; }
     #calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
     #calendar p { font-size: 10px; padding: 2px; }
     .reserve-button { transition: background-color 0.3s ease; }
-    .reserve-button:hover { background-color: #146bb8; }
+    .reserve-button:hover { background-color: #4a5156; }
     .modal {
       display: none;
       position: fixed;
@@ -81,7 +81,7 @@
     .success-message button {
       margin-top: 10px;
       padding: 5px 10px;
-      background-color: #146bb8;
+      background-color: #5A6268;
       color: white;
       border: none;
       border-radius: 4px;
@@ -103,45 +103,179 @@
     .video-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; object-fit: cover; }
     .home-screen { position: relative; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; text-align: center; }
     .home-screen h1 { font-size: 3rem; font-weight: bold; margin-bottom: 2rem; }
-    .home-screen button { font-size: 1.5rem; padding: 1rem 2rem; background-color: #1980e6; color: white; border: none; border-radius: 8px; cursor: pointer; }
-    .home-screen button:hover { background-color: #146bb8; }
+    .home-screen button { font-size: 1.5rem; padding: 1rem 2rem; background-color: #5A6268; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .home-screen button:hover { background-color: #4a5156; }
     .hidden { display: none; }
-    .booked-slots { max-height: 200px; overflow-y: auto; padding: 10px; border: 1px solid #e7edf3; border-radius: 8px; background-color: #f9f9f9; }
+    .booked-slots { 
+      max-height: 300px; 
+      overflow-y: auto; 
+      padding: 10px; 
+      border: 1px solid #e7edf3; 
+      border-radius: 8px; 
+      background-color: #f9f9f9; 
+      margin-bottom: 10px;
+    }
     .booked-slots.expanded { max-height: 500px; }
-    .booked-slot { display: flex; flex-direction: column; padding: 8px; margin-bottom: 8px; background-color: #d3d3d3; color: #a0a0a0; opacity: 0.8; border-radius: 4px; }
+    .booked-slot { 
+      display: flex; 
+      flex-direction: column; 
+      padding: 8px; 
+      margin-bottom: 8px; 
+      background-color: #d3d3d3; 
+      color: #a0a0a0; 
+      opacity: 0.8; 
+      border-radius: 4px; 
+      min-height: 70px;
+    }
     .booked-slot.completed { background-color: #d3d3d3; opacity: 0.6; }
-    .details-button { padding: 8px 12px; background-color: #1980e6; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: background-color 0.3s ease; text-align: center; }
-    .details-button:hover { background-color: #146bb8; }
-    .time-slots { overflow-x: auto; white-space: nowrap; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: nowrap; align-items: center; }
-    .time-slots button { display: inline-block; padding: 8px 16px; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9; cursor: pointer; transition: background-color 0.3s ease; min-width: 100px; text-align: center; margin: 0; }
-    .time-slots button.selected { background-color: #1980e6; color: white; }
-    .time-slots button.booked-slot { background-color: #d3d3d3; color: #a0a0a0; opacity: 0.8; pointer-events: none; position: relative; cursor: not-allowed; }
+    .details-button { 
+      padding: 6px 10px; 
+      background-color: #5A6268; 
+      color: white; 
+      border: none; 
+      border-radius: 4px; 
+      font-size: 11px; 
+      cursor: pointer; 
+      transition: background-color 0.3s ease; 
+    }
+    .details-button:hover { background-color: #4a5156; }
+    .time-slots-container {
+      padding: 20px;
+    }
+    .time-slots {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .time-slots button { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 8px 16px; 
+      border: 1px solid #ccc; 
+      border-radius: 4px; 
+      background-color: #f9f9f9; 
+      cursor: pointer; 
+      transition: background-color 0.3s ease; 
+      text-align: center; 
+      margin: 0;
+      min-height: 40px;
+    }
+    .time-slots button.selected { background-color: #5A6268; color: white; }
+    .time-slots button.booked-slot { 
+      background-color: #d3d3d3; 
+      color: #a0a0a0; 
+      opacity: 0.8; 
+      pointer-events: none; 
+      cursor: not-allowed;
+    }
+    .no-slots-message {
+      grid-column: 1 / -1;
+      color: red;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.5;
+      background-color: #fff;
+      border-radius: 4px;
+      margin: 0;
+    }
     button { min-height: 44px; min-width: 44px; padding: 8px 16px; }
-    #reserveButton { padding: 10px 20px; }
-    .reschedule-button { padding: 8px 12px; background-color: #1980e6; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: background-color 0.3s ease; text-align: center; display: flex; align-items: center; justify-content: center; }
-    .reschedule-button:hover { background-color: #146bb8; }
-    .for-meeting-room-button { padding: 10px 20px; background-color: #fbd103; color: black; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; transition: background-color 0.3s ease; text-align: center; margin: 0 10px; }
+    #reserveButton { padding: 10px 20px; background-color: #5A6268; }
+    .reschedule-button { 
+      padding: 6px 10px; 
+      background-color: #fbd103; 
+      color: black; 
+      border: none; 
+      border-radius: 4px; 
+      font-size: 11px; 
+      cursor: pointer; 
+      transition: background-color 0.3s ease; 
+    }
+    .reschedule-button:hover { background-color: #e6c002; }
+    .for-meeting-room-button { 
+      padding: 10px 20px; 
+      background-color: #fbd103; 
+      color: black; 
+      border: none; 
+      border-radius: 8px; 
+      font-size: 14px; 
+      cursor: pointer; 
+      transition: background-color 0.3s ease; 
+      margin: 0 10px;
+      font-family: "Work Sans", "Noto Sans", sans-serif;
+      font-weight: 500;
+    }
     .for-meeting-room-button:hover { background-color: #e6c002; }
-    .booking-info-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
-    .booking-info-modal-content { position: relative; background-color: rgba(255, 255, 255, 0.9); padding: 30px; border-radius: 12px; width: 100%; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); color: #0e141b; text-align: center; }
+    .booking-info-modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-color: rgba(0, 0, 0, 0.7); 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 2000; 
+      padding: 20px; 
+    }
+    .booking-info-modal-content { 
+      position: relative; 
+      background-color: rgba(255, 255, 255, 0.9); 
+      padding: 30px; 
+      border-radius: 12px; 
+      width: 100%; 
+      max-width: 600px; 
+      max-height: 80vh; 
+      overflow-y: auto; 
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
+      color: #0e141b; 
+      text-align: center; 
+    }
     .booking-info-modal-content h3 { font-size: 24px; font-weight: bold; margin-bottom: 20px; }
     .booking-info-modal-content p { font-size: 16px; margin: 10px 0; }
     .booking-info-modal-content .booking-navigation { display: flex; justify-content: space-between; margin-top: 30px; }
-    .booking-info-modal-content .booking-navigation button { padding: 10px 20px; background-color: #1980e6; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease; }
-    .booking-info-modal-content .booking-navigation button:hover { background-color: #146bb8; }
-    .booking-info-modal-content .close-info-modal { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #0e141b; font-size: 24px; cursor: pointer; font-weight: bold; }
+    .booking-info-modal-content .booking-navigation button { 
+      padding: 10px 20px; 
+      background-color: #5A6268; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: background-color 0.3s ease; 
+    }
+    .booking-info-modal-content .booking-navigation button:hover { background-color: #4a5156; }
+    .booking-info-modal-content .close-info-modal { 
+      position: absolute; 
+      top: 10px; 
+      right: 10px; 
+      background: none; 
+      border: none; 
+      color: #0e141b; 
+      font-size: 24px; 
+      cursor: pointer; 
+      font-weight: bold; 
+    }
     .layout-content-container { width: 100%; max-width: 960px; padding: 0 20px; }
-    .details { transition: all 0.3s ease; margin-top: 8px; padding: 8px; background-color: #f9f9f9; border-radius: 4px; width: 100%; }
+    .details { 
+      transition: all 0.3s ease; 
+      margin-top: 4px; 
+      padding: 8px; 
+      background-color: #f9f9f9; 
+      border-radius: 4px; 
+      width: 100%; 
+    }
     .details.hidden { display: none; }
     .details p { margin: 4px 0; font-size: 12px; color: #0e141b; }
-    .buttons-container { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+    .buttons-container { display: flex; justify-content: flex-end; gap: 6px; margin-top: 4px; }
     .ticker {
       background-color: #f0f0f0;
       padding: 5px 10px;
       overflow: hidden;
       white-space: nowrap;
       width: 100%;
-      position: sticky;
       bottom: 0;
       z-index: 10;
       min-height: 30px;
@@ -158,11 +292,32 @@
       0% { transform: translateX(100%); }
       100% { transform: translateX(-100%); }
     }
-    .success-message { padding: 20px; position: relative; }
-    .success-message .close-button { margin-left: 10px; }
-    .copy-button { background-color: #1980e6; padding: 5px 10px; margin-left: 10px; border-radius: 4px; cursor: pointer; color: white; }
-    .past-bookings-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000; }
-    .past-bookings-modal-content { background-color: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+    header {
+      z-index: 20;
+      background-color: #fff;
+      transition: all 0.3s ease;
+    }
+    .past-bookings-modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-color: rgba(0, 0, 0, 0.5); 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 1000; 
+    }
+    .past-bookings-modal-content { 
+      background-color: white; 
+      padding: 20px; 
+      border-radius: 8px; 
+      width: 90%; 
+      max-width: 500px; 
+      max-height: 80vh; 
+      overflow-y: auto; 
+    }
     .past-booking-entry {
       padding: 10px;
       border-bottom: 1px solid #e7edf3;
@@ -175,7 +330,6 @@
     .past-booking-entry:last-child { border-bottom: none; margin-bottom: 0; }
     .past-booking-entry:hover { background-color: #e7edf3; }
     .no-bookings { padding: 10px; text-align: center; color: #4e7397; font-style: italic; }
-    .no-slots-message { color: red; }
     .auth-modal {
       display: none;
       position: fixed;
@@ -198,12 +352,11 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     #signOutButton { margin-bottom: 10px; }
-    header { position: sticky; top: 0; z-index: 20; background-color: #fff; }
     .profile-pic {
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: #1980e6;
+      background-color: #5A6268;
       color: white;
       display: flex;
       align-items: center;
@@ -212,6 +365,7 @@
       font-weight: bold;
       text-transform: uppercase;
     }
+    .auth-modal-content a { color: #0000FF; }
     @media (max-width: 640px) {
       .video-background { display: none; }
       .home-screen { background-color: #000; }
@@ -221,29 +375,13 @@
       .calendar-day { font-size: 10px; min-height: 36px; }
       #calendar p { font-size: 8px; }
       .time-slots { 
-        display: block; 
-        overflow-x: hidden; 
-        white-space: normal; 
-        width: 100%; 
-        margin-bottom: 15px; 
-      }
-      .time-slots h3 { 
-        display: block; 
-        width: 100%; 
-        text-align: left; 
-        margin-bottom: 10px; 
-      }
-      .time-slots #timeSlots { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); 
+        grid-template-columns: repeat(2, 1fr); 
         gap: 8px; 
-        width: 100%; 
+        padding: 10px;
       }
       .time-slots button { 
-        margin: 0; 
-        font-size: 12px; 
-        padding: 6px 12px; 
-        min-width: 90px; 
+        padding: 10px;
+        font-size: 14px;
       }
       .text-base { font-size: 14px; }
       .text-sm { font-size: 12px; }
@@ -252,21 +390,16 @@
       #selectedDate { text-align: center !important; padding-left: 0 !important; padding-right: 0 !important; margin-left: 0 !important; margin-right: 0 !important; }
       .bottom-buttons { flex-direction: column !important; gap: 12px !important; align-items: center !important; padding-left: 0 !important; padding-right: 0 !important; }
       #reserveButton, .for-meeting-room-button { width: 100% !important; max-width: 100% !important; margin: 0 !important; font-size: 16px; }
-      .reschedule-button, .details-button { width: 100px; font-size: 12px; }
+      .reschedule-button, .details-button { width: 80px; font-size: 10px; padding: 4px 8px; }
       .modal-content { width: 90%; max-width: 250px; padding: 12px; }
-      .modal-content input, .modal-content select, .modal-content textarea { font-size: 12px; }
-      .booked-slots { padding: 8px; }
-      .booked-slot { padding: 6px; }
-      .booked-slot img, .booked-slot .profile-pic { width: 40px; height: 40px; }
-      .booked-slot p { font-size: 12px; }
-      .buttons-container { flex-direction: row; justify-content: flex-end; width: 100%; }
+      .booked-slots { padding: 8px; max-height: 200px; }
+      .booked-slot { padding: 6px; min-height: 60px; }
+      .buttons-container { gap: 4px; }
       .booking-info-modal-content { max-width: 90%; padding: 20px; }
-      .booking-info-modal-content h3 { font-size: 20px; }
-      .booking-info-modal-content p { font-size: 14px; }
-      .booking-info-modal-content .booking-navigation button { padding: 8px 16px; font-size: 14px; }
       .ticker { padding: 5px; font-size: 12px; }
       .success-message { width: 85%; max-width: 350px; }
       .past-booking-entry { font-size: 12px; padding: 8px; }
+      header { padding: 5px 5px; }
     }
   </style>
 </head>
@@ -294,15 +427,15 @@
               <img src="images/logo2.png" alt="Logo" class="h-10" />
             </div>
             <div class="flex gap-4">
-              <button id="signInButton" class="p-2 bg-[#1980e6] text-white rounded">Sign In</button>
-              <button id="signUpButton" class="p-2 bg-[#1980e6] text-white rounded">Sign Up</button>
-              <button id="signOutButton" class="p-2 bg-[#1980e6] text-white rounded hidden">Sign Out</button>
+              <button id="signInButton" class="p-2 bg-[#fbd103] text-black rounded">Sign In</button>
+              <button id="signUpButton" class="p-2 bg-[#fbd103] text-black rounded">Sign Up</button>
+              <button id="signOutButton" class="p-2 bg-[#fbd103] text-black rounded hidden">Sign Out</button>
             </div>
           </div>
           <div class="ticker" id="ticker">
             <div class="ticker-content" id="tickerContent"></div>
           </div>
-          <button id="pastBookingsButton" class="p-2 bg-[#1980e6] text-white rounded mt-2">Past Bookings</button>
+          <button id="pastBookingsButton" class="p-2 bg-[#5A6268] text-white rounded mt-2">Past Bookings</button>
         </header>
         <div class="px-40 flex flex-1 justify-center py-5">
           <div class="layout-content-container flex flex-col w-[512px] max-w-[512px] py-5 max-w-[960px] flex-1">
@@ -323,17 +456,17 @@
               </div>
             </div>
             <h3 id="selectedDate" class="text-[#0e141b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4"></h3>
-            <div class="time-slots p-4 hidden" id="timeSlotContainer">
+            <div class="time-slots-container p-4 hidden" id="timeSlotContainer">
               <h3 class="text-[#0e141b] text-lg font-bold mb-4">Available Time Slots</h3>
-              <div class="overflow-x-auto whitespace-nowrap" id="timeSlots"></div>
+              <div id="timeSlots" class="time-slots"></div>
             </div>
             <div class="booked-slots p-4" id="bookedSlotsContainer">
               <h3 class="text-[#0e141b] text-lg font-bold mb-4">Booked Slots</h3>
               <div id="bookedSlots"></div>
-              <button id="expandButton" class="text-[#1980e6] text-sm font-medium mt-2 hidden">Show more</button>
+              <button id="expandButton" class="text-[#5A6268] text-sm font-medium mt-2 hidden">Show more</button>
             </div>
             <div class="flex justify-center px-4 py-3 gap-4 bottom-buttons">
-              <button id="reserveButton" class="reserve-button flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#1980e6] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              <button id="reserveButton" class="reserve-button flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#5A6268] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                 <span class="truncate">Reserve Selected Slots</span>
               </button>
               <button id="forMeetingRoomButton" class="for-meeting-room-button">For Meeting Room Only</button>
@@ -386,7 +519,7 @@
         </div>
         <div class="flex justify-end gap-2">
           <button type="button" id="cancelBooking" class="p-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" class="p-2 bg-[#1980e6] text-white rounded">Submit</button>
+          <button type="submit" class="p-2 bg-[#5A6268] text-white rounded">Submit</button>
         </div>
       </form>
     </div>
@@ -407,7 +540,7 @@
         </div>
         <div class="flex justify-end gap-2">
           <button type="button" id="cancelReschedule" class="p-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" class="p-2 bg-[#1980e6] text-white rounded">Reschedule</button>
+          <button type="submit" class="p-2 bg-[#5A6268] text-white rounded">Reschedule</button>
         </div>
       </form>
     </div>
@@ -420,7 +553,7 @@
     </video>
     <div class="booking-info-modal-content">
       <button id="closeInfoModal" class="close-info-modal">X</button>
-      <h3>Current Slot is Booked By</h3>
+      <h3 id="bookingInfoTitle">Current Slot is Booked By</h3>
       <p id="currentBookingName"></p>
       <p id="currentBookingDepartment"></p>
       <p id="currentBookingTime"></p>
@@ -466,15 +599,15 @@
         </div>
         <div class="flex justify-end gap-2">
           <button type="button" id="cancelSignIn" class="p-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" class="p-2 bg-[#1980e6] text-white rounded">Sign In</button>
+          <button type="submit" class="p-2 bg-[#fbd103] text-black rounded">Sign In</button>
         </div>
       </form>
       <p class="text-sm text-[#0e141b] mt-2 text-center">
-        <a href="#" id="forgotPassword" class="text-[#1980e6] font-medium">Forgot Password?</a>
+        <a href="#" id="forgotPassword" class="font-medium">Forgot Password?</a>
       </p>
       <p class="text-sm text-[#0e141b] mt-4 text-center">
         Don't have an account? 
-        <a href="#" id="switchToSignUp" class="text-[#1980e6] font-medium">Sign Up</a>
+        <a href="#" id="switchToSignUp" class="font-medium">Sign Up</a>
       </p>
     </div>
   </div>
@@ -498,12 +631,12 @@
         </div>
         <div class="flex justify-end gap-2">
           <button type="button" id="cancelSignUp" class="p-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" class="p-2 bg-[#1980e6] text-white rounded">Sign Up</button>
+          <button type="submit" class="p-2 bg-[#fbd103] text-black rounded">Sign Up</button>
         </div>
       </form>
       <p class="text-sm text-[#0e141b] mt-4 text-center">
         Already have an account? 
-        <a href="#" id="switchToSignIn" class="text-[#1980e6] font-medium">Sign In</a>
+        <a href="#" id="switchToSignIn" class="font-medium">Sign In</a>
       </p>
     </div>
   </div>
@@ -541,6 +674,7 @@
       const bookedSlots = document.getElementById('bookedSlots');
       const forMeetingRoomButton = document.getElementById('forMeetingRoomButton');
       const bookingInfoModal = document.getElementById('bookingInfoModal');
+      const bookingInfoTitle = document.getElementById('bookingInfoTitle');
       const closeInfoModal = document.getElementById('closeInfoModal');
       const previousBookingButton = document.getElementById('previousBookingButton');
       const nextBookingButton = document.getElementById('nextBookingButton');
@@ -596,7 +730,6 @@
       bookingSuccessMessage.className = 'text-green-600 text-sm mt-2 hidden';
       document.querySelector('.bottom-buttons').appendChild(bookingSuccessMessage);
 
-      // Auth state listener
       onAuthStateChanged(auth, (user) => {
         currentUser = user;
         if (user) {
@@ -632,7 +765,6 @@
         expandButton.textContent = bookedSlotsContainer.classList.contains('expanded') ? 'Show less' : 'Show more';
       });
 
-      // Sign In
       signInButton.addEventListener('click', () => {
         signInModal.style.display = 'flex';
       });
@@ -892,7 +1024,10 @@
         }
 
         if (availableSlots === 0) {
-          timeSlots.innerHTML = '<p class="no-slots-message">No slots available for this day / All slots booked</p>';
+          const noSlotsMessage = document.createElement('p');
+          noSlotsMessage.className = 'no-slots-message';
+          noSlotsMessage.innerHTML = 'No slots available for this day<br>All slots booked';
+          timeSlots.appendChild(noSlotsMessage);
         }
       }
 
@@ -911,6 +1046,15 @@
           const querySnapshot = await getDocs(q);
           let bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           bookings.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+
+          if (bookings.length === 0) {
+            bookedSlots.innerHTML = `
+              <p class="text-[#4e7397] text-sm font-normal leading-normal">
+                No slots booked yet. Be the first to book a slot on ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}!
+              </p>`;
+            expandButton.classList.add('hidden');
+            return;
+          }
 
           bookings.forEach((booking) => {
             const bookingElement = document.createElement('div');
@@ -1012,7 +1156,7 @@
             const bookingDate = new Date(booking.date);
             const bookingTimeInMinutes = parseTime(booking.time);
 
-            if (bookingDate >= now.setHours(0, 0, 0, 0) || (bookingDate.toDateString() === currentDateStr && bookingTimeInMinutes > currentTimeInMinutes)) {
+            if (bookingDate > now.setHours(0, 0, 0, 0) || (bookingDate.toDateString() === currentDateStr && bookingTimeInMinutes > currentTimeInMinutes)) {
               currentBooking = booking;
               currentBookingIndexTemp = i;
               break;
@@ -1026,12 +1170,18 @@
 
       function displayBooking(booking) {
         if (booking) {
+          const now = new Date();
+          const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+          const bookingTimeInMinutes = parseTime(booking.time);
+          const isCurrent = new Date(booking.date).toDateString() === now.toDateString() && bookingTimeInMinutes <= currentTimeInMinutes;
+          bookingInfoTitle.textContent = isCurrent ? 'Current Slot is Booked By' : 'Next Booking';
           currentBookingName.textContent = booking.name || 'Unknown';
           currentBookingDepartment.textContent = booking.department || 'N/A';
           currentBookingTime.textContent = booking.time;
           currentBookingDate.textContent = new Date(booking.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         } else {
-          currentBookingName.textContent = 'No Booking';
+          bookingInfoTitle.textContent = 'Current Slot';
+          currentBookingName.textContent = 'No active booking present';
           currentBookingDepartment.textContent = '';
           currentBookingTime.textContent = '';
           currentBookingDate.textContent = '';
@@ -1048,7 +1198,8 @@
         }
         await fetchAllBookings();
         if (allBookings.length === 0) {
-          currentBookingName.textContent = 'No Bookings Available';
+          bookingInfoTitle.textContent = 'Current Slot';
+          currentBookingName.textContent = 'No active booking present';
           currentBookingDepartment.textContent = '';
           currentBookingTime.textContent = '';
           currentBookingDate.textContent = '';
@@ -1080,79 +1231,96 @@
       });
 
       async function populateAvailableTimeSlots(newDate, currentBookingId) {
-        if (!currentUser) return;
-        newTimeSelect.innerHTML = ''; 
-        
-        const dateKey = new Date(newDate).toDateString();
-        const allTimeSlots = [
-          "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", 
-          "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", 
-          "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"
-        ];
+  if (!currentUser) return;
+  newTimeSelect.innerHTML = '<option value="">Select a time slot</option>';
 
-        const now = new Date();
-        const isToday = dateKey === now.toDateString();
-        const currentTimeInHours = now.getHours() + (now.getMinutes() / 60);
-        const selectedDate = new Date(newDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+  if (!newDate) {
+    newTimeSelect.innerHTML = '<option value="">Select a date first</option>';
+    return;
+  }
 
-        try {
-          const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
-          const querySnapshot = await getDocs(q);
-          const bookedSlots = querySnapshot.docs
-            .filter(doc => doc.id !== currentBookingId)
-            .map(doc => doc.data().time);
+  const dateKey = new Date(newDate).toDateString();
+  const allTimeSlots = [
+    "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+    "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
+    "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"
+  ];
 
-          if (selectedDate < today) {
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = 'Cannot reschedule to past dates';
-            option.disabled = true;
-            option.selected = true;
-            newTimeSelect.appendChild(option);
-            return;
-          }
+  const now = new Date();
+  const isToday = dateKey === now.toDateString();
+  const currentTimeInHours = now.getHours() + (now.getMinutes() / 60);
+  const selectedDate = new Date(newDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-          let hasAvailableSlots = false;
-          
-          allTimeSlots.forEach(slot => {
-            const slotTimeInHours = parseTime(slot) / 60;
-            
-            if (isToday && slotTimeInHours <= currentTimeInHours) {
-              return;
-            }
+  try {
+    // Fetch the current booking details to get the original time slot
+    let originalTime = null;
+    if (currentBookingId) {
+      const docRef = doc(db, 'bookings', currentBookingId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        originalTime = docSnap.data().time;
+      }
+    }
 
-            if (!bookedSlots.includes(slot)) {
-              const option = document.createElement('option');
-              option.value = slot;
-              option.textContent = slot;
-              newTimeSelect.appendChild(option);
-              hasAvailableSlots = true;
-            }
-          });
+    // Fetch all booked slots for the selected date
+    const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+    const querySnapshot = await getDocs(q);
+    const bookedSlots = querySnapshot.docs
+      .filter(doc => doc.id !== currentBookingId) // Exclude the current booking from booked slots
+      .map(doc => doc.data().time);
 
-          if (!hasAvailableSlots) {
-            const option = document.createElement('option');
-            option.value = '';
-            option.className = 'no-slots-message';
-            option.textContent = 'No slots available for this day';
-            option.disabled = true;
-            option.selected = true;
-            newTimeSelect.appendChild(option);
-          }
-        } catch (error) {
-          console.error('Error fetching booked slots: ', error);
-          const option = document.createElement('option');
-          option.value = '';
-          option.className = 'no-slots-message';
-          option.textContent = 'Error loading slots';
-          option.disabled = true;
-          option.selected = true;
-          newTimeSelect.appendChild(option);
-        }
+    if (selectedDate < today) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = 'Cannot reschedule to past dates';
+      option.disabled = true;
+      option.selected = true;
+      newTimeSelect.appendChild(option);
+      return;
+    }
+
+    let hasAvailableSlots = false;
+
+    allTimeSlots.forEach(slot => {
+      const slotTimeInHours = parseTime(slot) / 60;
+
+      // Skip past slots if it's today
+      if (isToday && slotTimeInHours <= currentTimeInHours) {
+        return;
       }
 
+      // Check if the slot is booked by others or is the original time slot
+      const isBooked = bookedSlots.includes(slot) || (originalTime && slot === originalTime);
+
+      if (!isBooked) {
+        const option = document.createElement('option');
+        option.value = slot;
+        option.textContent = slot;
+        newTimeSelect.appendChild(option);
+        hasAvailableSlots = true;
+      }
+    });
+
+    if (!hasAvailableSlots) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = 'No slots available for this day';
+      option.disabled = true;
+      option.selected = true;
+      newTimeSelect.appendChild(option);
+    }
+  } catch (error) {
+    console.error('Error fetching booked slots: ', error);
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'Error loading slots';
+    option.disabled = true;
+    option.selected = true;
+    newTimeSelect.appendChild(option);
+  }
+}
       reserveButton.addEventListener('click', () => {
         if (!currentUser) {
           signInModal.style.display = 'flex';
@@ -1264,14 +1432,14 @@
           }
           const docId = e.target.getAttribute('data-id');
           rescheduleModal.style.display = 'flex';
-          newTimeSelect.innerHTML = '<option value="">Select a date first</option>';
           const today = new Date().toISOString().split('T')[0];
           newDateInput.setAttribute('min', today);
+          populateAvailableTimeSlots(newDateInput.value || today, docId);
 
           newDateInput.onchange = null;
           newDateInput.addEventListener('change', (e) => {
             populateAvailableTimeSlots(e.target.value, docId);
-          }, { once: true });
+          });
 
           rescheduleForm.onsubmit = null;
           rescheduleForm.addEventListener('submit', async (e) => {
@@ -1342,6 +1510,7 @@
 
       cancelRescheduleButton.addEventListener('click', () => {
         rescheduleModal.style.display = 'none';
+        rescheduleForm.reset();
       });
 
       prevMonthButton.addEventListener('click', () => {
