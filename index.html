@@ -593,10 +593,7 @@
           signOutButton.classList.remove('hidden');
           homeScreen.classList.add('hidden');
           bookingScreen.classList.remove('hidden');
-          renderCalendar();
-          renderTimeSlots();
-          renderBookedSlots();
-          updateTicker();
+          initializeBookingInterface();
         } else {
           signInButton.classList.remove('hidden');
           signUpButton.classList.remove('hidden');
@@ -611,7 +608,7 @@
 
       bookNowButton.addEventListener('click', () => {
         if (!currentUser) {
-          signUpModal.style.display = 'flex'; // Show sign-up modal directly
+          signUpModal.style.display = 'flex';
         } else {
           homeScreen.classList.add('hidden');
           bookingScreen.classList.remove('hidden');
@@ -633,7 +630,6 @@
         const email = document.getElementById('signInEmail').value.trim();
         const password = document.getElementById('signInPassword').value.trim();
 
-        // Basic validation
         if (!email || !password) {
           alert('Please enter both email and password.');
           if (!email) document.getElementById('signInEmail').focus();
@@ -648,12 +644,10 @@
         }
 
         try {
-          console.log('Attempting sign-in with email:', email);
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
-          console.log('Sign-in successful for user:', userCredential.user.uid);
           signInModal.style.display = 'none';
           signInForm.reset();
-          document.getElementById('signInEmail').focus(); // Prepare for next use
+          document.getElementById('signInEmail').focus();
         } catch (error) {
           console.error('Sign in error: ', error.code, error.message);
           let errorMessage = 'Sign in failed. Please try again.';
@@ -674,7 +668,7 @@
               errorMessage = 'An unexpected error occurred. Please try again later.';
           }
           alert(errorMessage);
-          document.getElementById('signInEmail').focus(); // Focus on email for re-entry
+          document.getElementById('signInEmail').focus();
         }
       });
 
@@ -683,7 +677,6 @@
         signInForm.reset();
       });
 
-      // Forgot Password
       forgotPassword.addEventListener('click', (e) => {
         e.preventDefault();
         const email = prompt('Please enter your email address to reset your password:');
@@ -699,7 +692,6 @@
         }
       });
 
-      // Sign Up
       signUpButton.addEventListener('click', () => {
         signUpModal.style.display = 'flex';
       });
@@ -717,7 +709,7 @@
 
         try {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await updateProfile(userCredential.user, { displayName: name }); // Set display name
+          await updateProfile(userCredential.user, { displayName: name });
           signUpModal.style.display = 'none';
           signUpForm.reset();
           alert('Signup successful!');
@@ -736,7 +728,6 @@
         signUpForm.reset();
       });
 
-      // Switch from Sign In to Sign Up
       document.getElementById('switchToSignUp').addEventListener('click', (e) => {
         e.preventDefault();
         signInModal.style.display = 'none';
@@ -744,7 +735,6 @@
         signInForm.reset();
       });
 
-      // Switch from Sign Up to Sign In
       document.getElementById('switchToSignIn').addEventListener('click', (e) => {
         e.preventDefault();
         signUpModal.style.display = 'none';
@@ -752,7 +742,6 @@
         signUpForm.reset();
       });
 
-      // Sign Out
       signOutButton.addEventListener('click', async () => {
         try {
           await signOut(auth);
@@ -768,6 +757,14 @@
         setTimeout(() => {
           bookingSuccessMessage.classList.add('hidden');
         }, 5000);
+      }
+
+      function initializeBookingInterface() {
+        renderCalendar();
+        selectDate(new Date()); // Automatically select the current date on load
+        renderTimeSlots();
+        renderBookedSlots();
+        updateTicker();
       }
 
       function renderCalendar() {
@@ -815,15 +812,6 @@
         }
 
         currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-        if (selectedDate < today) {
-          selectedDate = new Date(today);
-          selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-          timeSlotContainer.classList.remove('hidden');
-          bookedSlotsContainer.classList.remove('hidden');
-          renderTimeSlots();
-          renderBookedSlots();
-        }
       }
 
       function selectDate(date) {
@@ -840,7 +828,6 @@
         selectedDateElement.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         timeSlotContainer.classList.remove('hidden');
         bookedSlotsContainer.classList.remove('hidden');
-        renderCalendar();
         renderTimeSlots();
         renderBookedSlots();
       }
@@ -1284,7 +1271,18 @@
               alert('Booking rescheduled successfully!');
               rescheduleModal.style.display = 'none';
               rescheduleForm.reset();
-              renderBookedSlots();
+              // Refresh the booked slots for both old and new dates
+              const oldDateKey = selectedDate.toDateString();
+              if (oldDateKey !== newDateKey) {
+                renderBookedSlots(); // Refresh current date's booked slots
+                selectedDate = new Date(newDate); // Update selectedDate to new date
+                selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                renderCalendar(); // Re-render calendar to highlight new date
+                renderTimeSlots(); // Refresh time slots for new date
+                renderBookedSlots(); // Refresh booked slots for new date
+              } else {
+                renderBookedSlots(); // Refresh only if same date
+              }
             } catch (error) {
               console.error('Error rescheduling booking: ', error);
               alert('Failed to reschedule. Please try again.');
