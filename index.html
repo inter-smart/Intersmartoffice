@@ -207,6 +207,7 @@
       max-width: 350px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+    #signOutButton { margin-bottom: 10px; } /* Added margin to separate from ticker */
     @media (max-width: 640px) {
       .layout-content-container { width: 100% !important; max-width: 100% !important; padding: 0 10px !important; }
       .px-40 { padding-left: 10px !important; padding-right: 10px !important; }
@@ -808,8 +809,14 @@
           return;
         }
 
+        const previouslySelected = document.querySelector('.calendar-day.selected');
+        if (previouslySelected) {
+          previouslySelected.classList.remove('selected');
+        }
+
         selectedDate = date;
         selectedDateElement.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        renderCalendar();
         timeSlotContainer.classList.remove('hidden');
         bookedSlotsContainer.classList.remove('hidden');
         renderTimeSlots();
@@ -845,7 +852,6 @@
         const now = new Date();
         const currentTime = now.getHours() + now.getMinutes() / 60;
         let availableSlots = 0;
-        const totalSlots = ((endTime - startTime) / interval) + 1;
 
         for (let time = startTime; time <= endTime; time += interval) {
           const hours = Math.floor(time);
@@ -1064,7 +1070,7 @@
 
       async function populateAvailableTimeSlots(newDate, currentBookingId) {
         if (!currentUser) return;
-        newTimeSelect.innerHTML = ''; // Clear previous options
+        newTimeSelect.innerHTML = ''; 
         
         const dateKey = new Date(newDate).toDateString();
         const allTimeSlots = [
@@ -1081,14 +1087,12 @@
         today.setHours(0, 0, 0, 0);
 
         try {
-          // Fetch booked slots for the selected date
           const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
           const querySnapshot = await getDocs(q);
           const bookedSlots = querySnapshot.docs
-            .filter(doc => doc.id !== currentBookingId) // Exclude the current booking being rescheduled
+            .filter(doc => doc.id !== currentBookingId)
             .map(doc => doc.data().time);
 
-          // Check if date is in the past
           if (selectedDate < today) {
             const option = document.createElement('option');
             option.value = '';
@@ -1101,16 +1105,13 @@
 
           let hasAvailableSlots = false;
           
-          // Populate time slots
           allTimeSlots.forEach(slot => {
             const slotTimeInHours = parseTime(slot) / 60;
             
-            // Skip past times for today
             if (isToday && slotTimeInHours <= currentTimeInHours) {
               return;
             }
 
-            // Only add slot if it's not booked
             if (!bookedSlots.includes(slot)) {
               const option = document.createElement('option');
               option.value = slot;
@@ -1120,7 +1121,6 @@
             }
           });
 
-          // If no slots are available, show message
           if (!hasAvailableSlots) {
             const option = document.createElement('option');
             option.value = '';
@@ -1257,13 +1257,11 @@
           const today = new Date().toISOString().split('T')[0];
           newDateInput.setAttribute('min', today);
 
-          // Remove any existing listeners to prevent duplicates
           newDateInput.onchange = null;
           newDateInput.addEventListener('change', (e) => {
             populateAvailableTimeSlots(e.target.value, docId);
           }, { once: true });
 
-          // Remove any existing submit listeners
           rescheduleForm.onsubmit = null;
           rescheduleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
