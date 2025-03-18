@@ -11,7 +11,6 @@
   <link rel="icon" type="image/png" href="images/fav.png" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <style>
-    /* Existing styles remain unchanged */
     .calendar-day {
       transition: background-color 0.3s ease;
       font-size: 12px;
@@ -761,7 +760,6 @@
         };
       }
 
-      // Optimized auth state change handler
       onAuthStateChanged(auth, (user) => {
         currentUser = user;
         if (user) {
@@ -771,7 +769,6 @@
           bookNowButton.classList.add('hidden');
           welcomeMessage.classList.remove('hidden');
           welcomeText.textContent = `Welcome ${user.displayName || 'User'}`;
-          // Immediate transition
           homeScreen.style.display = 'none';
           bookingScreen.style.display = 'block';
           initializeBookingInterface();
@@ -781,7 +778,6 @@
           signOutButton.classList.add('hidden');
           bookNowButton.classList.remove('hidden');
           welcomeMessage.classList.add('hidden');
-          // Immediate transition
           homeScreen.style.display = 'flex';
           bookingScreen.style.display = 'none';
           timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
@@ -1012,6 +1008,7 @@
         timeSlots.innerHTML = '';
         bookedSlots.innerHTML = '';
         renderCalendar();
+        await fetchBookedSlots(date.toDateString());
         await renderTimeSlots();
         await debouncedRenderBookedSlots();
       }
@@ -1024,16 +1021,14 @@
 
       async function fetchBookedSlots(dateKey) {
         if (!currentUser) return;
-        if (!bookedSlotsCache.has(dateKey)) {
-          try {
-            const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
-            const querySnapshot = await getDocs(q);
-            const bookedTimes = new Set(querySnapshot.docs.map(doc => doc.data().time));
-            bookedSlotsCache.set(dateKey, bookedTimes);
-          } catch (error) {
-            console.error('Error fetching booked slots:', error);
-            bookedSlotsCache.set(dateKey, new Set());
-          }
+        try {
+          const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+          const querySnapshot = await getDocs(q);
+          const bookedTimes = new Set(querySnapshot.docs.map(doc => doc.data().time));
+          bookedSlotsCache.set(dateKey, bookedTimes);
+        } catch (error) {
+          console.error('Error fetching booked slots:', error);
+          bookedSlotsCache.set(dateKey, new Set());
         }
       }
 
@@ -1082,7 +1077,6 @@
               slotButton.classList.add('booked-slot');
               slotButton.disabled = true;
             } else if (isCurrent) {
-              // Current slot remains available for booking
               slotButton.addEventListener('click', () => {
                 slotButton.classList.toggle('selected');
                 selectedTimeSlots = Array.from(timeSlots.querySelectorAll('.selected')).map(el => el.textContent);
@@ -1123,19 +1117,11 @@
         const dateKey = selectedDate.toDateString();
         const now = new Date();
         const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-        const bookingsMap = new Map();
 
         try {
           const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
           const querySnapshot = await getDocs(q);
-          querySnapshot.docs.forEach(doc => {
-            const booking = { id: doc.id, ...doc.data() };
-            if (!bookingsMap.has(booking.id)) {
-              bookingsMap.set(booking.id, booking);
-            }
-          });
-
-          let bookings = Array.from(bookingsMap.values());
+          const bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           bookings.sort((a, b) => parseTime(a.time) - parseTime(b.time));
 
           if (bookings.length === 0) {
@@ -1190,8 +1176,11 @@
 
           if (bookings.length > 2) expandButton.classList.remove('hidden');
           else expandButton.classList.add('hidden');
+
+          bookedSlotsCache.set(dateKey, new Set(bookings.map(b => b.time)));
         } catch (error) {
           console.error('Error fetching bookings: ', error);
+          bookedSlots.innerHTML = '<p class="text-red-600 text-sm">Error loading booked slots. Please try again.</p>';
         }
       }
 
@@ -1586,7 +1575,6 @@
           currentDate = new Date(today);
         }
         renderCalendar();
-        // Auto-select first available date
         const firstAvailableDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
         if (firstAvailableDate >= today) {
           await fetchBookedSlots(firstAvailableDate.toDateString());
@@ -1598,7 +1586,6 @@
         if (!currentUser) return;
         currentDate.setMonth(currentDate.getMonth() + 1);
         renderCalendar();
-        // Auto-select first available date
         const firstAvailableDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
         await fetchBookedSlots(firstAvailableDate.toDateString());
         selectDate(firstAvailableDate);
@@ -1637,32 +1624,34 @@
 
             const span = document.createElement('span');
             span.className = statusClass;
-            span.textContent = `${booking.name || 'Unknown'} - ${booking.time} (${statusClass === 'ongoing' ? 'Ongoing' : statusClass === 'completed' ? 'Completed' : 'Upcoming'}) | `;
+            span.textContent = `${booking.name || 'Unknown'} - ${booking.time} (${booking.department || 'N/A'}) `;
             tickerContent.appendChild(span);
           });
         } catch (error) {
           console.error('Error updating ticker:', error);
           tickerContent.innerHTML = '<span>Error loading bookings</span>';
         }
-      }      pastBookingsButton.addEventListener('click', async () => {
+      }
+
+      pastBookingsButton.addEventListener('click', async () => {
         if (!currentUser) {
           signInModal.style.display = 'flex';
           alert('Please sign in to view all bookings.');
           return;
         }
         pastBookingsModal.style.display = 'flex';
-        await populatePastBookingsFilters();
-        await displayPastBookings();
+        await populateDepartments();
+        await renderPastBookings();
       });
 
-      async function populatePastBookingsFilters() {
-        const departments = new Set();
-        const q = query(collection(db, 'bookings'));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(doc => departments.add(doc.data().department));
-        
+      async function populateDepartments() {
+        const departments = [
+          "QA", "PHP", "Project Management", "Sales", "Management", "HTML",
+          "Digital Marketing", "SEO", "Graphic Designers", "Content Writers",
+          "Project Coordinators", "Mobile App Development Team", "UI Designers", "Wordpress"
+        ];
         pastBookingsDepartment.innerHTML = '<option value="">All Departments</option>';
-        Array.from(departments).sort().forEach(dept => {
+        departments.forEach(dept => {
           const option = document.createElement('option');
           option.value = dept;
           option.textContent = dept;
@@ -1670,24 +1659,22 @@
         });
       }
 
-      async function displayPastBookings() {
-        const selectedDate = pastBookingsDate.value;
-        const selectedDept = pastBookingsDepartment.value;
-
+      async function renderPastBookings() {
         pastBookingsList.innerHTML = '';
+        const selectedPastDate = pastBookingsDate.value;
+        const selectedDepartment = pastBookingsDepartment.value;
+
         try {
-          let q = query(collection(db, 'bookings'));
-          if (selectedDate) q = query(q, where('date', '==', new Date(selectedDate).toDateString()));
-          if (selectedDept) q = query(q, where('department', '==', selectedDept));
+          let q = collection(db, 'bookings');
+          if (selectedPastDate) {
+            q = query(q, where('date', '==', new Date(selectedPastDate).toDateString()));
+          }
+          if (selectedDepartment) {
+            q = query(q, where('department', '==', selectedDepartment));
+          }
 
           const querySnapshot = await getDocs(q);
           const bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-          if (bookings.length === 0) {
-            pastBookingsList.innerHTML = '<p class="no-bookings">No bookings found for the selected criteria.</p>';
-            return;
-          }
-
           bookings.sort((a, b) => {
             const dateA = new Date(a.date);
             const dateB = new Date(b.date);
@@ -1695,37 +1682,40 @@
             return parseTime(a.time) - parseTime(b.time);
           });
 
+          if (bookings.length === 0) {
+            pastBookingsList.innerHTML = '<p class="no-bookings">No bookings found for the selected criteria.</p>';
+            return;
+          }
+
           bookings.forEach(booking => {
-            const bookingElement = document.createElement('div');
-            bookingElement.className = 'past-booking-entry';
-            bookingElement.innerHTML = `
-              <p><strong>Name:</strong> ${booking.name || 'Unknown'}</p>
-              <p><strong>Date:</strong> ${new Date(booking.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-              <p><strong>Time:</strong> ${booking.time}</p>
-              <p><strong>Department:</strong> ${booking.department || 'N/A'}</p>
+            const bookingEntry = document.createElement('div');
+            bookingEntry.className = 'past-booking-entry';
+            bookingEntry.innerHTML = `
+              <p><strong>${booking.name || 'Unknown'}</strong> - ${booking.time}</p>
+              <p>${booking.department || 'N/A'} - ${new Date(booking.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+              <p>${booking.purpose || 'No purpose provided'}</p>
             `;
-            pastBookingsList.appendChild(bookingElement);
+            pastBookingsList.appendChild(bookingEntry);
           });
         } catch (error) {
           console.error('Error fetching past bookings:', error);
-          pastBookingsList.innerHTML = '<p class="no-bookings">Error loading bookings.</p>';
+          pastBookingsList.innerHTML = '<p class="text-red-600">Error loading bookings.</p>';
         }
       }
 
-      pastBookingsDate.addEventListener('change', displayPastBookings);
-      pastBookingsDepartment.addEventListener('change', displayPastBookings);
+      pastBookingsDate.addEventListener('change', renderPastBookings);
+      pastBookingsDepartment.addEventListener('change', renderPastBookings);
       closePastBookings.addEventListener('click', () => {
         pastBookingsModal.style.display = 'none';
+        pastBookingsDate.value = '';
+        pastBookingsDepartment.value = '';
       });
 
-      // Initialize ticker and periodic updates
+      // Initialize the ticker and bookings on page load
       if (currentUser) {
         updateTicker();
-        setInterval(updateTicker, 60000); // Update every minute
+        setInterval(updateTicker, 60000); // Update ticker every minute
       }
-
-      // Initial calendar rendering
-      renderCalendar();
     });
   </script>
 </body>
