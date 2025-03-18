@@ -402,6 +402,19 @@
       .past-booking-entry { font-size: 12px; padding: 8px; }
       header { padding: 5px 5px; }
     }
+    .delete-button {
+    padding: 6px 10px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.delete-button:hover {
+    background-color: #c82333;
+}
   </style>
 </head>
 <body>
@@ -650,8 +663,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { 
-      getFirestore, collection, getDocs, query, where, addDoc, updateDoc, getDoc, doc 
-    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    getFirestore, collection, getDocs, query, where, addDoc, updateDoc, getDoc, doc, deleteDoc 
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
     import { 
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
       signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail 
@@ -980,131 +993,126 @@
       }
 
       async function renderTimeSlots() {
-        if (!currentUser) {
-          timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
-          return;
-        }
+    if (!currentUser) {
+        timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
+        return;
+    }
 
-        // Clear existing time slots to prevent duplication
-        timeSlots.innerHTML = ''; // Ensure this line is always executed first
+    timeSlots.innerHTML = '';
+    const dateKey = selectedDate.toDateString();
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isToday = dateKey === today.toDateString();
+    const currentTimeInHours = today.getHours() + today.getMinutes() / 60;
 
-        const dateKey = selectedDate.toDateString();
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const isToday = dateKey === today.toDateString();
-        const currentTimeInHours = today.getHours() + today.getMinutes() / 60;
+    if (new Date(dateKey) < today) {
+        timeSlots.innerHTML = '<p class="no-slots-message">Cannot book past dates.</p>';
+        return;
+    }
 
-        if (new Date(dateKey) < today) {
-          timeSlots.innerHTML = '<p class="no-slots-message">Cannot book past dates.</p>';
-          return;
-        }
+    const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+    const querySnapshot = await getDocs(q);
+    const bookedSlots = new Set(querySnapshot.docs.map(doc => doc.data().time));
 
-        const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
-        const querySnapshot = await getDocs(q);
-        const bookedSlots = querySnapshot.docs.map(doc => doc.data().time);
+    const startTime = 9;
+    const endTime = 18;
+    const interval = 0.5;
 
-        const startTime = 9;
-        const endTime = 18;
-        const interval = 0.5;
+    const now = new Date();
+    const currentTime = now.getHours() + now.getMinutes() / 60;
+    let availableSlots = 0;
 
-        const now = new Date();
-        const currentTime = now.getHours() + now.getMinutes() / 60;
-        let availableSlots = 0;
+    for (let time = startTime; time <= endTime; time += interval) {
+        const hours = Math.floor(time);
+        const minutes = (time % 1) * 60;
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12;
+        const formattedMinutes = minutes === 0 ? '00' : '30';
+        const slot = `${formattedHours}:${formattedMinutes} ${period}`;
 
-        // Generate unique time slots
-        const allTimeSlots = [];
-        for (let time = startTime; time <= endTime; time += interval) {
-          const hours = Math.floor(time);
-          const minutes = (time % 1) * 60;
-          const period = hours >= 12 ? 'PM' : 'AM';
-          const formattedHours = hours % 12 || 12;
-          const formattedMinutes = minutes === 0 ? '00' : '30';
-          const slot = `${formattedHours}:${formattedMinutes} ${period}`;
-          allTimeSlots.push(slot);
-        }
+        const slotTimeInHours = parseTime(slot) / 60;
+        if (isToday && slotTimeInHours < currentTime) continue;
 
-        for (const slot of allTimeSlots) {
-          const slotTimeInHours = parseTime(slot) / 60;
-          if (isToday && slotTimeInHours < currentTime) continue;
-
-          const slotButton = document.createElement('button');
-          slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
-          const isBooked = bookedSlots.includes(slot);
-          if (isBooked) {
+        const slotButton = document.createElement('button');
+        slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
+        const isBooked = bookedSlots.has(slot);
+        if (isBooked) {
             slotButton.classList.add('booked-slot');
-          } else {
+        } else {
             availableSlots++;
             slotButton.addEventListener('click', () => {
-              slotButton.classList.toggle('selected');
-              selectedTimeSlots = Array.from(document.querySelectorAll('#timeSlots .selected')).map(el => el.textContent);
-              reserveButton.disabled = !selectedTimeSlots.length;
+                slotButton.classList.toggle('selected');
+                selectedTimeSlots = Array.from(document.querySelectorAll('#timeSlots .selected')).map(el => el.textContent);
+                reserveButton.disabled = !selectedTimeSlots.length;
             });
-          }
-          slotButton.textContent = slot;
-          timeSlots.appendChild(slotButton);
         }
+        slotButton.textContent = slot;
+        timeSlots.appendChild(slotButton);
+    }
 
-        if (availableSlots === 0) {
-          const noSlotsMessage = document.createElement('p');
-          noSlotsMessage.className = 'no-slots-message';
-          noSlotsMessage.innerHTML = 'No slots available for this day<br>All slots booked';
-          timeSlots.appendChild(noSlotsMessage);
-        }
-      }
+    if (availableSlots === 0) {
+        const noSlotsMessage = document.createElement('p');
+        noSlotsMessage.className = 'no-slots-message';
+        noSlotsMessage.innerHTML = 'No slots available for this day<br>All slots booked';
+        timeSlots.appendChild(noSlotsMessage);
+    }
+}
 
       async function renderBookedSlots() {
-        if (!currentUser) {
-          bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
-          return;
-        }
-        bookedSlots.innerHTML = '';
-        const dateKey = selectedDate.toDateString();
-        const now = new Date();
-        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+    if (!currentUser) {
+        bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
+        return;
+    }
+    bookedSlots.innerHTML = '';
+    const dateKey = selectedDate.toDateString();
+    const now = new Date();
+    const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
 
-        try {
-          const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
-          const querySnapshot = await getDocs(q);
-          let bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          bookings.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+    try {
+        const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+        const querySnapshot = await getDocs(q);
+        let bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        bookings.sort((a, b) => parseTime(a.time) - parseTime(b.time));
 
-          if (bookings.length === 0) {
+        if (bookings.length === 0) {
             bookedSlots.innerHTML = `
-              <p class="text-[#4e7397] text-sm font-normal leading-normal">
-                No slots booked yet. Be the first to book a slot on ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}!
-              </p>`;
+                <p class="text-[#4e7397] text-sm font-normal leading-normal">
+                    No slots booked yet. Be the first to book a slot on ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}!
+                </p>`;
             expandButton.classList.add('hidden');
             return;
-          }
+        }
 
-          bookings.forEach((booking) => {
+        bookings.forEach((booking) => {
             const bookingElement = document.createElement('div');
             const isCompleted = dateKey === now.toDateString() && parseTime(booking.time) < currentTimeInMinutes;
             bookingElement.className = `booked-slot flex flex-col p-4 border-b border-[#e7edf3] ${isCompleted ? 'completed' : ''}`;
             bookingElement.setAttribute('data-id', booking.id);
 
             const showReschedule = currentUser && currentUser.uid === booking.userId && !isCompleted;
+            const showDelete = currentUser && currentUser.uid === booking.userId && !isCompleted;
             const userInitial = (booking.name || 'U')[0].toUpperCase();
 
             bookingElement.innerHTML = `
-              <div class="flex items-center gap-4 w-full">
-                <div class="profile-pic">${userInitial}</div>
-                <div class="flex-1">
-                  <p class="text-[#0e141b] text-sm font-bold">${booking.name || 'Unknown'}</p>
-                  <p class="text-[#0e141b] text-sm font-normal">${booking.department || 'N/A'}</p>
-                  <p class="text-[#0e141b] text-sm font-medium">${booking.time}</p>
+                <div class="flex items-center gap-4 w-full">
+                    <div class="profile-pic">${userInitial}</div>
+                    <div class="flex-1">
+                        <p class="text-[#0e141b] text-sm font-bold">${booking.name || 'Unknown'}</p>
+                        <p class="text-[#0e141b] text-sm font-normal">${booking.department || 'N/A'}</p>
+                        <p class="text-[#0e141b] text-sm font-medium">${booking.time}</p>
+                    </div>
                 </div>
-              </div>
-              <div class="buttons-container">
-                <button class="details-button">Details</button>
-                ${showReschedule ? '<button class="reschedule-button" data-id="' + booking.id + '">Reschedule</button>' : ''}
-              </div>
-              <div class="details hidden">
-                <p><strong>Email:</strong> ${booking.email || 'N/A'}</p>
-                <p><strong>Role:</strong> ${booking.role || 'N/A'}</p>
-                <p><strong>Purpose:</strong> ${booking.purpose || 'N/A'}</p>
-              </div>
+                <div class="buttons-container">
+                    <button class="details-button">Details</button>
+                    ${showReschedule ? '<button class="reschedule-button" data-id="' + booking.id + '">Reschedule</button>' : ''}
+                    ${showDelete ? '<button class="delete-button" data-id="' + booking.id + '">Delete</button>' : ''}
+                </div>
+                <div class="details hidden">
+                    <p><strong>Email:</strong> ${booking.email || 'N/A'}</p>
+                    <p><strong>Role:</strong> ${booking.role || 'N/A'}</p>
+                    <p><strong>Purpose:</strong> ${booking.purpose || 'N/A'}</p>
+                </div>
             `;
 
             bookedSlots.appendChild(bookingElement);
@@ -1112,17 +1120,17 @@
             const detailsButton = bookingElement.querySelector('.details-button');
             const detailsElement = bookingElement.querySelector('.details');
             detailsButton.addEventListener('click', () => {
-              detailsElement.classList.toggle('hidden');
-              detailsButton.textContent = detailsElement.classList.contains('hidden') ? 'Details' : 'Hide Details';
+                detailsElement.classList.toggle('hidden');
+                detailsButton.textContent = detailsElement.classList.contains('hidden') ? 'Details' : 'Hide Details';
             });
-          });
+        });
 
-          if (bookings.length > 2) expandButton.classList.remove('hidden');
-          else expandButton.classList.add('hidden');
-        } catch (error) {
-          console.error('Error fetching bookings: ', error);
-        }
-      }
+        if (bookings.length > 2) expandButton.classList.remove('hidden');
+        else expandButton.classList.add('hidden');
+    } catch (error) {
+        console.error('Error fetching bookings: ', error);
+    }
+}
 
       async function fetchAllBookings() {
         if (!currentUser) return;
@@ -1253,81 +1261,81 @@
       });
 
       async function populateAvailableTimeSlots(newDate, currentBookingId) {
-        if (!currentUser) return;
-        newTimeSelect.innerHTML = '<option value="">Select a time slot</option>';
-        newTimeSelect.disabled = !newDate;
+    if (!currentUser) return;
+    newTimeSelect.innerHTML = '<option value="">Select a time slot</option>';
+    newTimeSelect.disabled = !newDate;
 
-        if (!newDate) {
-          newTimeSelect.innerHTML = '<option value="">Select a date first</option>';
-          return;
-        }
+    if (!newDate) {
+        newTimeSelect.innerHTML = '<option value="">Select a date first</option>';
+        return;
+    }
 
-        const dateKey = new Date(newDate).toDateString();
-        const allTimeSlots = [
-          "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-          "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
-          "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"
-        ];
+    const dateKey = new Date(newDate).toDateString();
+    const allTimeSlots = [
+        "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+        "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
+        "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"
+    ];
 
-        const now = new Date();
-        const isToday = dateKey === now.toDateString();
-        const currentTimeInHours = now.getHours() + (now.getMinutes() / 60);
-        const selectedDate = new Date(newDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const isToday = dateKey === now.toDateString();
+    const currentTimeInHours = now.getHours() + (now.getMinutes() / 60);
+    const selectedDate = new Date(newDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-        try {
-          let originalBooking = null;
-          if (currentBookingId) {
+    try {
+        let originalBooking = null;
+        if (currentBookingId) {
             const docRef = doc(db, 'bookings', currentBookingId);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-              originalBooking = docSnap.data();
+                originalBooking = docSnap.data();
             }
-          }
+        }
 
-          const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
-          const querySnapshot = await getDocs(q);
-          const bookedSlots = querySnapshot.docs
-            .filter(doc => doc.id !== currentBookingId) // Exclude the current booking being rescheduled
-            .map(doc => doc.data().time);
+        const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+        const querySnapshot = await getDocs(q);
+        const bookedSlots = new Set(querySnapshot.docs
+            .filter(doc => doc.id !== currentBookingId)
+            .map(doc => doc.data().time));
 
-          if (selectedDate < today) {
+        if (selectedDate < today) {
             newTimeSelect.innerHTML = '<option value="">Cannot reschedule to past dates</option>';
             newTimeSelect.disabled = true;
             return;
-          }
+        }
 
-          let hasAvailableSlots = false;
+        let hasAvailableSlots = false;
 
-          allTimeSlots.forEach(slot => {
+        allTimeSlots.forEach(slot => {
             const slotTimeInHours = parseTime(slot) / 60;
 
             if (isToday && slotTimeInHours < currentTimeInHours) {
-              return;
+                return;
             }
 
-            if (!bookedSlots.includes(slot)) {
-              const option = document.createElement('option');
-              option.value = slot;
-              option.textContent = slot;
-              newTimeSelect.appendChild(option);
-              hasAvailableSlots = true;
+            if (!bookedSlots.has(slot)) {
+                const option = document.createElement('option');
+                option.value = slot;
+                option.textContent = slot;
+                newTimeSelect.appendChild(option);
+                hasAvailableSlots = true;
             }
-          });
+        });
 
-          if (!hasAvailableSlots) {
+        if (!hasAvailableSlots) {
             newTimeSelect.innerHTML = '<option value="">No slots available for this day</option>';
             newTimeSelect.disabled = true;
-          } else {
+        } else {
             newTimeSelect.disabled = false;
-          }
-        } catch (error) {
-          console.error('Error fetching booked slots: ', error);
-          newTimeSelect.innerHTML = '<option value="">Error loading slots</option>';
-          newTimeSelect.disabled = true;
         }
-      }
+    } catch (error) {
+        console.error('Error fetching booked slots: ', error);
+        newTimeSelect.innerHTML = '<option value="">Error loading slots</option>';
+        newTimeSelect.disabled = true;
+    }
+}
 
       reserveButton.addEventListener('click', () => {
         if (!currentUser) {
@@ -1432,93 +1440,140 @@
       });
 
       document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('reschedule-button')) {
-          if (!currentUser) {
+    if (e.target.classList.contains('reschedule-button')) {
+        if (!currentUser) {
             signInModal.style.display = 'flex';
             alert('Please sign in to reschedule.');
             return;
-          }
-          const docId = e.target.getAttribute('data-id');
-          rescheduleModal.style.display = 'flex';
-          const today = new Date().toISOString().split('T')[0];
-          newDateInput.setAttribute('min', today);
-          newDateInput.value = '';
-          populateAvailableTimeSlots(null, docId);
+        }
+        const docId = e.target.getAttribute('data-id');
+        rescheduleModal.style.display = 'flex';
+        const today = new Date().toISOString().split('T')[0];
+        newDateInput.setAttribute('min', today);
+        newDateInput.value = '';
+        populateAvailableTimeSlots(null, docId);
 
-          newDateInput.onchange = () => populateAvailableTimeSlots(newDateInput.value, docId);
+        newDateInput.onchange = () => populateAvailableTimeSlots(newDateInput.value, docId);
 
-          rescheduleForm.onsubmit = async (e) => {
+        rescheduleForm.onsubmit = async (e) => {
             e.preventDefault();
             const newDate = newDateInput.value;
             const newTime = newTimeSelect.value;
 
             if (!newDate) {
-              alert('Please select a date first.');
-              return;
+                alert('Please select a date first.');
+                return;
             }
 
             if (!newTime || newTime === '') {
-              alert('Please select a valid time slot.');
-              return;
+                alert('Please select a valid time slot.');
+                return;
             }
 
             const now = new Date();
             const selectedDateObj = new Date(newDate);
             if (selectedDateObj < now.setHours(0, 0, 0, 0)) {
-              alert('Cannot reschedule to a past date.');
-              return;
+                alert('Cannot reschedule to a past date.');
+                return;
             }
 
             try {
-              const docRef = doc(db, 'bookings', docId);
-              const docSnap = await getDoc(docRef);
-              
-              if (!docSnap.exists()) {
-                alert('Booking not found!');
-                return;
-              }
+                const docRef = doc(db, 'bookings', docId);
+                const docSnap = await getDoc(docRef);
+                
+                if (!docSnap.exists()) {
+                    alert('Booking not found!');
+                    return;
+                }
 
-              const booking = docSnap.data();
-              
-              if (booking.userId !== currentUser.uid) {
-                alert('You can only reschedule your own bookings!');
-                return;
-              }
+                const booking = docSnap.data();
+                
+                if (booking.userId !== currentUser.uid) {
+                    alert('You can only reschedule your own bookings!');
+                    return;
+                }
 
-              const newDateKey = new Date(newDate).toDateString();
-              if (await checkIfTimeSlotBooked(newDateKey, newTime, docId)) {
-                alert('Selected time slot is already booked!');
-                return;
-              }
+                const newDateKey = new Date(newDate).toDateString();
+                if (await checkIfTimeSlotBooked(newDateKey, newTime, docId)) {
+                    alert('Selected time slot is already booked!');
+                    return;
+                }
 
-              await updateDoc(docRef, { 
-                date: newDateKey, 
-                time: newTime 
-              });
-              
-              alert('Booking rescheduled successfully!');
-              rescheduleModal.style.display = 'none';
-              rescheduleForm.reset();
-              const oldDateKey = selectedDate.toDateString();
-              if (oldDateKey !== newDateKey) {
-                selectedDate = new Date(newDate);
-                selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                renderCalendar();
-              }
-              await renderTimeSlots();
-              await renderBookedSlots();
+                await updateDoc(docRef, { 
+                    date: newDateKey, 
+                    time: newTime 
+                });
+                
+                alert('Booking rescheduled successfully!');
+                rescheduleModal.style.display = 'none';
+                rescheduleForm.reset();
+                const oldDateKey = selectedDate.toDateString();
+                if (oldDateKey !== newDateKey) {
+                    selectedDate = new Date(newDate);
+                    selectedDateElement.textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    renderCalendar();
+                }
+                await renderTimeSlots();
+                await renderBookedSlots();
             } catch (error) {
-              console.error('Error rescheduling booking: ', error);
-              alert('Failed to reschedule. Please try again.');
+                console.error('Error rescheduling booking: ', error);
+                alert('Failed to reschedule. Please try again.');
             }
-          };
+        };
+    } else if (e.target.classList.contains('delete-button')) {
+        if (!currentUser) {
+            signInModal.style.display = 'flex';
+            alert('Please sign in to delete bookings.');
+            return;
         }
-      });
+        const docId = e.target.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this booking?')) {
+            deleteBooking(docId);
+        }
+    }
+});
 
       cancelRescheduleButton.addEventListener('click', () => {
         rescheduleModal.style.display = 'none';
         rescheduleForm.reset();
       });
+      async function deleteBooking(docId) {
+    try {
+        const docRef = doc(db, 'bookings', docId);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+            alert('Booking not found!');
+            return;
+        }
+
+        const booking = docSnap.data();
+        
+        if (booking.userId !== currentUser.uid) {
+            alert('You can only delete your own bookings!');
+            return;
+        }
+
+        const now = new Date();
+        const bookingDate = new Date(booking.date);
+        const bookingTimeInMinutes = parseTime(booking.time);
+        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+
+        if (bookingDate.toDateString() === now.toDateString() && bookingTimeInMinutes <= currentTimeInMinutes) {
+            alert('Cannot delete past or ongoing bookings!');
+            return;
+        }
+
+        await deleteDoc(docRef);
+        showSuccessMessage('Booking deleted successfully!');
+        await renderTimeSlots();
+        await renderBookedSlots();
+        await updateTicker();
+    } catch (error) {
+        console.error('Error deleting booking: ', error);
+        alert('Failed to delete booking. Please try again.');
+    }
+}
 
       prevMonthButton.addEventListener('click', () => {
         if (!currentUser) return;
