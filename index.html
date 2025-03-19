@@ -1824,14 +1824,15 @@
             const dateKey = selectedDate.toDateString();
 
             try {
-              reserveButton.disabled = true;
-              reserveButton.innerHTML = '<div class="loader"></div>';
+              const submitButton = bookingForm.querySelector('button[type="submit"]');
+              submitButton.disabled = true;
+              submitButton.innerHTML = '<div class="loader"></div>';
 
               for (const timeSlot of selectedTimeSlots) {
                 if (await checkIfTimeSlotBooked(dateKey, timeSlot)) {
                   alert(`Time slot ${timeSlot} is already booked by someone else. Please select another slot.`);
-                  reserveButton.disabled = false;
-                  reserveButton.innerHTML = '<span class="truncate">Reserve Selected Slots</span>';
+                  submitButton.disabled = false;
+                  submitButton.innerHTML = 'Submit';
                   return;
                 }
               }
@@ -1872,35 +1873,9 @@
               console.error('Error booking slot:', error);
               alert('Failed to book slot: ' + error.message);
             } finally {
-              reserveButton.disabled = false;
-              reserveButton.innerHTML = '<span class="truncate">Reserve Selected Slots</span>';
-            }
-          });
-
-          cancelBookingButton.addEventListener('click', () => {
-            bookingModal.style.display = 'none';
-            bookingForm.reset();
-          });
-
-          newDateInput.addEventListener('change', async (e) => {
-            const newDate = e.target.value;
-            const bookingId = rescheduleModal.dataset.bookingId;
-            await populateAvailableTimeSlots(newDate, bookingId);
-          });
-
-          bookedSlots.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('reschedule-button')) {
-              const bookingId = e.target.dataset.id;
-              rescheduleModal.dataset.bookingId = bookingId;
-
-              const docRef = doc(db, 'bookings', bookingId);
-              const docSnap = await getDoc(docRef);
-              if (docSnap.exists()) {
-                const bookingData = docSnap.data();
-                newDateInput.value = new Date(bookingData.date).toISOString().split('T')[0];
-                await populateAvailableTimeSlots(newDateInput.value, bookingId);
-                rescheduleModal.style.display = 'flex';
-              }
+              const submitButton = bookingForm.querySelector('button[type="submit"]');
+              submitButton.disabled = false;
+              submitButton.innerHTML = 'Submit';
             }
           });
 
@@ -1969,6 +1944,33 @@
               const rescheduleButton = rescheduleForm.querySelector('button[type="submit"]');
               rescheduleButton.disabled = false;
               rescheduleButton.innerHTML = 'Reschedule';
+            }
+          });
+
+          cancelBookingButton.addEventListener('click', () => {
+            bookingModal.style.display = 'none';
+            bookingForm.reset();
+          });
+
+          newDateInput.addEventListener('change', async (e) => {
+            const newDate = e.target.value;
+            const bookingId = rescheduleModal.dataset.bookingId;
+            await populateAvailableTimeSlots(newDate, bookingId);
+          });
+
+          bookedSlots.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('reschedule-button')) {
+              const bookingId = e.target.dataset.id;
+              rescheduleModal.dataset.bookingId = bookingId;
+
+              const docRef = doc(db, 'bookings', bookingId);
+              const docSnap = await getDoc(docRef);
+              if (docSnap.exists()) {
+                const bookingData = docSnap.data();
+                newDateInput.value = new Date(bookingData.date).toISOString().split('T')[0];
+                await populateAvailableTimeSlots(newDateInput.value, bookingId);
+                rescheduleModal.style.display = 'flex';
+              }
             }
           });
 
