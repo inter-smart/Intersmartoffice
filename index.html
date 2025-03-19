@@ -411,7 +411,7 @@
 
     .ticker-content {
       display: inline-block;
-      animation: ticker 55s linear infinite;
+      animation: ticker 20s linear infinite;
       white-space: nowrap;
       min-width: 100%;
     }
@@ -838,52 +838,45 @@
   </div>
 
   <!-- Modal for Booking Details -->
-  <div id="bookingModal" class="modal">
-    <div class="modal-content">
-      <h3 class="text-[#0e141b] text-lg font-bold mb-4">Booking Details</h3>
-      <form id="bookingForm">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Name</label>
-          <input type="text" id="name" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Email</label>
-          <input type="email" id="email" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Department</label>
-          <select id="department" class="w-full p-2 border rounded" required>
-            <option value="QA">QA</option>
-            <option value="PHP">PHP</option>
-            <option value="Project Management">Project Management</option>
-            <option value="Sales">Sales</option>
-            <option value="Management">Management</option>
-            <option value="HTML">HTML</option>
-            <option value="Digital Marketing">Digital Marketing</option>
-            <option value="SEO">SEO</option>
-            <option value="Graphic Designers">Graphic Designers</option>
-            <option value="Content Writers">Content Writers</option>
-            <option value="Project Coordinators">Project Coordinators</option>
-            <option value="Mobile App Development Team">Mobile App Development Team</option>
-            <option value="UI Designers">UI Designers</option>
-            <option value="Wordpress">Wordpress</option>
-          </select>
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Role</label>
-          <input type="text" id="role" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Purpose of Meeting</label>
-          <textarea id="purpose" class="w-full p-2 border rounded" required></textarea>
-        </div>
-        <div class="flex justify-end gap-2">
-          <button type="button" id="cancelBooking" class="p-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" class="p-2 bg-[#5A6268] text-white rounded">Submit</button>
-        </div>
-      </form>
-    </div>
+  <!-- Modal for Booking Details -->
+<div id="bookingModal" class="modal">
+  <div class="modal-content">
+    <h3 class="text-[#0e141b] text-lg font-bold mb-4">Booking Details</h3>
+    <form id="bookingForm">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-[#0e141b]">Department</label>
+        <select id="department" class="w-full p-2 border rounded" required>
+          <option value="QA">QA</option>
+          <option value="PHP">PHP</option>
+          <option value="Project Management">Project Management</option>
+          <option value="Sales">Sales</option>
+          <option value="Management">Management</option>
+          <option value="HTML">HTML</option>
+          <option value="Digital Marketing">Digital Marketing</option>
+          <option value="SEO">SEO</option>
+          <option value="Graphic Designers">Graphic Designers</option>
+          <option value="Content Writers">Content Writers</option>
+          <option value="Project Coordinators">Project Coordinators</option>
+          <option value="Mobile App Development Team">Mobile App Development Team</option>
+          <option value="UI Designers">UI Designers</option>
+          <option value="Wordpress">Wordpress</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-[#0e141b]">Role</label>
+        <input type="text" id="role" class="w-full p-2 border rounded" required />
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-[#0e141b]">Purpose of Meeting</label>
+        <textarea id="purpose" class="w-full p-2 border rounded" required></textarea>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" id="cancelBooking" class="p-2 bg-gray-300 rounded">Cancel</button>
+        <button type="submit" class="p-2 bg-[#5A6268] text-white rounded">Submit</button>
+      </div>
+    </form>
   </div>
+</div>
 
   <!-- Modal for Rescheduling -->
   <div id="rescheduleModal" class="modal">
@@ -1718,80 +1711,78 @@
       }
 
       bookingForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!currentUser) {
-          alert('Please sign in to make a booking.');
-          return;
-        }
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const department = document.getElementById('department').value;
-        const role = document.getElementById('role').value;
-        const purpose = document.getElementById('purpose').value;
-        const dateKey = selectedDate.toDateString();
-        const now = new Date();
-        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+  e.preventDefault();
+  if (!currentUser) {
+    alert('Please sign in to make a booking.');
+    return;
+  }
+  const department = document.getElementById('department').value;
+  const role = document.getElementById('role').value;
+  const purpose = document.getElementById('purpose').value;
+  const dateKey = selectedDate.toDateString();
+  const now = new Date();
+  const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
 
-        try {
-          const bookedSlots = new Set();
-          const bookingsToAdd = [];
+  try {
+    const bookedSlots = new Set();
+    const bookingsToAdd = [];
 
-          for (const time of selectedTimeSlots) {
-            const slotTimeInMinutes = parseTime(time);
-            const slotEndTime = slotTimeInMinutes + 30;
-            if (dateKey === now.toDateString() && slotEndTime <= currentTimeInMinutes) {
-              alert(`Cannot book past time slot: ${time}`);
-              return;
-            }
-            if (await checkIfTimeSlotBooked(dateKey, time)) {
-              bookedSlots.add(time);
-            } else {
-              bookingsToAdd.push({
-                date: dateKey,
-                time,
-                name,
-                email,
-                department,
-                role,
-                purpose,
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                userDisplayName: currentUser.displayName || name,
-                timestamp: Date.now()
-              });
-            }
-          }
+    for (const time of selectedTimeSlots) {
+      const slotTimeInMinutes = parseTime(time);
+      const slotEndTime = slotTimeInMinutes + 30;
+      if (dateKey === now.toDateString() && slotEndTime <= currentTimeInMinutes) {
+        alert(`Cannot book past time slot: ${time}`);
+        return;
+      }
+      if (await checkIfTimeSlotBooked(dateKey, time)) {
+        bookedSlots.add(time);
+      } else {
+        bookingsToAdd.push({
+          date: dateKey,
+          time,
+          name: currentUser.displayName || 'Unknown', // Use authenticated user's name
+          email: currentUser.email,                   // Use authenticated user's email
+          department,
+          role,
+          purpose,
+          userId: currentUser.uid,
+          userEmail: currentUser.email,
+          userDisplayName: currentUser.displayName || 'Unknown',
+          timestamp: Date.now()
+        });
+      }
+    }
 
-          if (bookedSlots.size > 0) {
-            alert(`Unfortunately, these slots were just booked by someone else: ${Array.from(bookedSlots).join(', ')}`);
-            bookingModal.style.display = 'none';
-            bookingForm.reset();
-            bookedSlotsCache.delete(dateKey);
-            await fetchBookedSlots(dateKey);
-            await renderTimeSlots();
-            return;
-          }
+    if (bookedSlots.size > 0) {
+      alert(`Unfortunately, these slots were just booked by someone else: ${Array.from(bookedSlots).join(', ')}`);
+      bookingModal.style.display = 'none';
+      bookingForm.reset();
+      bookedSlotsCache.delete(dateKey);
+      await fetchBookedSlots(dateKey);
+      await renderTimeSlots();
+      return;
+    }
 
-          for (const booking of bookingsToAdd) {
-            await addDoc(collection(db, 'bookings'), booking);
-          }
+    for (const booking of bookingsToAdd) {
+      await addDoc(collection(db, 'bookings'), booking);
+    }
 
-          showSuccessMessage(`Booking confirmed!`);
-          bookingModal.style.display = 'none';
-          bookingForm.reset();
-          selectedTimeSlots = [];
-          reserveButton.disabled = true;
-          bookedSlotsCache.delete(dateKey);
-          await fetchBookedSlots(dateKey);
-          await renderTimeSlots();
-          await debouncedRenderBookedSlots();
-          await updateTicker();
-          await updateMeetingRoomBoxWithCurrentBooking();
-        } catch (error) {
-          console.error('Error adding booking: ', error);
-          alert('Failed to book. Please try again.');
-        }
-      });
+    showSuccessMessage(`Booking confirmed!`);
+    bookingModal.style.display = 'none';
+    bookingForm.reset();
+    selectedTimeSlots = [];
+    reserveButton.disabled = true;
+    bookedSlotsCache.delete(dateKey);
+    await fetchBookedSlots(dateKey);
+    await renderTimeSlots();
+    await debouncedRenderBookedSlots();
+    await updateTicker();
+    await updateMeetingRoomBoxWithCurrentBooking();
+  } catch (error) {
+    console.error('Error adding booking: ', error);
+    alert('Failed to book. Please try again.');
+  }
+});
 
       cancelBookingButton.addEventListener('click', () => {
         bookingModal.style.display = 'none';
