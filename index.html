@@ -284,8 +284,9 @@
     }
     .ticker-content {
       display: inline-block;
-      animation: ticker 15s linear infinite; /* Adjust this value to change speed */
-      padding-right: 100%; /* Ensure space for smooth transition */
+  animation: ticker 20s linear infinite;
+  white-space: nowrap;
+  min-width: 100%;
     }
     .ticker .completed { color: green; }
     .ticker .ongoing { color: blue; }
@@ -1609,11 +1610,10 @@
         tickerContent.innerHTML = '';
 
         if (!currentUser) {
-          const span = document.createElement('span');
-          span.textContent = 'Please sign in to view bookings   |   ';
-          tickerContent.appendChild(span);
-          return;
-        }
+    tickerContent.innerHTML = '<span>Please sign in to view bookings   |   </span>';
+    tickerContent.innerHTML += tickerContent.innerHTML; // Duplicate content
+    return;
+  }
 
         const now = new Date();
         const currentDateStr = now.toDateString();
@@ -1634,27 +1634,28 @@
           bookings.sort((a, b) => parseTime(a.time) - parseTime(b.time));
 
           bookings.forEach((booking, index) => {
-            const bookingTimeInMinutes = parseTime(booking.time);
-            let statusClass = 'upcoming';
-            if (bookingTimeInMinutes<= currentTimeInMinutes && currentTimeInMinutes < bookingTimeInMinutes + 30) {
-              statusClass = 'ongoing';
-            } else if (bookingTimeInMinutes + 30 <= currentTimeInMinutes) {
-              statusClass = 'completed';
-            }
+      const bookingTimeInMinutes = parseTime(booking.time);
+      let statusClass = 'upcoming';
+      if (bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingTimeInMinutes + 30) {
+        statusClass = 'ongoing';
+      } else if (bookingTimeInMinutes + 30 <= currentTimeInMinutes) {
+        statusClass = 'completed';
+      }
 
-            const span = document.createElement('span');
-            span.className = statusClass;
-            span.innerHTML = `${booking.name || 'Unknown'} - ${booking.time} (<span class="status">${statusClass === 'ongoing' ? 'Ongoing' : statusClass === 'completed' ? 'Completed' : 'Upcoming'}</span>)`;
-            
-            // Add separator after each booking except the last one
-            if (index < bookings.length - 1) {
-              const separator = document.createElement('span');
-              separator.className = 'ticker-separator';
-              tickerContent.appendChild(separator);
-            }
+      const span = document.createElement('span');
+      span.className = statusClass;
+      span.innerHTML = `${booking.name || 'Unknown'} - ${booking.time} (<span class="status">${statusClass === 'ongoing' ? 'Ongoing' : statusClass === 'completed' ? 'Completed' : 'Upcoming'}</span>)`;
+      
+      if (index < bookings.length - 1) {
+        const separator = document.createElement('span');
+        separator.className = 'ticker-separator';
+        tickerContent.appendChild(separator);
+      }
 
-            tickerContent.appendChild(span);
-          });
+      tickerContent.appendChild(span);
+    });
+    // Duplicate the content for seamless looping
+    tickerContent.innerHTML += tickerContent.innerHTML;
 
           // No cloning needed; CSS handles infinite loop
         } catch (error) {
@@ -1662,6 +1663,7 @@
           const span = document.createElement('span');
           span.textContent = 'Error loading bookings   |   ';
           tickerContent.appendChild(span);
+          tickerContent.innerHTML += tickerContent.innerHTML; // Duplicate even in error case
         }
       }
 
