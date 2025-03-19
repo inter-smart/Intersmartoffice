@@ -783,6 +783,25 @@
     .delete-button:hover {
       background-color: #c82333;
     }
+
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 4px solid #3498db;
+      width: 20px;
+      height: 20px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
 
@@ -1805,9 +1824,14 @@
             const dateKey = selectedDate.toDateString();
 
             try {
+              reserveButton.disabled = true;
+              reserveButton.innerHTML = '<div class="loader"></div>';
+
               for (const timeSlot of selectedTimeSlots) {
                 if (await checkIfTimeSlotBooked(dateKey, timeSlot)) {
                   alert(`Time slot ${timeSlot} is already booked by someone else. Please select another slot.`);
+                  reserveButton.disabled = false;
+                  reserveButton.innerHTML = '<span class="truncate">Reserve Selected Slots</span>';
                   return;
                 }
               }
@@ -1847,6 +1871,9 @@
             } catch (error) {
               console.error('Error booking slot:', error);
               alert('Failed to book slot: ' + error.message);
+            } finally {
+              reserveButton.disabled = false;
+              reserveButton.innerHTML = '<span class="truncate">Reserve Selected Slots</span>';
             }
           });
 
@@ -1896,6 +1923,10 @@
             }
 
             try {
+              const rescheduleButton = rescheduleForm.querySelector('button[type="submit"]');
+              rescheduleButton.disabled = true;
+              rescheduleButton.innerHTML = '<div class="loader"></div>';
+
               const docRef = doc(db, 'bookings', bookingId);
               const docSnap = await getDoc(docRef);
               if (!docSnap.exists()) {
@@ -1909,6 +1940,8 @@
 
               if (await checkIfTimeSlotBooked(newDateKey, newTime, bookingId)) {
                 alert('Selected time slot is already booked. Please choose another.');
+                rescheduleButton.disabled = false;
+                rescheduleButton.innerHTML = 'Reschedule';
                 return;
               }
 
@@ -1932,6 +1965,10 @@
             } catch (error) {
               console.error('Error rescheduling booking:', error);
               alert('Failed to reschedule booking: ' + error.message);
+            } finally {
+              const rescheduleButton = rescheduleForm.querySelector('button[type="submit"]');
+              rescheduleButton.disabled = false;
+              rescheduleButton.innerHTML = 'Reschedule';
             }
           });
 
