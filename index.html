@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -409,7 +410,7 @@
 
     .ticker-content {
       display: inline-block;
-      animation: ticker 65s linear infinite;
+      animation: ticker 55s linear infinite;
       white-space: nowrap;
       min-width: 100%;
     }
@@ -460,7 +461,7 @@
       border: 1px solid #e7edf3;
       border-radius: 8px;
       background-color: #f9f9f9;
-      width: calc(100% - 330px - 300px - 20px* 3);
+      width: calc(100% - 330px - 300px - 20px * 3);
       max-height: 415px;
       overflow: auto;
       margin: 0;
@@ -537,15 +538,17 @@
       color: #0000FF;
     }
 
-    .desktop-layout {
+    .content-sections {
       display: flex;
       flex-wrap: wrap;
-      flex-direction: row;
-      justify-content: center;
       gap: 20px;
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
+    }
+
+    .section {
+      width: 100%;
     }
 
     .calendar-container {
@@ -555,6 +558,46 @@
       max-width: 100%;
     }
 
+    /* Desktop and Tablet (min-width: 641px) - Maintain original layout */
+    @media (min-width: 641px) {
+      .content-sections {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      .past-bookings-section {
+        width: calc(100% - 330px - 300px - 20px * 2);
+        max-width: none;
+      }
+
+      .calendar-container {
+        width: 330px;
+        flex: 0 0 330px;
+      }
+
+      .meeting-room-section {
+        width: 300px;
+        flex: 0 0 300px;
+      }
+
+      .time-slots-section,
+      .reserve-button-section,
+      .booked-slots-section {
+        width: 100%;
+      }
+
+      .past-bookings-container {
+        width: 100%;
+        margin: 0;
+      }
+
+      .for-meeting-room-container {
+        width: 100%;
+      }
+    }
+
+    /* Mobile (max-width: 640px) - Reorder as requested */
     @media (max-width: 640px) {
       .video-background {
         display: none;
@@ -575,9 +618,48 @@
         padding-right: 10px !important;
       }
 
-      .flex-wrap {
+      .content-sections {
         flex-direction: column;
-        align-items: center;
+        gap: 10px;
+      }
+
+      .calendar-container {
+        order: 1;
+        width: 100%;
+      }
+
+      .time-slots-section {
+        order: 2;
+        width: 100%;
+      }
+
+      .reserve-button-section {
+        order: 3;
+        width: 100%;
+      }
+
+      .booked-slots-section {
+        order: 4;
+        width: 100%;
+      }
+
+      .past-bookings-section {
+        order: 5;
+        width: 100%;
+      }
+
+      .meeting-room-section {
+        order: 6;
+        width: 100%;
+      }
+
+      .past-bookings-container {
+        width: 100%;
+        margin-right: 0;
+      }
+
+      .for-meeting-room-container {
+        width: 100%;
       }
 
       .calendar-day {
@@ -685,25 +767,6 @@
       .header {
         padding: 5px 5px 40px 5px;
       }
-
-      .desktop-layout {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .past-bookings-container {
-        width: 100%;
-        margin-right: 0;
-      }
-
-      .calendar-container {
-        width: 100%;
-        max-width: 100%;
-      }
-
-      .for-meeting-room-container {
-        width: 100%;
-      }
     }
 
     .delete-button {
@@ -771,22 +834,24 @@
                 <p class="text-[#4e7397] text-sm font-normal leading-normal">Seats 12 people</p>
               </div>
             </div>
-            <div class="desktop-layout">
-              <div class="past-bookings-container">
-                <h3 class="text-[#0e141b] text-lg font-bold mb-4">All Bookings</h3>
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-[#0e141b]">Select Date</label>
-                  <input type="date" id="pastBookingsDate" class="w-full p-2 border rounded" />
+            <div class="content-sections">
+              <div class="past-bookings-section section">
+                <div class="past-bookings-container">
+                  <h3 class="text-[#0e141b] text-lg font-bold mb-4">All Bookings</h3>
+                  <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Select Date</label>
+                    <input type="date" id="pastBookingsDate" class="w-full p-2 border rounded" />
+                  </div>
+                  <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Department</label>
+                    <select id="pastBookingsDepartment" class="w-full p-2 border rounded">
+                      <option value="">All Departments</option>
+                    </select>
+                  </div>
+                  <div id="pastBookingsList"></div>
                 </div>
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-[#0e141b]">Department</label>
-                  <select id="pastBookingsDepartment" class="w-full p-2 border rounded">
-                    <option value="">All Departments</option>
-                  </select>
-                </div>
-                <div id="pastBookingsList"></div>
               </div>
-              <div class="calendar-container">
+              <div class="calendar-container section">
                 <div class="flex items-center p-1 justify-between">
                   <button id="prevMonth">
                     <div class="text-[#0e141b] flex size-10 items-center justify-center">
@@ -797,7 +862,8 @@
                       </svg>
                     </div>
                   </button>
-                  <p id="currentMonth" class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center"></p>
+                  <p id="currentMonth"
+                    class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center"></p>
                   <button id="nextMonth">
                     <div class="text-[#0e141b] flex size-10 items-center justify-center">
                       <svg height="20" viewBox="0 0 128 128" width="20">
@@ -810,38 +876,45 @@
                 </div>
                 <div class="grid grid-cols-7" id="calendar"></div>
               </div>
-              <div class="for-meeting-room-container">
-                <div class="for-meeting-room-content">
-                  <h3 id="bookingInfoTitle">Current Slot is Booked By</h3>
-                  <p id="currentBookingName"></p>
-                  <p id="currentBookingDepartment"></p>
-                  <p id="currentBookingTime"></p>
-                  <p id="currentBookingDate"></p>
-                  <div class="booking-navigation">
-                    <button id="previousBookingButton">Previous</button>
-                    <button id="nextBookingButton">Next</button>
+              <div class="meeting-room-section section">
+                <div class="for-meeting-room-container">
+                  <div class="for-meeting-room-content">
+                    <h3 id="bookingInfoTitle">Current Slot is Booked By</h3>
+                    <p id="currentBookingName"></p>
+                    <p id="currentBookingDepartment"></p>
+                    <p id="currentBookingTime"></p>
+                    <p id="currentBookingDate"></p>
+                    <div class="booking-navigation">
+                      <button id="previousBookingButton">Previous</button>
+                      <button id="nextBookingButton">Next</button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <br>
-            <h3 id="selectedDate"
-              class="text-[#0e141b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4"></h3>
-            <div class="time-slots-container p-4 hidden" id="timeSlotContainer">
-              <h3 class="text-[#0e141b] text-lg font-bold mb-4">Available Time Slots</h3>
-              <div id="timeSlots" class="time-slots"></div>
-            </div>
-            <div class="flex justify-center px-4 py-3 gap-4 bottom-buttons">
-              <button id="reserveButton"
-                class="reserve-button flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#5A6268] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled>
-                <span class="truncate">Reserve Selected Slots</span>
-              </button>
-            </div>
-            <div class="booked-slots p-4" id="bookedSlotsContainer">
-              <h3 class="text-[#0e141b] text-lg font-bold mb-4">Your Booked Slots</h3>
-              <div id="bookedSlots"></div>
-              <button id="expandButton" class="text-[#5A6268] text-sm font-medium mt-2 hidden">Show more</button>
+              <div class="time-slots-section section">
+                <h3 id="selectedDate"
+                  class="text-[#0e141b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4"></h3>
+                <div class="time-slots-container p-4 hidden" id="timeSlotContainer">
+                  <h3 class="text-[#0e141b] text-lg font-bold mb-4">Available Time Slots</h3>
+                  <div id="timeSlots" class="time-slots"></div>
+                </div>
+              </div>
+              <div class="reserve-button-section section">
+                <div class="flex justify-center px-4 py-3 gap-4 bottom-buttons">
+                  <button id="reserveButton"
+                    class="reserve-button flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#5A6268] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
+                    <span class="truncate">Reserve Selected Slots</span>
+                  </button>
+                </div>
+              </div>
+              <div class="booked-slots-section section">
+                <div class="booked-slots p-4" id="bookedSlotsContainer">
+                  <h3 class="text-[#0e141b] text-lg font-bold mb-4">Your Booked Slots</h3>
+                  <div id="bookedSlots"></div>
+                  <button id="expandButton" class="text-[#5A6268] text-sm font-medium mt-2 hidden">Show more</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -849,7 +922,6 @@
     </div>
   </div>
 
-  <!-- Modal for Booking Details -->
   <!-- Modal for Booking Details -->
   <div id="bookingModal" class="modal">
     <div class="modal-content">
@@ -1087,7 +1159,7 @@
           bookingScreen.style.display = 'none';
           timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
           bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
-          updateMeetingRoomBox(null); // Clear meeting room box when signed out
+          updateMeetingRoomBox(null);
         }
         updateTicker();
       });
@@ -1524,14 +1596,13 @@
       function findCurrentBooking() {
         if (!allBookings.length) return null;
 
-        const now = new Date(); // Current date and time (e.g., March 18, 2025)
+        const now = new Date();
         const currentDateStr = now.toDateString();
         const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
 
         let currentBooking = null;
         let currentBookingIndexTemp = -1;
 
-        // Step 1: Look for an active booking (current time falls within the slot)
         for (let i = 0; i < allBookings.length; i++) {
           const booking = allBookings[i];
           const bookingDate = new Date(booking.date);
@@ -1547,7 +1618,6 @@
           }
         }
 
-        // Step 2: If no active booking, find the next upcoming booking
         if (!currentBooking) {
           for (let i = 0; i < allBookings.length; i++) {
             const booking = allBookings[i];
@@ -1570,7 +1640,6 @@
           }
         }
 
-        // Step 3: If still no booking (all are past), take the most recent past booking
         if (!currentBooking) {
           for (let i = allBookings.length - 1; i >= 0; i--) {
             const booking = allBookings[i];
@@ -1716,389 +1785,364 @@
         }
       });
 
-      async function checkIfTimeSlotBooked(dateKey, timeSlot, excludeId = null) {
-        const q = query(collection(db, 'bookings'), where('date', '==', dateKey), where('time', '==', timeSlot));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.some(doc => doc.id !== excludeId);
-      }
+      async function checkIfTimeSlotBooked(dateKey, timeSlot, excludeBookingId = null) {
+            const q = query(collection(db, 'bookings'), where('date', '==', dateKey), where('time', '==', timeSlot));
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.docs.some(doc => doc.id !== excludeBookingId);
+          }
 
-      bookingForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!currentUser) {
-          alert('Please sign in to make a booking.');
-          return;
-        }
-        const department = document.getElementById('department').value;
-        const role = document.getElementById('role').value;
-        const purpose = document.getElementById('purpose').value;
-        const dateKey = selectedDate.toDateString();
-        const now = new Date();
-        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-
-        try {
-          const bookedSlots = new Set();
-          const bookingsToAdd = [];
-
-          for (const time of selectedTimeSlots) {
-            const slotTimeInMinutes = parseTime(time);
-            const slotEndTime = slotTimeInMinutes + 30;
-            if (dateKey === now.toDateString() && slotEndTime <= currentTimeInMinutes) {
-              alert(`Cannot book past time slot: ${time}`);
+          bookingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) {
+              alert('Please sign in to reserve slots.');
+              bookingModal.style.display = 'none';
               return;
             }
-            if (await checkIfTimeSlotBooked(dateKey, time)) {
-              bookedSlots.add(time);
-            } else {
-              bookingsToAdd.push({
-                date: dateKey,
-                time,
-                name: currentUser.displayName || 'Unknown', // Use authenticated user's name
-                email: currentUser.email,                   // Use authenticated user's email
-                department,
-                role,
-                purpose,
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                userDisplayName: currentUser.displayName || 'Unknown',
-                timestamp: Date.now()
-              });
-            }
-          }
 
-          if (bookedSlots.size > 0) {
-            alert(`Unfortunately, these slots were just booked by someone else: ${Array.from(bookedSlots).join(', ')}`);
+            const department = document.getElementById('department').value;
+            const role = document.getElementById('role').value;
+            const purpose = document.getElementById('purpose').value;
+            const dateKey = selectedDate.toDateString();
+
+            try {
+              for (const timeSlot of selectedTimeSlots) {
+                if (await checkIfTimeSlotBooked(dateKey, timeSlot)) {
+                  alert(`Time slot ${timeSlot} is already booked by someone else. Please select another slot.`);
+                  return;
+                }
+              }
+
+              const bookingPromises = selectedTimeSlots.map(timeSlot => {
+                return addDoc(collection(db, 'bookings'), {
+                  userId: currentUser.uid,
+                  email: currentUser.email,
+                  name: currentUser.displayName || 'Unknown',
+                  date: dateKey,
+                  time: timeSlot,
+                  department,
+                  role,
+                  purpose,
+                  timestamp: new Date().toISOString()
+                });
+              });
+
+              await Promise.all(bookingPromises);
+
+              showSuccessMessage('Booking successful!');
+              bookedSlotsCache.delete(dateKey);
+              selectedTimeSlots = [];
+              reserveButton.disabled = true;
+
+              const selectedButtons = timeSlots.querySelectorAll('.selected');
+              selectedButtons.forEach(button => button.classList.remove('selected'));
+
+              await fetchBookedSlots(dateKey);
+              await renderTimeSlots();
+              await debouncedRenderBookedSlots();
+              await updateMeetingRoomBoxWithCurrentBooking();
+              await updateTicker();
+
+              bookingModal.style.display = 'none';
+              bookingForm.reset();
+            } catch (error) {
+              console.error('Error booking slot:', error);
+              alert('Failed to book slot: ' + error.message);
+            }
+          });
+
+          cancelBookingButton.addEventListener('click', () => {
             bookingModal.style.display = 'none';
             bookingForm.reset();
-            bookedSlotsCache.delete(dateKey);
-            await fetchBookedSlots(dateKey);
-            await renderTimeSlots();
-            return;
-          }
-
-          for (const booking of bookingsToAdd) {
-            await addDoc(collection(db, 'bookings'), booking);
-          }
-
-          showSuccessMessage(`Booking confirmed!`);
-          bookingModal.style.display = 'none';
-          bookingForm.reset();
-          selectedTimeSlots = [];
-          reserveButton.disabled = true;
-          bookedSlotsCache.delete(dateKey);
-          await fetchBookedSlots(dateKey);
-          await renderTimeSlots();
-          await debouncedRenderBookedSlots();
-          await updateTicker();
-          await updateMeetingRoomBoxWithCurrentBooking();
-        } catch (error) {
-          console.error('Error adding booking: ', error);
-          alert('Failed to book. Please try again.');
-        }
-      });
-
-      cancelBookingButton.addEventListener('click', () => {
-        bookingModal.style.display = 'none';
-        bookingForm.reset();
-      });
-
-      document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('reschedule-button')) {
-          if (!currentUser) {
-            signInModal.style.display = 'flex';
-            alert('Please sign in to reschedule.');
-            return;
-          }
-          const docId = e.target.getAttribute('data-id');
-          rescheduleModal.style.display = 'flex';
-          rescheduleModal.dataset.bookingId = docId;
-          const today = new Date().toISOString().split('T')[0];
-          newDateInput.setAttribute('min', today);
-          newDateInput.value = '';
-          populateAvailableTimeSlots(null, docId);
-
-          newDateInput.onchange = () => populateAvailableTimeSlots(newDateInput.value, docId);
-        } else if (e.target.classList.contains('delete-button')) {
-          if (!currentUser) {
-            signInModal.style.display = 'flex';
-            alert('Please sign in to delete bookings.');
-            return;
-          }
-          const docId = e.target.getAttribute('data-id');
-          if (confirm('Are you sure you want to delete this booking?')) {
-            deleteBooking(docId);
-          }
-        }
-      });
-
-      rescheduleForm.onsubmit = async (e) => {
-        e.preventDefault();
-        const newDate = newDateInput.value;
-        const newTime = newTimeSelect.value;
-        const docId = rescheduleModal.dataset.bookingId;
-
-        if (!newDate || !newTime || newTime === '') {
-          alert('Please select both date and a valid time slot.');
-          return;
-        }
-
-        const newDateKey = new Date(newDate).toDateString();
-        if (await checkIfTimeSlotBooked(newDateKey, newTime, docId)) {
-          alert('This slot is already booked by someone else.');
-          return;
-        }
-
-        try {
-          const docRef = doc(db, 'bookings', docId);
-          await updateDoc(docRef, { date: newDateKey, time: newTime });
-          alert('Booking rescheduled successfully!');
-          rescheduleModal.style.display = "none";
-          bookedSlotsCache.delete(selectedDate.toDateString());
-          bookedSlotsCache.delete(newDateKey);
-          await fetchBookedSlots(selectedDate.toDateString());
-          await renderTimeSlots();
-          await debouncedRenderBookedSlots();
-          await updateMeetingRoomBoxWithCurrentBooking();
-        } catch (error) {
-          alert('Failed to reschedule: ' + error.message);
-        }
-      };
-
-      cancelRescheduleButton.addEventListener('click', () => {
-        rescheduleModal.style.display = 'none';
-        rescheduleForm.reset();
-      });
-
-      async function deleteBooking(docId) {
-        try {
-          const docRef = doc(db, 'bookings', docId);
-          const docSnap = await getDoc(docRef);
-
-          if (!docSnap.exists()) {
-            alert('Booking not found!');
-            return;
-          }
-
-          const booking = docSnap.data();
-
-          if (booking.userId !== currentUser.uid) {
-            alert('You can only delete your own bookings!');
-            return;
-          }
-
-          const now = new Date();
-          const bookingDate = new Date(booking.date);
-          const bookingTimeInMinutes = parseTime(booking.time);
-          const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-
-          if (bookingDate.toDateString() === now.toDateString() && bookingTimeInMinutes + 30 <= currentTimeInMinutes) {
-            alert('Cannot delete past or ongoing bookings!');
-            return;
-          }
-
-          await deleteDoc(docRef);
-          showSuccessMessage('Booking deleted successfully!');
-          bookedSlotsCache.delete(selectedDate.toDateString());
-          await fetchBookedSlots(selectedDate.toDateString());
-          await renderTimeSlots();
-          await debouncedRenderBookedSlots();
-          await updateTicker();
-          await updateMeetingRoomBoxWithCurrentBooking();
-        } catch (error) {
-          console.error('Error deleting booking: ', error);
-          alert('Failed to delete booking. Please try again.');
-        }
-      }
-
-      prevMonthButton.addEventListener('click', async () => {
-        if (!currentUser) return;
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (currentDate < today) {
-          currentDate = new Date(today);
-        }
-        renderCalendar();
-        const firstAvailableDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        if (firstAvailableDate >= today) {
-          await fetchBookedSlots(firstAvailableDate.toDateString());
-          selectDate(firstAvailableDate);
-        }
-      });
-
-      nextMonthButton.addEventListener('click', async () => {
-        if (!currentUser) return;
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar();
-        const firstAvailableDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        await fetchBookedSlots(firstAvailableDate.toDateString());
-        selectDate(firstAvailableDate);
-      });
-
-      async function updateTicker() {
-        tickerContent.innerHTML = '';
-
-        if (!currentUser) {
-          tickerContent.innerHTML = '<span>Please sign in to view bookings   |   </span>';
-          tickerContent.innerHTML += tickerContent.innerHTML; // Duplicate for smooth scrolling
-          return;
-        }
-
-        const now = new Date();
-        const currentDateStr = now.toDateString();
-        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-
-        try {
-          const q = query(collection(db, 'bookings'));
-          const querySnapshot = await getDocs(q);
-          const bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          bookings.sort((a, b) => {
-            const dateA = new Date(a.date);
-            const dateB = new Date(b.date);
-            if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
-            return parseTime(a.time) - parseTime(b.time);
           });
 
-          if (bookings.length === 0) {
-            tickerContent.innerHTML = '<span>No bookings available   |   </span>';
-            tickerContent.innerHTML += tickerContent.innerHTML;
-            return;
-          }
+          newDateInput.addEventListener('change', async (e) => {
+            const newDate = e.target.value;
+            const bookingId = rescheduleModal.dataset.bookingId;
+            await populateAvailableTimeSlots(newDate, bookingId);
+          });
 
-          let tickerHTML = '';
-          bookings.forEach(booking => {
-            const bookingDate = new Date(booking.date);
-            const bookingTimeInMinutes = parseTime(booking.time);
-            let status = '';
-            if (bookingDate < now && (bookingDate.toDateString() !== currentDateStr || bookingTimeInMinutes + 30 <= currentTimeInMinutes)) {
-              status = 'completed';
-            } else if (bookingDate.toDateString() === currentDateStr && bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingTimeInMinutes + 30) {
-              status = 'ongoing';
-            } else {
-              status = 'upcoming';
+          bookedSlots.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('reschedule-button')) {
+              const bookingId = e.target.dataset.id;
+              rescheduleModal.dataset.bookingId = bookingId;
+
+              const docRef = doc(db, 'bookings', bookingId);
+              const docSnap = await getDoc(docRef);
+              if (docSnap.exists()) {
+                const bookingData = docSnap.data();
+                newDateInput.value = new Date(bookingData.date).toISOString().split('T')[0];
+                await populateAvailableTimeSlots(newDateInput.value, bookingId);
+                rescheduleModal.style.display = 'flex';
+              }
+            }
+          });
+
+          rescheduleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) {
+              alert('Please sign in to reschedule.');
+              rescheduleModal.style.display = 'none';
+              return;
             }
 
-            tickerHTML += `
-              <span class="${status}">
-                <span class="status">${status.charAt(0).toUpperCase() + status.slice(1)}:</span>
+            const newDate = newDateInput.value;
+            const newTime = newTimeSelect.value;
+            const bookingId = rescheduleModal.dataset.bookingId;
+            const newDateKey = new Date(newDate).toDateString();
+
+            if (!newDate || !newTime) {
+              alert('Please select both a date and a time slot.');
+              return;
+            }
+
+            try {
+              const docRef = doc(db, 'bookings', bookingId);
+              const docSnap = await getDoc(docRef);
+              if (!docSnap.exists()) {
+                alert('Booking no longer exists.');
+                rescheduleModal.style.display = 'none';
+                return;
+              }
+
+              const oldData = docSnap.data();
+              const oldDateKey = oldData.date;
+
+              if (await checkIfTimeSlotBooked(newDateKey, newTime, bookingId)) {
+                alert('Selected time slot is already booked. Please choose another.');
+                return;
+              }
+
+              await updateDoc(docRef, {
+                date: newDateKey,
+                time: newTime,
+                timestamp: new Date().toISOString()
+              });
+
+              showSuccessMessage('Booking rescheduled successfully!');
+              bookedSlotsCache.delete(oldDateKey);
+              bookedSlotsCache.delete(newDateKey);
+              await fetchBookedSlots(selectedDate.toDateString());
+              await renderTimeSlots();
+              await debouncedRenderBookedSlots();
+              await updateMeetingRoomBoxWithCurrentBooking();
+              await updateTicker();
+
+              rescheduleModal.style.display = 'none';
+              rescheduleForm.reset();
+            } catch (error) {
+              console.error('Error rescheduling booking:', error);
+              alert('Failed to reschedule booking: ' + error.message);
+            }
+          });
+
+          cancelRescheduleButton.addEventListener('click', () => {
+            rescheduleModal.style.display = 'none';
+            rescheduleForm.reset();
+          });
+
+          bookedSlots.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-button')) {
+              const bookingId = e.target.dataset.id;
+              await deleteBooking(bookingId);
+            }
+          });
+
+          async function deleteBooking(bookingId) {
+            if (!currentUser) {
+              alert('Please sign in to delete bookings.');
+              return;
+            }
+
+            if (!confirm('Are you sure you want to delete this booking?')) return;
+
+            try {
+              const docRef = doc(db, 'bookings', bookingId);
+              const docSnap = await getDoc(docRef);
+              if (!docSnap.exists()) {
+                alert('Booking no longer exists.');
+                return;
+              }
+
+              const bookingData = docSnap.data();
+              const bookingTimeInMinutes = parseTime(bookingData.time);
+              const now = new Date();
+              const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+
+              if (bookingData.userId !== currentUser.uid) {
+                alert('You can only delete your own bookings.');
+                return;
+              }
+
+              if (new Date(bookingData.date) < now || 
+                  (bookingData.date === now.toDateString() && bookingTimeInMinutes + 30 <= currentTimeInMinutes)) {
+                alert('Cannot delete completed bookings.');
+                return;
+              }
+
+              await deleteDoc(docRef);
+              showSuccessMessage('Booking deleted successfully!');
+              bookedSlotsCache.delete(selectedDate.toDateString());
+              await fetchBookedSlots(selectedDate.toDateString());
+              await renderTimeSlots();
+              await debouncedRenderBookedSlots();
+              await updateMeetingRoomBoxWithCurrentBooking();
+              await updateTicker();
+            } catch (error) {
+              console.error('Error deleting booking: ', error);
+              alert('Failed to delete booking: ' + error.message);
+            }
+          }
+
+          prevMonthButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+          });
+
+          nextMonthButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+          });
+
+          async function updateTicker() {
+            if (!currentUser) {
+              tickerContent.innerHTML = 'Please sign in to view booking updates.';
+              return;
+            }
+
+            await fetchAllBookings();
+            if (allBookings.length === 0) {
+              tickerContent.innerHTML = 'No bookings available.';
+              return;
+            }
+
+            const now = new Date();
+            const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+
+            const tickerItems = allBookings.map(booking => {
+              const bookingDate = new Date(booking.date);
+              const bookingTimeInMinutes = parseTime(booking.time);
+              const bookingEndTime = bookingTimeInMinutes + 30;
+              const isToday = bookingDate.toDateString() === now.toDateString();
+              let status = 'upcoming';
+
+              if (bookingDate < now || (isToday && bookingEndTime <= currentTimeInMinutes)) {
+                status = 'completed';
+              } else if (isToday && bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingEndTime) {
+                status = 'ongoing';
+              }
+
+              return `
+                <span class="status ${status}">${status.toUpperCase()}</span>: 
                 ${booking.name || 'Unknown'} (${booking.department || 'N/A'}) - 
-                ${booking.time} on ${booking.date}
-              </span>
-              <span class="ticker-separator"> | </span>
-            `;
-          });
+                ${booking.time} on 
+                ${bookingDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                <span class="ticker-separator">|</span>
+              `;
+            });
 
-          tickerContent.innerHTML = tickerHTML + tickerHTML; // Duplicate for smooth scrolling
-        } catch (error) {
-          console.error('Error updating ticker:', error);
-          tickerContent.innerHTML = '<span>Error loading bookings   |   </span>';
-          tickerContent.innerHTML += tickerContent.innerHTML;
-        }
-      }
-
-      async function populatePastBookingsFilters() {
-        if (!currentUser) return;
-        const departments = new Set();
-        try {
-          const q = query(collection(db, 'bookings'));
-          const querySnapshot = await getDocs(q);
-          querySnapshot.forEach(doc => {
-            const booking = doc.data();
-            if (booking.department) departments.add(booking.department);
-          });
-
-          pastBookingsDepartment.innerHTML = '<option value="">All Departments</option>';
-          departments.forEach(dept => {
-            const option = document.createElement('option');
-            option.value = dept;
-            option.textContent = dept;
-            pastBookingsDepartment.appendChild(option);
-          });
-
-          const today = new Date().toISOString().split('T')[0];
-          pastBookingsDate.value = today;
-        } catch (error) {
-          console.error('Error populating filters:', error);
-        }
-      }
-
-      async function filterPastBookings() {
-        if (!currentUser) {
-          pastBookingsList.innerHTML = '<p class="no-bookings">Please sign in to view bookings.</p>';
-          return;
-        }
-
-        const selectedDate = pastBookingsDate.value;
-        const selectedDept = pastBookingsDepartment.value;
-
-        try {
-          let q = query(collection(db, 'bookings'));
-          if (selectedDate) {
-            const dateStr = new Date(selectedDate).toDateString();
-            q = query(q, where('date', '==', dateStr));
-          }
-          if (selectedDept) {
-            q = query(q, where('department', '==', selectedDept));
+            tickerContent.innerHTML = tickerItems.join(' ') + tickerItems.join(' ');
           }
 
-          const querySnapshot = await getDocs(q);
-          const bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          bookings.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+          async function populatePastBookingsFilters() {
+            if (!currentUser) return;
+            try {
+              const departments = new Set();
+              const q = query(collection(db, 'bookings'));
+              const querySnapshot = await getDocs(q);
+              querySnapshot.forEach(doc => {
+                const department = doc.data().department;
+                if (department) departments.add(department);
+              });
 
-          pastBookingsList.innerHTML = '';
-          if (bookings.length === 0) {
-            pastBookingsList.innerHTML = '<p class="no-bookings">No bookings found for the selected filters.</p>';
-            return;
+              pastBookingsDepartment.innerHTML = '<option value="">All Departments</option>';
+              departments.forEach(department => {
+                const option = document.createElement('option');
+                option.value = department;
+                option.textContent = department;
+                pastBookingsDepartment.appendChild(option);
+              });
+
+              const today = new Date().toISOString().split('T')[0];
+              pastBookingsDate.value = today;
+            } catch (error) {
+              console.error('Error populating filters:', error);
+            }
           }
 
-          bookings.forEach(booking => {
-            const bookingElement = document.createElement('div');
-            bookingElement.className = 'past-booking-entry';
-            bookingElement.innerHTML = `
-              <p><strong>${booking.name || 'Unknown'}</strong> (${booking.department || 'N/A'})</p>
-              <p>${booking.time} - ${booking.date}</p>
-              <p><em>${booking.purpose || 'No purpose specified'}</em></p>
-            `;
-            pastBookingsList.appendChild(bookingElement);
+          async function filterPastBookings() {
+            if (!currentUser) {
+              pastBookingsList.innerHTML = '<p>Please sign in to view past bookings.</p>';
+              return;
+            }
+
+            const selectedDateStr = pastBookingsDate.value;
+            const selectedDepartment = pastBookingsDepartment.value;
+
+            try {
+              let q = query(collection(db, 'bookings'));
+              if (selectedDateStr) {
+                const selectedDate = new Date(selectedDateStr).toDateString();
+                q = query(q, where('date', '==', selectedDate));
+              }
+              if (selectedDepartment) {
+                q = query(q, where('department', '==', selectedDepartment));
+              }
+
+              const querySnapshot = await getDocs(q);
+              const bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+              bookings.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
+                return parseTime(a.time) - parseTime(b.time);
+              });
+
+              pastBookingsList.innerHTML = '';
+              if (bookings.length === 0) {
+                pastBookingsList.innerHTML = '<p class="no-bookings">No bookings found for the selected criteria.</p>';
+                return;
+              }
+
+              bookings.forEach(booking => {
+                const bookingElement = document.createElement('div');
+                bookingElement.className = 'past-booking-entry';
+                bookingElement.innerHTML = `
+                  <p><strong>${booking.name || 'Unknown'}</strong> (${booking.department || 'N/A'})</p>
+                  <p>${booking.time} on ${new Date(booking.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  <p>Purpose: ${booking.purpose || 'N/A'}</p>
+                `;
+                pastBookingsList.appendChild(bookingElement);
+              });
+            } catch (error) {
+              console.error('Error filtering past bookings:', error);
+              pastBookingsList.innerHTML = '<p class="text-red-600">Error loading bookings.</p>';
+            }
+          }
+
+          pastBookingsDate.addEventListener('change', filterPastBookings);
+          pastBookingsDepartment.addEventListener('change', filterPastBookings);
+
+          setInterval(updateMeetingRoomBoxWithCurrentBooking, 60000);
+          setInterval(updateTicker, 60000);
+
+          window.addEventListener('click', (e) => {
+            if (e.target === bookingModal) {
+              bookingModal.style.display = 'none';
+              bookingForm.reset();
+            } else if (e.target === rescheduleModal) {
+              rescheduleModal.style.display = 'none';
+              rescheduleForm.reset();
+            } else if (e.target === signInModal) {
+              signInModal.style.display = 'none';
+              signInForm.reset();
+            } else if (e.target === signUpModal) {
+              signUpModal.style.display = 'none';
+              signUpForm.reset();
+            }
           });
-        } catch (error) {
-          console.error('Error filtering past bookings:', error);
-          pastBookingsList.innerHTML = '<p class="text-red-600">Error loading bookings.</p>';
-        }
-      }
-
-      pastBookingsDate.addEventListener('change', filterPastBookings);
-      pastBookingsDepartment.addEventListener('change', filterPastBookings);
-
-      // Initial setup
-      if (currentUser) {
-        initializeBookingInterface();
-      }
-
-      // Periodic updates for real-time feel
-      setInterval(async () => {
-        if (currentUser) {
-          await updateMeetingRoomBoxWithCurrentBooking();
-          await updateTicker();
-          await debouncedRenderBookedSlots();
-          await debouncedRenderTimeSlots();
-        }
-      }, 60000); // Update every minute
-
-      // Close modals when clicking outside
-      [bookingModal, rescheduleModal, signInModal, signUpModal].forEach(modal => {
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            modal.style.display = 'none';
-            if (modal === bookingModal) bookingForm.reset();
-            if (modal === rescheduleModal) rescheduleForm.reset();
-            if (modal === signInModal) signInForm.reset();
-            if (modal === signUpModal) signUpForm.reset();
-          }
         });
-      });
-    });
-  </script>
-</body>
+      </script>
+    </body>
 
-</html>
-
+    </html>
