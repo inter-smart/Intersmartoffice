@@ -196,8 +196,9 @@
       padding: 10px;
       border: 1px solid #e7edf3;
       border-radius: 8px;
-      background-color: #f9f9f9;
+      background-color: #ffffff;
       margin-bottom: 10px;
+      margin-top: 25px;
     }
 
     .booked-slots.expanded {
@@ -254,7 +255,7 @@
       padding: 8px 16px;
       border: 1px solid #ccc;
       border-radius: 4px;
-      background-color: #f9f9f9;
+      background-color: #ffffff;
       cursor: pointer;
       transition: background-color 0.3s ease;
       text-align: center;
@@ -317,12 +318,16 @@
       padding: 20px;
       border: 1px solid #e7edf3;
       border-radius: 8px;
-      background-color: #f9f9f9;
+      background-color: #ffffff;
       width: 300px;
       min-height: 300px;
     }
 
     .for-meeting-room-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
       text-align: center;
     }
 
@@ -353,6 +358,7 @@
       border-radius: 4px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      width: 48%;
     }
 
     .booking-navigation button:hover {
@@ -374,7 +380,7 @@
       transition: all 0.3s ease;
       margin-top: 4px;
       padding: 8px;
-      background-color: #f9f9f9;
+      background-color: #ffffff;
       border-radius: 4px;
       width: 100%;
     }
@@ -410,7 +416,7 @@
 
     .ticker-content {
       display: inline-block;
-      animation: ticker 75s linear infinite;
+      animation: ticker 55s linear infinite;
       white-space: nowrap;
       min-width: 100%;
     }
@@ -460,8 +466,8 @@
       padding: 20px;
       border: 1px solid #e7edf3;
       border-radius: 8px;
-      background-color: #f9f9f9;
-      width: calc(100% - 330px - 300px - 20px * 3);
+      background-color: #ffffff;
+      width: calc(100% - 330px - 300px - 20px* 3);
       max-height: 415px;
       overflow: auto;
       margin: 0;
@@ -470,7 +476,7 @@
     .past-booking-entry {
       padding: 10px;
       border-bottom: 1px solid #e7edf3;
-      background-color: #f9f9f9;
+      background-color: #ffffff;
       margin-bottom: 5px;
       border-radius: 4px;
       font-size: 14px;
@@ -538,17 +544,15 @@
       color: #0000FF;
     }
 
-    .content-sections {
+    .desktop-layout {
       display: flex;
       flex-wrap: wrap;
+      flex-direction: row;
+      justify-content: center;
       gap: 20px;
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
-    }
-
-    .section {
-      width: 100%;
     }
 
     .calendar-container {
@@ -556,46 +560,8 @@
       flex: 1;
       width: 330px;
       max-width: 100%;
+      background: #ffffff;
     }
-
-    @media (min-width: 641px) {
-      .content-sections {
-        flex-direction: row;
-        justify-content: center;
-        align-items: flex-start;
-      }
-
-      .past-bookings-section {
-        width: calc(100% - 330px - 300px - 20px * 2);
-        max-width: none;
-      }
-
-      .calendar-container {
-        width: 330px;
-        flex: 0 0 330px;
-      }
-
-      .meeting-room-section {
-        width: 300px;
-        flex: 0 0 300px;
-      }
-
-      .time-slots-section,
-      .reserve-button-section,
-      .booked-slots-section {
-        width: 100%;
-      }
-
-      .past-bookings-container {
-        width: 100%;
-        margin: 0;
-      }
-
-      .for-meeting-room-container {
-        width: 100%;
-      }
-    }
-
     @media (max-width: 640px) {
       .video-background {
         display: none;
@@ -616,48 +582,9 @@
         padding-right: 10px !important;
       }
 
-      .content-sections {
+      .flex-wrap {
         flex-direction: column;
-        gap: 10px;
-      }
-
-      .calendar-container {
-        order: 1;
-        width: 100%;
-      }
-
-      .time-slots-section {
-        order: 2;
-        width: 100%;
-      }
-
-      .reserve-button-section {
-        order: 3;
-        width: 100%;
-      }
-
-      .booked-slots-section {
-        order: 4;
-        width: 100%;
-      }
-
-      .past-bookings-section {
-        order: 5;
-        width: 100%;
-      }
-
-      .meeting-room-section {
-        order: 6;
-        width: 100%;
-      }
-
-      .past-bookings-container {
-        width: 100%;
-        margin-right: 0;
-      }
-
-      .for-meeting-room-container {
-        width: 100%;
+        align-items: center;
       }
 
       .calendar-day {
@@ -765,6 +692,25 @@
       .header {
         padding: 5px 5px 40px 5px;
       }
+
+      .desktop-layout {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .past-bookings-container {
+        width: 100%;
+        margin-right: 0;
+      }
+
+      .calendar-container {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .for-meeting-room-container {
+        width: 100%;
+      }
     }
 
     .delete-button {
@@ -780,25 +726,6 @@
 
     .delete-button:hover {
       background-color: #c82333;
-    }
-
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 4px solid #3498db;
-      width: 20px;
-      height: 20px;
-      animation: spin 2s linear infinite;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
     }
   </style>
 </head>
