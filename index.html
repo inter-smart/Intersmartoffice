@@ -962,6 +962,7 @@
             <option value="Mobile App Development Team">Mobile App Development Team</option>
             <option value="UI Designers">UI Designers</option>
             <option value="Wordpress">Wordpress</option>
+            <option value="Intersmart Edutech">Intersmart Edutech</option>
           </select>
         </div>
         <div class="mb-4">
@@ -1202,43 +1203,44 @@
       });
 
       signInForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('signInEmail').value.trim();
-        const password = document.getElementById('signInPassword').value.trim();
+    e.preventDefault();
+    const email = document.getElementById('signInEmail').value.trim();
+    const password = document.getElementById('signInPassword').value.trim();
 
-        if (!email || !password) {
-          alert('Please enter both email and password.');
-          return;
-        }
+    if (!email || !password) {
+        alert('Please enter both email and password.');
+        return;
+    }
 
-        if (!email.endsWith('@intersmart.in')) {
-          alert('Only emails ending with @intersmart.in are allowed.');
-          return;
-        }
+    // Check if email ends with either @intersmart.in or @intersmartedutech.com
+    if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
+        alert('Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
+        return;
+    }
 
-        try {
-          await signInWithEmailAndPassword(auth, email, password);
-          signInModal.style.display = 'none';
-          signInForm.reset();
-        } catch (error) {
-          let errorMessage = 'Sign in failed. Please try again.';
-          switch (error.code) {
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        signInModal.style.display = 'none';
+        signInForm.reset();
+    } catch (error) {
+        let errorMessage = 'Sign in failed. Please try again.';
+        switch (error.code) {
             case 'auth/invalid-credential':
-              errorMessage = 'Invalid email or password.';
-              break;
+                errorMessage = 'Invalid email or password.';
+                break;
             case 'auth/user-not-found':
-              errorMessage = 'No account found with this email.';
-              break;
+                errorMessage = 'No account found with this email.';
+                break;
             case 'auth/wrong-password':
-              errorMessage = 'Incorrect password.';
-              break;
+                errorMessage = 'Incorrect password.';
+                break;
             case 'auth/too-many-requests':
-              errorMessage = 'Too many attempts. Please try again later.';
-              break;
-          }
-          alert(errorMessage);
+                errorMessage = 'Too many attempts. Please try again later.';
+                break;
         }
-      });
+        alert(errorMessage);
+    }
+});
 
       cancelSignIn.addEventListener('click', () => {
         signInModal.style.display = 'none';
@@ -1260,30 +1262,31 @@
       });
 
       signUpForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('signUpEmail').value;
-        const password = document.getElementById('signUpPassword').value;
-        const name = document.getElementById('signUpName').value;
+    e.preventDefault();
+    const email = document.getElementById('signUpEmail').value;
+    const password = document.getElementById('signUpPassword').value;
+    const name = document.getElementById('signUpName').value;
 
-        if (!email.endsWith('@intersmart.in')) {
-          alert('Only emails ending with @intersmart.in are allowed.');
-          return;
-        }
+    // Check if email ends with either @intersmart.in or @intersmartedutech.com
+    if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
+        alert('Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
+        return;
+    }
 
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await updateProfile(userCredential.user, { displayName: name });
-          signUpModal.style.display = 'none';
-          signUpForm.reset();
-          alert('Signup successful!');
-        } catch (error) {
-          if (error.code === 'auth/email-already-in-use') {
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(userCredential.user, { displayName: name });
+        signUpModal.style.display = 'none';
+        signUpForm.reset();
+        alert('Signup successful!');
+    } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
             alert('This email is already registered.');
-          } else {
+        } else {
             alert('Signup failed: ' + error.message);
-          }
         }
-      });
+    }
+});
 
       cancelSignUp.addEventListener('click', () => {
         signUpModal.style.display = 'none';
