@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -410,9 +410,13 @@
 
     .ticker-content {
       display: inline-block;
-      animation: ticker 170s linear infinite;
+      animation: ticker linear infinite;
       white-space: nowrap;
       min-width: 100%;
+    }
+
+    .ticker .status {
+      color: #5A6268;
     }
 
     .ticker .completed {
@@ -428,7 +432,7 @@
     }
 
     .ticker .status {
-      font-weight: bold;
+      font-weight: 400;
     }
 
     .ticker-separator {
@@ -456,7 +460,7 @@
       position: relative;
     }
 
-    
+
     .past-bookings-container {
       padding: 20px;
       border: 1px solid #e7edf3;
@@ -802,6 +806,41 @@
       }
     }
   </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const ticker = document.getElementById("ticker");
+      const tickerContent = document.getElementsByClassName("ticker-content")[0];
+
+      function updateTickerSpeed() {
+        if (!tickerContent) return;
+
+        const contentWidth = tickerContent.scrollWidth; // Total width of ticker content
+        const baseSpeed = 120; // Adjust this for desired speed (higher = slower)
+
+        // Calculate duration dynamically based on content width
+        const duration = contentWidth / baseSpeed;
+
+        // Apply animation duration dynamically
+        tickerContent.style.animationDuration = `${duration}s`;
+      }
+
+      // Run function on page load
+      window.addEventListener("load", updateTickerSpeed);
+
+      // Run function on window resize
+      window.addEventListener("resize", updateTickerSpeed);
+
+      // Observe content changes and update speed
+      const observer = new MutationObserver(updateTickerSpeed);
+      observer.observe(tickerContent, { childList: true, subtree: true });
+
+      updateTickerSpeed(); // Initial run
+      window.onload = function () {
+        setTimeout(updateTickerSpeed, 1800); // 5000 milliseconds = 5 seconds
+      };
+    });
+
+  </script>
 </head>
 
 <body>
@@ -839,7 +878,40 @@
           </div>
           <div class="w-full flex flex-col items-center relative">
             <div class="ticker w-full" id="ticker">
-              <div class="ticker-content" id="tickerContent"></div>
+              <div class="ticker-content" id="tickerContent">
+                <span class="completed">
+                  Clean the room before leaving.
+                </span>
+                <span class="ticker-separator">|</span>
+                <span class="ongoing">
+                  Turn off the lights before leaving.
+                </span>
+                <span class="ticker-separator">|</span>
+                <span class="upcoming">
+                  Make sure to book the room before entering.
+                </span>
+                <span class="ticker-separator">|</span>
+                <span class="status">
+                  Please refrain from occupying a pre-booked conference room without prior approval.
+                </span>
+                <span class="ticker-separator">|</span>
+                <span class="completed">
+                  Clean the room before leaving.
+                </span>
+                <span class="ticker-separator">|</span>
+                <span class="ongoing">
+                  Turn off the lights before leaving.
+                </span>
+                <span class="ticker-separator">|</span>
+                <span class="upcoming">
+                  Make sure to book the room before entering.
+                </span>
+                <span class="ticker-separator">|</span>
+                <span class="status">
+                  Please refrain from occupying a pre-booked conference room without prior approval.
+                </span>
+                <span class="ticker-separator">|</span>
+              </div>
             </div>
           </div>
         </header>
@@ -880,8 +952,7 @@
                       </svg>
                     </div>
                   </button>
-                  <p id="currentMonth"
-                    class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center"></p>
+                  <p id="currentMonth" class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center"></p>
                   <button id="nextMonth">
                     <div class="text-[#0e141b] flex size-10 items-center justify-center">
                       <svg height="20" viewBox="0 0 128 128" width="20">
@@ -1102,7 +1173,7 @@
       const currentBookingTime = document.getElementById('currentBookingTime');
       const currentBookingDate = document.getElementById('currentBookingDate');
       const ticker = document.getElementById('ticker');
-      const tickerContent = document.getElementById('tickerContent');
+      // const tickerContent = document.getElementById('tickerContent');
       const pastBookingsDate = document.getElementById('pastBookingsDate');
       const pastBookingsDepartment = document.getElementById('pastBookingsDepartment');
       const pastBookingsList = document.getElementById('pastBookingsList');
@@ -1203,44 +1274,44 @@
       });
 
       signInForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('signInEmail').value.trim();
-    const password = document.getElementById('signInPassword').value.trim();
+        e.preventDefault();
+        const email = document.getElementById('signInEmail').value.trim();
+        const password = document.getElementById('signInPassword').value.trim();
 
-    if (!email || !password) {
-        alert('Please enter both email and password.');
-        return;
-    }
-
-    // Check if email ends with either @intersmart.in or @intersmartedutech.com
-    if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
-        alert('Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
-        return;
-    }
-
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        signInModal.style.display = 'none';
-        signInForm.reset();
-    } catch (error) {
-        let errorMessage = 'Sign in failed. Please try again.';
-        switch (error.code) {
-            case 'auth/invalid-credential':
-                errorMessage = 'Invalid email or password.';
-                break;
-            case 'auth/user-not-found':
-                errorMessage = 'No account found with this email.';
-                break;
-            case 'auth/wrong-password':
-                errorMessage = 'Incorrect password.';
-                break;
-            case 'auth/too-many-requests':
-                errorMessage = 'Too many attempts. Please try again later.';
-                break;
+        if (!email || !password) {
+          alert('Please enter both email and password.');
+          return;
         }
-        alert(errorMessage);
-    }
-});
+
+        // Check if email ends with either @intersmart.in or @intersmartedutech.com
+        if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
+          alert('Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
+          return;
+        }
+
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          signInModal.style.display = 'none';
+          signInForm.reset();
+        } catch (error) {
+          let errorMessage = 'Sign in failed. Please try again.';
+          switch (error.code) {
+            case 'auth/invalid-credential':
+              errorMessage = 'Invalid email or password.';
+              break;
+            case 'auth/user-not-found':
+              errorMessage = 'No account found with this email.';
+              break;
+            case 'auth/wrong-password':
+              errorMessage = 'Incorrect password.';
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = 'Too many attempts. Please try again later.';
+              break;
+          }
+          alert(errorMessage);
+        }
+      });
 
       cancelSignIn.addEventListener('click', () => {
         signInModal.style.display = 'none';
@@ -1262,31 +1333,31 @@
       });
 
       signUpForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('signUpEmail').value;
-    const password = document.getElementById('signUpPassword').value;
-    const name = document.getElementById('signUpName').value;
+        e.preventDefault();
+        const email = document.getElementById('signUpEmail').value;
+        const password = document.getElementById('signUpPassword').value;
+        const name = document.getElementById('signUpName').value;
 
-    // Check if email ends with either @intersmart.in or @intersmartedutech.com
-    if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
-        alert('Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
-        return;
-    }
-
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCredential.user, { displayName: name });
-        signUpModal.style.display = 'none';
-        signUpForm.reset();
-        alert('Signup successful!');
-    } catch (error) {
-        if (error.code === 'auth/email-already-in-use') {
-            alert('This email is already registered.');
-        } else {
-            alert('Signup failed: ' + error.message);
+        // Check if email ends with either @intersmart.in or @intersmartedutech.com
+        if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
+          alert('Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
+          return;
         }
-    }
-});
+
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          await updateProfile(userCredential.user, { displayName: name });
+          signUpModal.style.display = 'none';
+          signUpForm.reset();
+          alert('Signup successful!');
+        } catch (error) {
+          if (error.code === 'auth/email-already-in-use') {
+            alert('This email is already registered.');
+          } else {
+            alert('Signup failed: ' + error.message);
+          }
+        }
+      });
 
       cancelSignUp.addEventListener('click', () => {
         signUpModal.style.display = 'none';
@@ -1690,36 +1761,36 @@
       }
 
       function updateMeetingRoomBox(booking) {
-  if (!booking) {
-    bookingInfoTitle.textContent = 'No Current Bookings';
-    currentBookingName.textContent = '';
-    currentBookingDepartment.textContent = '';
-    currentBookingTime.textContent = '';
-    currentBookingDate.textContent = '';
-    return;
-  }
+        if (!booking) {
+          bookingInfoTitle.textContent = 'No Current Bookings';
+          currentBookingName.textContent = '';
+          currentBookingDepartment.textContent = '';
+          currentBookingTime.textContent = '';
+          currentBookingDate.textContent = '';
+          return;
+        }
 
-  const now = new Date();
-  const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-  const currentDateStr = now.toDateString();
-  const bookingDate = new Date(booking.date);
-  const bookingTimeInMinutes = parseTime(booking.time);
-  const bookingEndTime = bookingTimeInMinutes + 30;
+        const now = new Date();
+        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+        const currentDateStr = now.toDateString();
+        const bookingDate = new Date(booking.date);
+        const bookingTimeInMinutes = parseTime(booking.time);
+        const bookingEndTime = bookingTimeInMinutes + 30;
 
-  // Determine if the booking is ongoing or upcoming
-  let isOngoing = false;
-  if (bookingDate.toDateString() === currentDateStr) {
-    isOngoing = bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingEndTime;
-  }
-  const isUpcoming = bookingDate > now || (bookingDate.toDateString() === currentDateStr && bookingTimeInMinutes > currentTimeInMinutes);
+        // Determine if the booking is ongoing or upcoming
+        let isOngoing = false;
+        if (bookingDate.toDateString() === currentDateStr) {
+          isOngoing = bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingEndTime;
+        }
+        const isUpcoming = bookingDate > now || (bookingDate.toDateString() === currentDateStr && bookingTimeInMinutes > currentTimeInMinutes);
 
-  // Set the title based on the booking status
-  bookingInfoTitle.textContent = isOngoing ? 'Current Slot is Booked By' : (isUpcoming ? 'Next Booking' : 'Last Booking');
-  currentBookingName.textContent = booking.name || 'Unknown';
-  currentBookingDepartment.textContent = booking.department || 'N/A';
-  currentBookingTime.textContent = booking.time;
-  currentBookingDate.textContent = booking.date;
-}
+        // Set the title based on the booking status
+        bookingInfoTitle.textContent = isOngoing ? 'Current Slot is Booked By' : (isUpcoming ? 'Next Booking' : 'Last Booking');
+        currentBookingName.textContent = booking.name || 'Unknown';
+        currentBookingDepartment.textContent = booking.department || 'N/A';
+        currentBookingTime.textContent = booking.time;
+        currentBookingDate.textContent = booking.date;
+      }
 
       function updateNavigationButtons() {
         previousBookingButton.disabled = currentBookingIndex === 0;
@@ -1939,54 +2010,56 @@
         }
       }
 
-      async function updateTicker() {
-        if (!currentUser) {
-          tickerContent.innerHTML = 'Please sign in to view booking status.';
-          return;
-        }
+      // async function updateTicker() {
+      //   if (!currentUser) {
+      //     tickerContent.innerHTML = 'Please sign in to view booking status.';
+      //     return;
+      //   }
 
-        await fetchAllBookings();
-        if (allBookings.length === 0) {
-          tickerContent.innerHTML = 'No bookings available.';
-          return;
-        }
+      //   await fetchAllBookings();
+      //   if (allBookings.length === 0) {
+      //     tickerContent.innerHTML = 'No bookings available.';
+      //     return;
+      //   }
 
-        const now = new Date();
-        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-        const currentDateStr = now.toDateString();
+      //   const now = new Date();
+      //   const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+      //   const currentDateStr = now.toDateString();
 
-        const tickerItems = allBookings.map(booking => {
-          const bookingDate = new Date(booking.date);
-          const bookingTimeInMinutes = parseTime(booking.time);
-          const bookingEndTime = bookingTimeInMinutes + 30;
-          let status = 'upcoming';
-          let statusClass = 'upcoming';
+      //   const tickerItems = allBookings.map(booking => {
+      //     const bookingDate = new Date(booking.date);
+      //     const bookingTimeInMinutes = parseTime(booking.time);
+      //     const bookingEndTime = bookingTimeInMinutes + 30;
+      //     let status = 'upcoming';
+      //     let statusClass = 'upcoming';
 
-          if (bookingDate.toDateString() === currentDateStr) {
-            if (bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingEndTime) {
-              status = 'ongoing';
-              statusClass = 'ongoing';
-            } else if (bookingEndTime <= currentTimeInMinutes) {
-              status = 'completed';
-              statusClass = 'completed';
-            }
-          } else if (bookingDate < now) {
-            status = 'completed';
-            statusClass = 'completed';
-          }
+      //     if (bookingDate.toDateString() === currentDateStr) {
+      //       if (bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingEndTime) {
+      //         status = 'ongoing';
+      //         statusClass = 'ongoing';
+      //       } else if (bookingEndTime <= currentTimeInMinutes) {
+      //         status = 'completed';
+      //         statusClass = 'completed';
+      //       }
+      //     } else if (bookingDate < now) {
+      //       status = 'completed';
+      //       statusClass = 'completed';
+      //     }
 
-          return `
-            <span>
-              ${booking.name || 'Unknown'} (${booking.department || 'N/A'}) - 
-              ${booking.date} ${booking.time} - 
-              <span class="status ${statusClass}">${status}</span>
-            </span>
-            <span class="ticker-separator"> | </span>
-          `;
-        }).join('');
+      //     return `
+      //       <span>
+      //         <span>
+      //           ${booking.name || 'Unknown'} (${booking.department || 'N/A'}) - 
+      //           ${booking.date} ${booking.time} - 
+      //           <span class="status ${statusClass}">${status}</span>
+      //         </span>
+      //         <span class="ticker-separator"> | </span>
+      //       </span>
+      //     `;
+      //   }).join('');
 
-        tickerContent.innerHTML = tickerItems + tickerItems;
-      }
+      //   tickerContent.innerHTML = tickerItems + tickerItems;
+      // }
 
       async function populatePastBookingsFilters() {
         if (!currentUser) return;
