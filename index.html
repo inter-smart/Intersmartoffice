@@ -1255,7 +1255,7 @@
           bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
           updateMeetingRoomBox(null);
         }
-        updateTicker();
+        // updateTicker();
       });
 
       bookNowButton.addEventListener('click', () => {
@@ -1855,7 +1855,7 @@
           await renderTimeSlots();
           await debouncedRenderBookedSlots();
           await updateMeetingRoomBoxWithCurrentBooking();
-          await updateTicker();
+          // await updateTicker();
           selectedTimeSlots = [];
           reserveButton.disabled = true;
           const selectedSlots = timeSlots.querySelectorAll('.selected');
@@ -1953,7 +1953,7 @@
             await renderTimeSlots();
             await debouncedRenderBookedSlots();
             await updateMeetingRoomBoxWithCurrentBooking();
-            await updateTicker();
+            // await updateTicker();
             rescheduleModal.style.display = 'none';
             rescheduleForm.reset();
           } catch (error) {
@@ -2003,7 +2003,7 @@
           await renderTimeSlots();
           await debouncedRenderBookedSlots();
           await updateMeetingRoomBoxWithCurrentBooking();
-          await updateTicker();
+          // await updateTicker();
         } catch (error) {
           console.error('Error deleting booking:', error);
           alert('Failed to delete booking: ' + error.message);
@@ -2152,7 +2152,7 @@
         if (currentUser) {
           await updateMeetingRoomBoxWithCurrentBooking();
           await debouncedRenderBookedSlots();
-          await updateTicker();
+          // await updateTicker();
           await debouncedRenderTimeSlots();
         }
       }, 60000);
