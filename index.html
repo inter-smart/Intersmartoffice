@@ -2,532 +2,1017 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
-    href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&family=Work+Sans%3Awght%40400%3B500%3B700%3B900" />
-  <title>Conference Room Booking</title>
-  <link rel="icon" type="image/png" href="images/fav.png" />
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
+        href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&family=Work+Sans%3Awght%40400%3B500%3B700%3B900" />
+    <title>Conference Room Booking</title>
+    <link rel="icon" type="image/png" href="images/fav.png" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+    .layout-container{
+        padding-top: 75px;
+    }
+    @media (max-width: 540px){
+        .layout-container{
+            padding-top: 20px;
+        }  
+    }
+    header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background-color: #fff;
+        border-bottom: 1px solid #e7edf3;
+    }
+
+    .menu-header {
+        position: fixed;
+        top: 0px;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        background-color: #ffffff;
+        padding: 15px 0;
+        border-bottom: 1px solid #e7edf3;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    @media (max-width: 540px){
+        .menu-header{
+            display: none;
+        }
+    }
+    .menu-nav {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        gap: 40px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        justify-content: center;
+    }
+
+    .menu-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .menu-nav button {
+        padding: 8px 16px;
+        background: none;
+        border: none;
+        color: #4e7397;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        min-height: 44px;
+    }
+
+    .menu-nav button::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: transparent;
+        transition: all 0.3s ease;
+    }
+
+    .menu-nav button:hover {
+        color: #0e141b;
+    }
+
+    .menu-nav button:hover::after {
+        background-color: rgba(226, 92, 105, 0.3);
+    }
+
+    .menu-nav button.active {
+        color: #0e141b;
+        font-weight: 600;
+    }
+
+    .menu-nav button.active::after {
+        background-color: #e25c69;
+        height: 3px;
+    }
+
+    .layout-content-container {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+        margin-top: 140px;
+    }
+
+    .content-sections {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        width: 100%;
+        position: relative;
+        padding: 20px;
+    }
+
+    .section {
+        position: relative;
+        z-index: 1;
+    }
+
+    .calendar-container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 16px;
+        height: fit-content;
+        width: 330px;
+        flex: 0 0 330px;
+        order: 1;
+    }
+
+    .time-slots-section {
+        flex: 1;
+        min-width: 0;
+        margin-left: 20px;
+        order: 2;
+    }
+
+    .reserve-button-section {
+        width: 100%;
+        order: 3;
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    .meeting-room-section {
+        width: 300px;
+        order: 4;
+    }
+
+    .booked-slots-section {
+        flex: 1;
+        min-width: 0;
+        margin-left: 20px;
+        order: 5;
+    }
+
+    .past-bookings-section {
+        width: 100%;
+        order: 6;
+        margin-top: 20px;
+    }
+
+    .auth-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .auth-modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .auth-modal-content h3 {
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #0e141b;
+    }
+
+    .auth-modal-content input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #e7edf3;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .auth-modal-content button {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .home-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1500;
+    }
+
+    .home-screen h1 {
+        color: white;
+        font-size: 36px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .home-screen button {
+        padding: 15px 30px;
+        font-size: 18px;
+        border-radius: 8px;
+        background-color: #fbd103;
+        color: #0e141b;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .home-screen button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 1200px) {
+
+        .time-slots-section,
+        .booked-slots-section {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .calendar-container {
+            width: 100%;
+            max-width: 330px;
+            margin: 0 auto;
+        }
+
+        .meeting-room-section {
+            width: 100%;
+            margin: 20px 0;
+        }
+    }
+    @media (max-width: 768px){
+        .calendar-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            flex: none;
+        }
+    }
+    @media (max-width: 1441px){
+        .layout-content-container{
+            margin-top: 10px !important; 
+        }
+    }
+    @media (max-width: 640px) {
+        .menu-header {
+            top: 0px;
+        }
+
+        .layout-content-container {
+            margin-top: 120px;
+            padding: 0 10px;
+        }
+
+        .content-sections {
+            padding: 10px;
+            gap: 15px;
+        }
+
+        .calendar-container,
+        .time-slots-section,
+        .meeting-room-section,
+        .booked-slots-section,
+        .past-bookings-section {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .auth-modal-content {
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .home-screen h1 {
+            font-size: 24px;
+            padding: 0 20px;
+        }
+    }
+
+    .past-bookings-container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        height: fit-content;
+    }
+
+    .past-bookings-container h3 {
+        margin-bottom: 20px;
+        font-size: 18px;
+        color: #0e141b;
+        border-bottom: 1px solid #e7edf3;
+        padding-bottom: 10px;
+    }
+
+    .past-booking-entry {
+        background-color: #f9f9f9;
+        border: 1px solid #e7edf3;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: #0e141b;
+        transition: all 0.3s ease;
+    }
+
+    .past-booking-entry:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #pastBookingsDate,
+    #pastBookingsDepartment {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #e7edf3;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
     .calendar-day {
-      transition: background-color 0.3s ease;
-      font-size: 12px;
-      padding: 4px;
-      text-align: center;
-      min-height: 40px;
+        transition: background-color 0.2s ease;
+        font-size: 14px;
+        padding: 8px;
+        text-align: center;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        outline: none;
+        position: relative;
+        overflow: hidden;
+        margin: 6px;
+        width: calc(100% - 12px);
     }
 
-    .calendar-day:hover {
-      background-color: #e7edf3;
-    }
-
-    .calendar-day.disabled {
-      background-color: #f0f0f0;
-      color: #a0a0a0;
-      cursor: not-allowed;
-      pointer-events: none;
+    .calendar-day:not(.disabled):hover {
+        background-color: rgba(251, 209, 3, 0.1);
     }
 
     .calendar-day.selected {
-      background-color: #fbd103;
-      color: black;
+        background-color: #fbd103;
+        color: black;
+        font-weight: 500;
+        padding: 8px;
+    }
+
+    .calendar-day.selected::before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        background-color: #fbd103;
+        z-index: -1;
+        border-radius: 6px;
+    }
+
+    .calendar-day:not(.disabled):active {
+        transform: none;
+        background-color: #fbd103;
+    }
+
+    .calendar-day.disabled {
+        background-color: #f0f0f0;
+        color: #a0a0a0;
+        cursor: not-allowed;
+        pointer-events: none;
+        margin: 6px;
+        border-radius: 8px;
     }
 
     #calendar {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 2px;
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 10px;
+        padding: 20px;
+        background-color: white;
     }
 
     #calendar p {
-      font-size: 10px;
-      padding: 2px;
+        font-size: 12px;
+        padding: 4px;
+        margin: 6px;
+        font-weight: 600;
+        color: #0e141b;
+        text-align: center;
     }
 
     .reserve-button {
-      transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease;
     }
 
     .reserve-button:hover {
-      background-color: #4a5156;
+        background-color: #4a5156;
     }
 
     .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      padding: 10px;
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 10px;
     }
 
     .modal-content {
-      background-color: white;
-      padding: 15px;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 250px;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: white;
+        padding: 15px;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 250px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .modal-content h3 {
-      font-size: 16px;
-      margin-bottom: 12px;
+        font-size: 16px;
+        margin-bottom: 12px;
     }
 
     .modal-content label {
-      font-size: 12px;
-      margin-bottom: 4px;
+        font-size: 12px;
+        margin-bottom: 4px;
     }
 
     .modal-content input,
     .modal-content select,
     .modal-content textarea {
-      font-size: 12px;
-      padding: 6px;
-      border-radius: 4px;
-      width: 100%;
-      box-sizing: border-box;
+        font-size: 12px;
+        padding: 6px;
+        border-radius: 4px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .modal-content textarea {
-      height: 60px;
+        height: 60px;
     }
 
     .modal-content .mb-4 {
-      margin-bottom: 12px;
+        margin-bottom: 12px;
     }
 
     .modal-content .flex.justify-end {
-      gap: 6px;
+        gap: 6px;
     }
 
     .modal-content button {
-      padding: 6px 12px;
-      font-size: 12px;
+        padding: 6px 12px;
+        font-size: 12px;
     }
 
     .success-message {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: #4CAF50;
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      z-index: 5000;
-      display: none;
-      text-align: center;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-      min-height: 100px;
-      overflow: auto;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #4CAF50;
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        z-index: 5000;
+        display: none;
+        text-align: center;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        min-height: 100px;
+        overflow: auto;
     }
 
     .success-message button {
-      margin-top: 10px;
-      padding: 5px 10px;
-      background-color: #5A6268;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #5A6268;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
     }
 
     .video-background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      object-fit: cover;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        object-fit: cover;
     }
 
     .home-screen {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: white;
-      text-align: center;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: white;
+        text-align: center;
     }
 
     .home-screen h1 {
-      font-size: 3rem;
-      font-weight: bold;
-      margin-bottom: 2rem;
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
     }
 
     .home-screen button {
-      font-size: 1.5rem;
-      padding: 1rem 2rem;
-      background-color: #5A6268;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+        font-size: 1.5rem;
+        padding: 1rem 2rem;
+        background-color: #5A6268;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
     }
 
     .home-screen button:hover {
-      background-color: #4a5156;
+        background-color: #4a5156;
     }
 
     .hidden {
-      display: none;
+        display: none;
     }
 
     .booked-slots {
-      max-height: 300px;
-      overflow-y: auto;
-      padding: 10px;
-      border: 1px solid #e7edf3;
-      border-radius: 8px;
-      background-color: #f9f9f9;
-      margin-bottom: 10px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 20px;
+        border: 1px solid #e7edf3;
+        border-radius: 12px;
+        background-color: #ffffff;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .booked-slots h3 {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e7edf3;
+        color: #0e141b;
+        font-size: 18px;
+        font-weight: 600;
     }
 
     .booked-slots.expanded {
-      max-height: 500px;
+        max-height: 500px;
     }
 
     .booked-slot {
-      display: flex;
-      flex-direction: column;
-      padding: 8px;
-      margin-bottom: 8px;
-      background-color: #d3d3d3;
-      color: #a0a0a0;
-      opacity: 0.8;
-      border-radius: 4px;
-      min-height: 70px;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        margin-bottom: 12px;
+        background-color: #f9f9f9;
+        border: 1px solid #e7edf3;
+        border-radius: 8px;
+        min-height: 70px;
+        transition: all 0.3s ease;
+    }
+
+    .booked-slot:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .booked-slot.completed {
-      background-color: #d3d3d3;
-      opacity: 0.6;
+        background-color: #f0f0f0;
+        opacity: 0.8;
     }
 
     .details-button {
-      padding: 6px 10px;
-      background-color: #5A6268;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+        padding: 6px 10px;
+        background-color: #5A6268;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
     .details-button:hover {
-      background-color: #4a5156;
+        background-color: #4a5156;
     }
 
     .time-slots-container {
-      padding: 20px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        height: fit-content;
+    }
+
+    .time-slots-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e7edf3;
+    }
+
+    .time-slots-header h3 {
+        color: #0e141b;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    #selectedDate {
+        color: #0e141b;
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0;
+        padding: 0;
     }
 
     .time-slots {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 15px;
     }
 
     .time-slots button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: #f9f9f9;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      text-align: center;
-      margin: 0;
-      min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 15px;
+        border: 1px solid #e7edf3;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        margin: 0;
+        min-height: 50px;
+        font-size: 13px;
+        line-height: 1.4;
+        color: #0e141b;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        white-space: normal;
+        word-wrap: break-word;
+    }
+
+    .time-slots button:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .time-slots button.selected {
-      background-color: #e25c69;
-      color: white;
+        background-color: #e25c69;
+        color: white;
+        border-color: #e25c69;
+        font-weight: 500;
     }
 
     .time-slots button.booked-slot {
-      background-color: #d3d3d3;
-      color: #a0a0a0;
-      opacity: 0.8;
-      pointer-events: none;
-      cursor: not-allowed;
+        background-color: #d3d3d3;
+        color: #a0a0a0;
+        opacity: 0.8;
+        pointer-events: none;
+        cursor: not-allowed;
+        border-color: #d3d3d3;
     }
 
     .no-slots-message {
-      grid-column: 1 / -1;
-      color: red;
-      padding: 10px;
-      text-align: center;
-      font-size: 14px;
-      line-height: 1.5;
-      background-color: #fff;
-      border-radius: 4px;
-      margin: 0;
+        grid-column: 1 / -1;
+        color: red;
+        padding: 10px;
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.5;
+        background-color: #fff;
+        border-radius: 4px;
+        margin: 0;
     }
 
     button {
-      min-height: 44px;
-      min-width: 44px;
-      padding: 8px 16px;
+        min-height: 35px;
+        min-width: 35px;
+        padding: 8px 16px;
     }
 
     #reserveButton {
-      padding: 10px 20px;
-      background-color: #5A6268;
+        padding: 10px 20px;
+        background-color: #5A6268;
     }
 
     .reschedule-button {
-      padding: 6px 10px;
-      background-color: #fbd103;
-      color: black;
-      border: none;
-      border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+        padding: 6px 10px;
+        background-color: #fbd103;
+        color: black;
+        border: none;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
     .reschedule-button:hover {
-      background-color: #e6c002;
+        background-color: #e6c002;
     }
 
     .for-meeting-room-container {
-      padding: 20px;
-      border: 1px solid #e7edf3;
-      border-radius: 8px;
-      background-color: #f9f9f9;
-      width: 300px;
-      min-height: 300px;
+        padding: 20px;
+        border: 1px solid #e7edf3;
+        border-radius: 12px;
+        background-color: #f9f9f9;
+        width: 300px;
+        min-height: 300px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-left: 20px;
+        height: fit-content;
+        position: relative;
+        z-index: 1;
+        flex: 0 0 300px;
     }
-
+    @media (max-width: 1200px){
+        .for-meeting-room-container{
+            width: 100%;
+            margin-left: 0px;
+        }  
+    }
     .for-meeting-room-content {
-      text-align: center;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
     }
 
     .for-meeting-room-content h3 {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      color: #0e141b;
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 10px;
+        color: #0e141b;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e7edf3;
     }
 
-    .for-meeting-room-content p {
-      font-size: 14px;
-      margin: 8px 0;
-      color: #0e141b;
+    .booking-info-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 15px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .for-meeting-room-content .name {
+        font-weight: 700;
+        font-size: 20px;
+        color: #0e141b;
+        margin-bottom: 4px;
+        padding: 4px 0;
+    }
+
+    .for-meeting-room-content .role {
+        font-weight: 500;
+        font-size: 16px;
+        color: #4e7397;
+        margin-bottom: 8px;
+        padding: 4px 0;
+    }
+
+    .for-meeting-room-content .purpose {
+        font-size: 14px;
+        color: #0e141b;
+        margin-bottom: 8px;
+        padding: 4px 0;
+        line-height: 1.4;
+    }
+
+    .for-meeting-room-content .time {
+        font-size: 14px;
+        color: #0e141b;
+        margin-bottom: 4px;
+        padding: 4px 0;
+    }
+
+    .for-meeting-room-content .date {
+        font-size: 14px;
+        color: #0e141b;
+        margin-bottom: 4px;
+        padding: 4px 0;
     }
 
     .booking-navigation {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        gap: 10px;
+        padding: 0 10px;
     }
 
     .booking-navigation button {
-      padding: 8px 16px;
-      background-color: #e25c69;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+        min-width: 100px;
+        font-weight: 500;
+        color: white;
     }
 
-    .booking-navigation button:hover {
-      background-color: #4a5156;
+    .booking-navigation button#previousBookingButton {
+        background-color: #4e7397;
+    }
+
+    .booking-navigation button#previousBookingButton:hover {
+        background-color: #3c5a77;
+    }
+
+    .booking-navigation button#nextBookingButton {
+        background-color: #e25c69;
+    }
+
+    .booking-navigation button#nextBookingButton:hover {
+        background-color: #d1404e;
     }
 
     .booking-navigation button:disabled {
-      background-color: e25c69;
-      cursor: not-allowed;
-    }
-
-    .layout-content-container {
-      width: 100%;
-      max-width: 1150px;
-      padding: 0 20px;
+        background-color: #e0e0e0;
+        color: #a0a0a0;
+        cursor: not-allowed;
     }
 
     .details {
-      transition: all 0.3s ease;
-      margin-top: 4px;
-      padding: 8px;
-      background-color: #f9f9f9;
-      border-radius: 4px;
-      width: 100%;
+        transition: all 0.3s ease;
+        margin-top: 4px;
+        padding: 8px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        width: 100%;
     }
 
     .details.hidden {
-      display: none;
+        display: none;
     }
 
     .details p {
-      margin: 4px 0;
-      font-size: 12px;
-      color: #0e141b;
+        margin: 4px 0;
+        font-size: 12px;
+        color: #0e141b;
     }
 
     .buttons-container {
-      display: flex;
-      justify-content: flex-end;
-      gap: 6px;
-      margin-top: 4px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        margin-top: 4px;
     }
 
     .ticker {
-      background-color: #f0f0f0;
-      padding: 5px 10px;
-      overflow: hidden;
-      white-space: nowrap;
-      width: 100%;
-      position: relative;
-      min-height: 30px;
-      margin-top: 5px;
-      z-index: 5;
+        background-color: #f0f0f0;
+        padding: 5px 10px;
+        overflow: hidden;
+        white-space: nowrap;
+        width: 100%;
+        position: relative;
+        min-height: 30px;
+        margin-top: 5px;
+        z-index: 5;
     }
 
     .ticker-content {
-      display: inline-block;
-      animation: ticker linear infinite;
-      white-space: nowrap;
-      min-width: 100%;
+        display: inline-block;
+        animation: ticker linear infinite;
+        white-space: nowrap;
+        min-width: 100%;
     }
 
     .ticker .status {
-      color: #5A6268;
+        color: #5A6268;
     }
 
     .ticker .completed {
-      color: green;
+        color: green;
     }
 
     .ticker .ongoing {
-      color: blue;
+        color: blue;
     }
 
     .ticker .upcoming {
-      color: orange;
+        color: orange;
     }
 
     .ticker .status {
-      font-weight: 400;
+        font-weight: 400;
     }
 
     .ticker-separator {
-      content: " | ";
-      display: inline-block;
-      margin: 0 5px;
-      color: #000;
+        content: " | ";
+        display: inline-block;
+        margin: 0 5px;
+        color: #000;
     }
 
     @keyframes ticker {
-      0% {
-        transform: translateX(0);
-      }
+        0% {
+            transform: translateX(0);
+        }
 
-      100% {
-        transform: translateX(-50%);
-      }
+        100% {
+            transform: translateX(-50%);
+        }
     }
 
-    header {
-      z-index: 20;
-      background-color: #fff;
-      transition: all 0.3s ease;
-      padding-bottom: 50px;
-      position: relative;
+    .for-meeting-room-container {
+        padding: 20px;
+        border: 1px solid #e7edf3;
+        border-radius: 12px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        height: fit-content;
     }
 
+    .booked-slots {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        height: fit-content;
+        max-height: 600px;
+        overflow-y: auto;
+    }
 
     .past-bookings-container {
-      padding: 20px;
-      border: 1px solid #e7edf3;
-      border-radius: 8px;
-      background-color: #f9f9f9;
-      width: calc(100% - 330px - 300px - 20px * 3);
-      max-height: 415px;
-      overflow: auto;
-      margin: 0;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        height: fit-content;
+        max-height: 350px;
+        overflow-y: auto;
     }
 
-    .past-booking-entry {
-      padding: 10px;
-      border-bottom: 1px solid #e7edf3;
-      background-color: #f9f9f9;
-      margin-bottom: 5px;
-      border-radius: 4px;
-      font-size: 14px;
-      color: #0e141b;
-    }
-
-    .past-booking-entry:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-    }
-
-    .past-booking-entry:hover {
-      background-color: #e7edf3;
-    }
-
-    .no-bookings {
-      padding: 10px;
-      text-align: center;
-      color: #4e7397;
-      font-style: italic;
-    }
-
-    .auth-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      padding: 10px;
-    }
-
-    .auth-modal-content {
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 350px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    #signOutButton {
-      margin-bottom: 10px;
+    .time-slots-container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        height: fit-content;
     }
 
     .profile-pic {
       width: 40px;
       height: 40px;
+      min-width: 40px;
       border-radius: 50%;
       background-color: #e25c69;
       color: white;
@@ -539,239 +1024,6 @@
       text-transform: uppercase;
     }
 
-    .auth-modal-content a {
-      color: #0000FF;
-    }
-
-    .content-sections {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .section {
-      width: 100%;
-    }
-
-    .calendar-container {
-      border: 1px solid #e7e7e7;
-      flex: 1;
-      width: 330px;
-      max-width: 100%;
-    }
-
-    @media (min-width: 641px) {
-      .content-sections {
-        flex-direction: row;
-        justify-content: center;
-        align-items: flex-start;
-      }
-
-      .past-bookings-section {
-        width: calc(100% - 330px - 300px - 20px * 2);
-        max-width: none;
-      }
-
-      .calendar-container {
-        width: 330px;
-        flex: 0 0 330px;
-      }
-
-      .meeting-room-section {
-        width: 300px;
-        flex: 0 0 300px;
-      }
-
-      .time-slots-section,
-      .reserve-button-section,
-      .booked-slots-section {
-        width: 100%;
-      }
-
-      .past-bookings-container {
-        width: 100%;
-        margin: 0;
-      }
-
-      .for-meeting-room-container {
-        width: 100%;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .video-background {
-        display: none;
-      }
-
-      .home-screen {
-        background-color: #000;
-      }
-
-      .layout-content-container {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 10px !important;
-      }
-
-      .px-40 {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-      }
-
-      .content-sections {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .calendar-container {
-        order: 1;
-        width: 100%;
-      }
-
-      .time-slots-section {
-        order: 2;
-        width: 100%;
-      }
-
-      .reserve-button-section {
-        order: 3;
-        width: 100%;
-      }
-
-      .booked-slots-section {
-        order: 4;
-        width: 100%;
-      }
-
-      .past-bookings-section {
-        order: 5;
-        width: 100%;
-      }
-
-      .meeting-room-section {
-        order: 6;
-        width: 100%;
-      }
-
-      .past-bookings-container {
-        width: 100%;
-        margin-right: 0;
-      }
-
-      .for-meeting-room-container {
-        width: 100%;
-      }
-
-      .calendar-day {
-        font-size: 10px;
-        min-height: 36px;
-      }
-
-      #calendar p {
-        font-size: 8px;
-      }
-
-      .time-slots {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-        padding: 10px;
-      }
-
-      .time-slots button {
-        padding: 10px;
-        font-size: 14px;
-      }
-
-      .text-base {
-        font-size: 14px;
-      }
-
-      .text-sm {
-        font-size: 12px;
-      }
-
-      .text-lg {
-        font-size: 16px;
-      }
-
-      .text-32px {
-        font-size: 24px !important;
-      }
-
-      #selectedDate {
-        text-align: center !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-      }
-
-      .bottom-buttons {
-        flex-direction: column !important;
-        gap: 12px !important;
-        align-items: center !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-      }
-
-      #reserveButton {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        font-size: 16px;
-      }
-
-      .reschedule-button,
-      .details-button {
-        width: 80px;
-        font-size: 10px;
-        padding: 4px 8px;
-      }
-
-      .modal-content {
-        width: 90%;
-        max-width: 250px;
-        padding: 12px;
-      }
-
-      .booked-slots {
-        padding: 8px;
-        max-height: 200px;
-      }
-
-      .booked-slot {
-        padding: 6px;
-        min-height: 60px;
-      }
-
-      .buttons-container {
-        gap: 4px;
-      }
-
-      .ticker {
-        padding: 5px;
-        font-size: 12px;
-        margin-top: 5px;
-      }
-
-      .success-message {
-        width: 85%;
-        max-width: 350px;
-      }
-
-      .past-booking-entry {
-        font-size: 12px;
-        padding: 8px;
-      }
-
-      .header {
-        padding: 5px 5px 40px 5px;
-      }
-    }
-
     .delete-button {
       padding: 6px 10px;
       background-color: #dc3545;
@@ -781,837 +1033,946 @@
       font-size: 11px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      min-height: 28px;
     }
 
     .delete-button:hover {
       background-color: #c82333;
     }
 
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 4px solid #3498db;
-      width: 20px;
-      height: 20px;
-      animation: spin 2s linear infinite;
+    .buttons-container {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
     }
 
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
+    .booked-slot {
+      background-color: #ffffff;
+      border: 1px solid #e7edf3;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
     }
-  </style>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const ticker = document.getElementById("ticker");
-      const tickerContent = document.getElementsByClassName("ticker-content")[0];
 
-      function updateTickerSpeed() {
-        if (!tickerContent) return;
+    .booked-slot:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
 
-        const contentWidth = tickerContent.scrollWidth; // Total width of ticker content
-        const baseSpeed = 120; // Adjust this for desired speed (higher = slower)
+    .booked-slot .flex {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-        // Calculate duration dynamically based on content width
-        const duration = contentWidth / baseSpeed;
+    .booked-slot .flex-1 {
+      flex: 1;
+      min-width: 0;
+    }
 
-        // Apply animation duration dynamically
-        tickerContent.style.animationDuration = `${duration}s`;
-      }
+    .booked-slot .flex-1 p {
+      margin: 4px 0;
+    }
+    </style>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ticker = document.getElementById("ticker");
+        const tickerContent = document.getElementsByClassName("ticker-content")[0];
 
-      // Run function on page load
-      window.addEventListener("load", updateTickerSpeed);
+        function updateTickerSpeed() {
+            if (!tickerContent) return;
 
-      // Run function on window resize
-      window.addEventListener("resize", updateTickerSpeed);
+            const contentWidth = tickerContent.scrollWidth; // Total width of ticker content
+            const baseSpeed = 120; // Adjust this for desired speed (higher = slower)
 
-      // Observe content changes and update speed
-      const observer = new MutationObserver(updateTickerSpeed);
-      observer.observe(tickerContent, { childList: true, subtree: true });
+            // Calculate duration dynamically based on content width
+            const duration = contentWidth / baseSpeed;
 
-      updateTickerSpeed(); // Initial run
-      window.onload = function () {
-        setTimeout(updateTickerSpeed, 1800); // 5000 milliseconds = 5 seconds
-      };
+            // Apply animation duration dynamically
+            tickerContent.style.animationDuration = `${duration}s`;
+        }
+
+        // Run function on page load
+        window.addEventListener("load", updateTickerSpeed);
+
+        // Run function on window resize
+        window.addEventListener("resize", updateTickerSpeed);
+
+        // Observe content changes and update speed
+        const observer = new MutationObserver(updateTickerSpeed);
+        observer.observe(tickerContent, {
+            childList: true,
+            subtree: true
+        });
+
+        updateTickerSpeed(); // Initial run
+        window.onload = function() {
+            setTimeout(updateTickerSpeed, 1800); // 5000 milliseconds = 5 seconds
+        };
     });
-
-  </script>
+    </script>
 </head>
 
 <body>
-  <!-- Home Screen -->
-  <div id="homeScreen" class="home-screen">
-    <video autoplay muted loop class="video-background">
-      <source src="videos/new.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-    <div>
-      <h1>Welcome to Conference Room Booking</h1>
-      <button id="bookNowButton" class="hidden">Book Now</button>
-      <div id="welcomeMessage" class="hidden">
-        <span id="welcomeText" class="text-2xl font-bold"></span>
-      </div>
+    <!-- Home Screen -->
+    <div id="homeScreen" class="home-screen">
+        <video autoplay muted loop class="video-background">
+            <source src="videos/new.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div>
+            <h1>Welcome to Conference Room Booking</h1>
+            <button id="bookNowButton" class="hidden">Book Now</button>
+            <div id="welcomeMessage" class="hidden">
+                <span id="welcomeText" class="text-2xl font-bold"></span>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Booking Screen -->
-  <div id="bookingScreen" class="hidden">
-    <div class="relative flex size-full min-h-screen flex-col bg-slate-50 group/design-root overflow-x-hidden"
-      style='font-family: "Work Sans", "Noto Sans", sans-serif;'>
-      <div class="layout-container flex h-full grow flex-col">
-        <header
-          class="flex flex-col items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] px-10 py-3 relative min-h-[80px] z-10 bg-white">
-          <div class="flex items-center justify-between w-full gap-4 text-[#0e141b]">
-            <div class="flex items-center gap-4">
-              <img src="images/logo2.png" alt="Logo" class="h-10" />
+    <!-- Booking Screen -->
+    <div id="bookingScreen" class="hidden">
+        <div class="relative flex size-full min-h-screen flex-col bg-slate-50 group/design-root overflow-x-hidden"
+            style='font-family: "Work Sans", "Noto Sans", sans-serif;'>
+            <div class="layout-container flex h-full grow flex-col">
+                <header
+                    class="flex flex-col items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] px-10 py-3 relative min-h-[80px] z-10 bg-white">
+                    <div class="flex items-center justify-between w-full gap-4 text-[#0e141b]">
+                        <div class="flex items-center gap-4">
+                            <img src="images/logo2.png" alt="Logo" class="h-10" />
+                        </div>
+                        <div class="flex gap-4">
+                            <button id="signInButton" class="p-2 bg-[#fbd103] text-black rounded hidden">Sign
+                                In</button>
+                            <button id="signUpButton" class="p-2 bg-[#fbd103] text-black rounded hidden">Sign
+                                Up</button>
+                            <button id="signOutButton" class="p-2 bg-[#fbd103] text-black rounded">Sign Out</button>
+                        </div>
+                    </div>
+                    <div class="w-full flex flex-col items-center relative">
+                        <div class="ticker w-full" id="ticker">
+                            <div class="ticker-content" id="tickerContent">
+                                <span class="completed">
+                                    Clean the room before leaving.
+                                </span>
+                                <span class="ticker-separator">|</span>
+                                <span class="ongoing">
+                                    Turn off the lights before leaving.
+                                </span>
+                                <span class="ticker-separator">|</span>
+                                <span class="upcoming">
+                                    Make sure to book the room before entering.
+                                </span>
+                                <span class="ticker-separator">|</span>
+                                <span class="status">
+                                    Please refrain from occupying a pre-booked conference room without prior approval.
+                                </span>
+                                <span class="ticker-separator">|</span>
+                                <span class="completed">
+                                    Clean the room before leaving.
+                                </span>
+                                <span class="ticker-separator">|</span>
+                                <span class="ongoing">
+                                    Turn off the lights before leaving.
+                                </span>
+                                <span class="ticker-separator">|</span>
+                                <span class="upcoming">
+                                    Make sure to book the room before entering.
+                                </span>
+                                <span class="ticker-separator">|</span>
+                                <span class="status">
+                                    Please refrain from occupying a pre-booked conference room without prior approval.
+                                </span>
+                                <span class="ticker-separator">|</span>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <div class="menu-header">
+                    <nav class="menu-nav">
+                        <button data-section="calendar-container">Calendar</button>
+                        <button data-section="reserve-button-section">Booking Section</button>
+                    </nav>
+                </div>
+                <div class="px-30 flex flex-1 justify-center py-5">
+                    <div class="layout-content-container flex flex-col w-full py-5">
+                        <div class="flex flex-wrap justify-between gap-3 p-4">
+                            <div class="flex min-w-72 flex-col gap-3">
+                                <p class="text-[#0e141b] tracking-light text-[32px] font-bold leading-tight">Reserve the
+                                    Main Conference
+                                    Room</p>
+                                <p class="text-[#4e7397] text-sm font-normal leading-normal">Seats 12 people</p>
+                            </div>
+                        </div>
+                        <div class="content-sections">
+
+
+
+
+
+
+
+                            <div class="calendar-container section">
+                                <div class="flex items-center p-1 justify-between">
+                                    <button id="prevMonth">
+                                        <div class="text-[#0e141b] flex size-10 items-center justify-center">
+                                            <svg height="20" viewBox="0 0 128 128" width="20">
+                                                <path
+                                                    d="m84 108c-1.023 0-2.047-.391-2.828-1.172l-40-40c-1.563-1.563-1.563-4.094 0-5.656l40-40c1.563-1.563 4.094-1.563 5.656 0s1.563 4.094 0 5.656l-37.172 37.172 37.172 37.172c1.563 1.563 1.563 4.094 0 5.656-.781.781-1.805 1.172-2.828 1.172z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                    </button>
+                                    <p id="currentMonth"
+                                        class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center"></p>
+                                    <button id="nextMonth">
+                                        <div class="text-[#0e141b] flex size-10 items-center justify-center">
+                                            <svg height="20" viewBox="0 0 128 128" width="20">
+                                                <path
+                                                    d="m44 108c-1.023 0-2.047-.391-2.828-1.172-1.563-1.563-1.563-4.094 0-5.656l37.172-37.172-37.172-37.172c-1.563-1.563-1.563-4.094 0-5.656s4.094-1.563 5.656 0l40 40c1.563 1.563 1.563 4.094 0 5.656l-40 40c-.781.781-1.805 1.172-2.828 1.172z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-7" id="calendar"></div>
+                            </div>
+                            <div class="meeting-room-section section">
+                                <div class="for-meeting-room-container">
+                                    <div class="for-meeting-room-content">
+                                        <h3 id="bookingInfoTitle">Current Slot is Booked By</h3>
+                                        <p id="currentBookingName"></p>
+                                        <p id="currentBookingDepartment"></p>
+                                        <p id="currentBookingTime"></p>
+                                        <p id="currentBookingDate"></p>
+                                        <div class="booking-navigation">
+                                            <button id="previousBookingButton">Previous</button>
+                                            <button id="nextBookingButton">Next</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="time-slots-section section">
+                                <div class="time-slots-container p-4 hidden" id="timeSlotContainer">
+                                    <div class="time-slots-header">
+                                        <h3>Available Time Slots</h3>
+                                        <p id="selectedDate"></p>
+                                    </div>
+                                    <div id="timeSlots" class="time-slots"></div>
+                                </div>
+                            </div>
+                            <div class="reserve-button-section section">
+                                <div class="flex justify-center px-4 py-3 gap-4 bottom-buttons">
+                                    <button id="reserveButton"
+                                        class="reserve-button flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#5A6268] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled>
+                                        <span class="truncate">Reserve Selected Slots</span>
+                                    </button>
+                                </div>
+                            </div>
+
+
+
+                            <div class="booked-slots-section section">
+                                <div class="booked-slots p-4" id="bookedSlotsContainer">
+                                    <h3 class="text-[#0e141b] text-lg font-bold mb-4">Your Booked Slots</h3>
+                                    <div id="bookedSlots"></div>
+                                    <button id="expandButton"
+                                        class="text-[#5A6268] text-sm font-medium mt-2 hidden">Show more</button>
+                                </div>
+
+
+                                <div class="past-bookings-section section">
+                                    <div class="past-bookings-container">
+                                        <h3 class="text-[#0e141b] text-lg font-bold mb-4">All Bookings</h3>
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-[#0e141b]">Select Date</label>
+                                            <input type="date" id="pastBookingsDate"
+                                                class="w-full p-2 border rounded" />
+                                        </div>
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-[#0e141b]">Department</label>
+                                            <select id="pastBookingsDepartment" class="w-full p-2 border rounded">
+                                                <option value="">All Departments</option>
+                                            </select>
+                                        </div>
+                                        <div id="pastBookingsList"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="flex gap-4">
-              <button id="signInButton" class="p-2 bg-[#fbd103] text-black rounded hidden">Sign In</button>
-              <button id="signUpButton" class="p-2 bg-[#fbd103] text-black rounded hidden">Sign Up</button>
-              <button id="signOutButton" class="p-2 bg-[#fbd103] text-black rounded">Sign Out</button>
-            </div>
-          </div>
-          <div class="w-full flex flex-col items-center relative">
-            <div class="ticker w-full" id="ticker">
-              <div class="ticker-content" id="tickerContent">
-                <span class="completed">
-                  Clean the room before leaving.
-                </span>
-                <span class="ticker-separator">|</span>
-                <span class="ongoing">
-                  Turn off the lights before leaving.
-                </span>
-                <span class="ticker-separator">|</span>
-                <span class="upcoming">
-                  Make sure to book the room before entering.
-                </span>
-                <span class="ticker-separator">|</span>
-                <span class="status">
-                  Please refrain from occupying a pre-booked conference room without prior approval.
-                </span>
-                <span class="ticker-separator">|</span>
-                <span class="completed">
-                  Clean the room before leaving.
-                </span>
-                <span class="ticker-separator">|</span>
-                <span class="ongoing">
-                  Turn off the lights before leaving.
-                </span>
-                <span class="ticker-separator">|</span>
-                <span class="upcoming">
-                  Make sure to book the room before entering.
-                </span>
-                <span class="ticker-separator">|</span>
-                <span class="status">
-                  Please refrain from occupying a pre-booked conference room without prior approval.
-                </span>
-                <span class="ticker-separator">|</span>
-              </div>
-            </div>
-          </div>
-        </header>
-        <div class="px-30 flex flex-1 justify-center py-5">
-          <div class="layout-content-container flex flex-col w-full py-5">
-            <div class="flex flex-wrap justify-between gap-3 p-4">
-              <div class="flex min-w-72 flex-col gap-3">
-                <p class="text-[#0e141b] tracking-light text-[32px] font-bold leading-tight">Reserve the Main Conference
-                  Room</p>
-                <p class="text-[#4e7397] text-sm font-normal leading-normal">Seats 12 people</p>
-              </div>
-            </div>
-            <div class="content-sections">
-              <div class="past-bookings-section section">
-                <div class="past-bookings-container">
-                  <h3 class="text-[#0e141b] text-lg font-bold mb-4">All Bookings</h3>
-                  <div class="mb-4">
-                    <label class="block text-sm font-medium text-[#0e141b]">Select Date</label>
-                    <input type="date" id="pastBookingsDate" class="w-full p-2 border rounded" />
-                  </div>
-                  <div class="mb-4">
+        </div>
+    </div>
+
+    <!-- Modal for Booking Details -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-[#0e141b] text-lg font-bold mb-4">Booking Details</h3>
+            <form id="bookingForm">
+                <div class="mb-4">
                     <label class="block text-sm font-medium text-[#0e141b]">Department</label>
-                    <select id="pastBookingsDepartment" class="w-full p-2 border rounded">
-                      <option value="">All Departments</option>
+                    <select id="department" class="w-full p-2 border rounded" required>
+                        <option value="QA">QA</option>
+                        <option value="PHP">PHP</option>
+                        <option value="Project Management">Project Management</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Management">Management</option>
+                        <option value="HTML">HTML</option>
+                        <option value="Digital Marketing">Digital Marketing</option>
+                        <option value="SEO">SEO</option>
+                        <option value="Graphic Designers">Graphic Designers</option>
+                        <option value="Content Writers">Content Writers</option>
+                        <option value="Project Coordinators">Project Coordinators</option>
+                        <option value="Mobile App Development Team">Mobile App Development Team</option>
+                        <option value="UI Designers">UI Designers</option>
+                        <option value="Wordpress">Wordpress</option>
+                        <option value="Intersmart Edutech">Intersmart Edutech</option>
                     </select>
-                  </div>
-                  <div id="pastBookingsList"></div>
                 </div>
-              </div>
-              <div class="calendar-container section">
-                <div class="flex items-center p-1 justify-between">
-                  <button id="prevMonth">
-                    <div class="text-[#0e141b] flex size-10 items-center justify-center">
-                      <svg height="20" viewBox="0 0 128 128" width="20">
-                        <path
-                          d="m84 108c-1.023 0-2.047-.391-2.828-1.172l-40-40c-1.563-1.563-1.563-4.094 0-5.656l40-40c1.563-1.563 4.094-1.563 5.656 0s1.563 4.094 0 5.656l-37.172 37.172 37.172 37.172c1.563 1.563 1.563 4.094 0 5.656-.781.781-1.805 1.172-2.828 1.172z">
-                        </path>
-                      </svg>
-                    </div>
-                  </button>
-                  <p id="currentMonth" class="text-[#0e141b] text-base font-bold leading-tight flex-1 text-center"></p>
-                  <button id="nextMonth">
-                    <div class="text-[#0e141b] flex size-10 items-center justify-center">
-                      <svg height="20" viewBox="0 0 128 128" width="20">
-                        <path
-                          d="m44 108c-1.023 0-2.047-.391-2.828-1.172-1.563-1.563-1.563-4.094 0-5.656l37.172-37.172-37.172-37.172c-1.563-1.563-1.563-4.094 0-5.656s4.094-1.563 5.656 0l40 40c1.563 1.563 1.563 4.094 0 5.656l-40 40c-.781.781-1.805 1.172-2.828 1.172z">
-                        </path>
-                      </svg>
-                    </div>
-                  </button>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Role</label>
+                    <input type="text" id="role" class="w-full p-2 border rounded" required />
                 </div>
-                <div class="grid grid-cols-7" id="calendar"></div>
-              </div>
-              <div class="meeting-room-section section">
-                <div class="for-meeting-room-container">
-                  <div class="for-meeting-room-content">
-                    <h3 id="bookingInfoTitle">Current Slot is Booked By</h3>
-                    <p id="currentBookingName"></p>
-                    <p id="currentBookingDepartment"></p>
-                    <p id="currentBookingTime"></p>
-                    <p id="currentBookingDate"></p>
-                    <div class="booking-navigation">
-                      <button id="previousBookingButton">Previous</button>
-                      <button id="nextBookingButton">Next</button>
-                    </div>
-                  </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Purpose of Meeting</label>
+                    <textarea id="purpose" class="w-full p-2 border rounded" required></textarea>
                 </div>
-              </div>
-              <div class="time-slots-section section">
-                <h3 id="selectedDate"
-                  class="text-[#0e141b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4"></h3>
-                <div class="time-slots-container p-4 hidden" id="timeSlotContainer">
-                  <h3 class="text-[#0e141b] text-lg font-bold mb-4">Available Time Slots</h3>
-                  <div id="timeSlots" class="time-slots"></div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" id="cancelBooking" class="p-2 bg-gray-300 rounded">Cancel</button>
+                    <button type="submit" class="p-2 bg-[#5A6268] text-white rounded">Submit</button>
                 </div>
-              </div>
-              <div class="reserve-button-section section">
-                <div class="flex justify-center px-4 py-3 gap-4 bottom-buttons">
-                  <button id="reserveButton"
-                    class="reserve-button flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#5A6268] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled>
-                    <span class="truncate">Reserve Selected Slots</span>
-                  </button>
-                </div>
-              </div>
-              <div class="booked-slots-section section">
-                <div class="booked-slots p-4" id="bookedSlotsContainer">
-                  <h3 class="text-[#0e141b] text-lg font-bold mb-4">Your Booked Slots</h3>
-                  <div id="bookedSlots"></div>
-                  <button id="expandButton" class="text-[#5A6268] text-sm font-medium mt-2 hidden">Show more</button>
-                </div>
-              </div>
-            </div>
-          </div>
+            </form>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Modal for Booking Details -->
-  <div id="bookingModal" class="modal">
-    <div class="modal-content">
-      <h3 class="text-[#0e141b] text-lg font-bold mb-4">Booking Details</h3>
-      <form id="bookingForm">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Department</label>
-          <select id="department" class="w-full p-2 border rounded" required>
-            <option value="QA">QA</option>
-            <option value="PHP">PHP</option>
-            <option value="Project Management">Project Management</option>
-            <option value="Sales">Sales</option>
-            <option value="Management">Management</option>
-            <option value="HTML">HTML</option>
-            <option value="Digital Marketing">Digital Marketing</option>
-            <option value="SEO">SEO</option> <!-- Fixed: Changed 'fulue' to 'value' -->
-            <option value="Graphic Designers">Graphic Designers</option>
-            <option value="Content Writers">Content Writers</option>
-            <option value="Project Coordinators">Project Coordinators</option>
-            <option value="Mobile App Development Team">Mobile App Development Team</option>
-            <option value="UI Designers">UI Designers</option>
-            <option value="Wordpress">Wordpress</option>
-            <option value="Intersmart Edutech">Intersmart Edutech</option>
-          </select>
+    <!-- Modal for Rescheduling -->
+    <div id="rescheduleModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-[#0e141b] text-lg font-bold mb-4">Reschedule Booking</h3>
+            <form id="rescheduleForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Select New Date</label>
+                    <input type="date" id="newDate" class="w-full p-2 border rounded" required />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Select New Time Slot</label>
+                    <select id="newTime" class="w-full p-2 border rounded" disabled required>
+                        <option value="">Select a date first</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" id="cancelReschedule" class="p-2 bg-gray-300 rounded">Cancel</button>
+                    <button type="submit" class="p-2 bg-[#5A6268] text-white rounded">Reschedule</button>
+                </div>
+            </form>
         </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Role</label>
-          <input type="text" id="role" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Purpose of Meeting</label>
-          <textarea id="purpose" class="w-full p-2 border rounded" required></textarea>
-        </div>
-        <div class="flex justify-end gap-2">
-          <button type="button" id="cancelBooking" class="p-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" class="p-2 bg-[#5A6268] text-white rounded">Submit</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- Modal for Rescheduling -->
-  <div id="rescheduleModal" class="modal">
-    <div class="modal-content">
-      <h3 class="text-[#0e141b] text-lg font-bold mb-4">Reschedule Booking</h3>
-      <form id="rescheduleForm">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Select New Date</label>
-          <input type="date" id="newDate" class="w-full p-2 border rounded" required />
+    <!-- Sign In Modal -->
+    <div id="signInModal" class="auth-modal">
+        <div class="auth-modal-content">
+            <h3 class="text-[#0e141b] text-lg font-bold mb-4">Sign In</h3>
+            <form id="signInForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Email</label>
+                    <input type="email" id="signInEmail" class="w-full p-2 border rounded" required />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Password</label>
+                    <input type="password" id="signInPassword" class="w-full p-2 border rounded" required />
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" id="cancelSignIn" class="p-2 bg-gray-300 rounded">Cancel</button>
+                    <button type="submit" class="p-2 bg-[#fbd103] text-black rounded">Sign In</button>
+                </div>
+            </form>
+            <p class="text-sm text-[#0e141b] mt-2 text-center">
+                <a href="#" id="forgotPassword" class="font-medium">Forgot Password?</a>
+            </p>
+            <p class="text-sm text-[#0e141b] mt-4 text-center">
+                Don't have an account?
+                <a href="#" id="switchToSignUp" class="font-medium">Sign Up</a>
+            </p>
         </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Select New Time Slot</label>
-          <select id="newTime" class="w-full p-2 border rounded" disabled required>
-            <option value="">Select a date first</option>
-          </select>
-        </div>
-        <div class="flex justify-end gap-2">
-          <button type="button" id="cancelReschedule" class="p-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" class="p-2 bg-[#5A6268] text-white rounded">Reschedule</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- Sign In Modal -->
-  <div id="signInModal" class="auth-modal">
-    <div class="auth-modal-content">
-      <h3 class="text-[#0e141b] text-lg font-bold mb-4">Sign In</h3>
-      <form id="signInForm">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Email</label>
-          <input type="email" id="signInEmail" class="w-full p-2 border rounded" required />
+    <!-- Sign Up Modal -->
+    <div id="signUpModal" class="auth-modal">
+        <div class="auth-modal-content">
+            <h3 class="text-[#0e141b] text-lg font-bold mb-4">Sign Up</h3>
+            <form id="signUpForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Email</label>
+                    <input type="email" id="signUpEmail" class="w-full p-2 border rounded" required />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Password</label>
+                    <input type="password" id="signUpPassword" class="w-full p-2 border rounded" required />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-[#0e141b]">Name</label>
+                    <input type="text" id="signUpName" class="w-full p-2 border rounded" required />
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" id="cancelSignUp" class="p-2 bg-gray-300 rounded">Cancel</button>
+                    <button type="submit" class="p-2 bg-[#fbd103] text-black rounded">Sign Up</button>
+                </div>
+            </form>
+            <p class="text-sm text-[#0e141b] mt-4 text-center">
+                Already have an account?
+                <a href="#" id="switchToSignIn" class="font-medium">Sign In</a>
+            </p>
         </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Password</label>
-          <input type="password" id="signInPassword" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="flex justify-end gap-2">
-          <button type="button" id="cancelSignIn" class="p-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" class="p-2 bg-[#fbd103] text-black rounded">Sign In</button>
-        </div>
-      </form>
-      <p class="text-sm text-[#0e141b] mt-2 text-center">
-        <a href="#" id="forgotPassword" class="font-medium">Forgot Password?</a>
-      </p>
-      <p class="text-sm text-[#0e141b] mt-4 text-center">
-        Don't have an account?
-        <a href="#" id="switchToSignUp" class="font-medium">Sign Up</a>
-      </p>
     </div>
-  </div>
 
-  <!-- Sign Up Modal -->
-  <div id="signUpModal" class="auth-modal">
-    <div class="auth-modal-content">
-      <h3 class="text-[#0e141b] text-lg font-bold mb-4">Sign Up</h3>
-      <form id="signUpForm">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Email</label>
-          <input type="email" id="signUpEmail" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Password</label>
-          <input type="password" id="signUpPassword" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-[#0e141b]">Name</label>
-          <input type="text" id="signUpName" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="flex justify-end gap-2">
-          <button type="button" id="cancelSignUp" class="p-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" class="p-2 bg-[#fbd103] text-black rounded">Sign Up</button>
-        </div>
-      </form>
-      <p class="text-sm text-[#0e141b] mt-4 text-center">
-        Already have an account?
-        <a href="#" id="switchToSignIn" class="font-medium">Sign In</a>
-      </p>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    <script type="module">
     import {
-      getFirestore, collection, getDocs, query, where, addDoc, updateDoc, getDoc, doc, deleteDoc
+        initializeApp
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import {
+        getFirestore,
+        collection,
+        getDocs,
+        query,
+        where,
+        addDoc,
+        updateDoc,
+        getDoc,
+        doc,
+        deleteDoc
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
     import {
-      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+        updateProfile,
+        sendPasswordResetEmail
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCqLBJtkkFHJejNVjAKxwnL7G5YYJ3l4eE",
-      authDomain: "interbook-c003c.firebaseapp.com",
-      projectId: "interbook-c003c",
-      storageBucket: "interbook-c003c.firebasestorage.app",
-      messagingSenderId: "835157789713",
-      appId: "1:835157789713:web:1c48fd4ee7b9ac9bc535b0",
-      measurementId: "G-00H9J6GP5C"
+        apiKey: "AIzaSyCqLBJtkkFHJejNVjAKxwnL7G5YYJ3l4eE",
+        authDomain: "interbook-c003c.firebaseapp.com",
+        projectId: "interbook-c003c",
+        storageBucket: "interbook-c003c.firebasestorage.app",
+        messagingSenderId: "835157789713",
+        appId: "1:835157789713:web:1c48fd4ee7b9ac9bc535b0",
+        measurementId: "G-00H9J6GP5C"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    document.addEventListener('DOMContentLoaded', function () {
-      const homeScreen = document.getElementById('homeScreen');
-      const bookingScreen = document.getElementById('bookingScreen');
-      const bookNowButton = document.getElementById('bookNowButton');
-      const welcomeMessage = document.getElementById('welcomeMessage');
-      const welcomeText = document.getElementById('welcomeText');
-      const expandButton = document.getElementById('expandButton');
-      const bookedSlotsContainer = document.getElementById('bookedSlotsContainer');
-      const bookedSlots = document.getElementById('bookedSlots');
-      const bookingInfoTitle = document.getElementById('bookingInfoTitle');
-      const previousBookingButton = document.getElementById('previousBookingButton');
-      const nextBookingButton = document.getElementById('nextBookingButton');
-      const currentBookingName = document.getElementById('currentBookingName');
-      const currentBookingDepartment = document.getElementById('currentBookingDepartment');
-      const currentBookingTime = document.getElementById('currentBookingTime');
-      const currentBookingDate = document.getElementById('currentBookingDate');
-      const ticker = document.getElementById('ticker');
-      // const tickerContent = document.getElementById('tickerContent');
-      const pastBookingsDate = document.getElementById('pastBookingsDate');
-      const pastBookingsDepartment = document.getElementById('pastBookingsDepartment');
-      const pastBookingsList = document.getElementById('pastBookingsList');
-      const signInButton = document.getElementById('signInButton');
-      const signUpButton = document.getElementById('signUpButton');
-      const signOutButton = document.getElementById('signOutButton');
-      const signInModal = document.getElementById('signInModal');
-      const signUpModal = document.getElementById('signUpModal');
-      const signInForm = document.getElementById('signInForm');
-      const signUpForm = document.getElementById('signUpForm');
-      const cancelSignIn = document.getElementById('cancelSignIn');
-      const cancelSignUp = document.getElementById('cancelSignUp');
-      const forgotPassword = document.getElementById('forgotPassword');
+    document.addEventListener('DOMContentLoaded', function() {
+        const homeScreen = document.getElementById('homeScreen');
+        const bookingScreen = document.getElementById('bookingScreen');
+        const bookNowButton = document.getElementById('bookNowButton');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const welcomeText = document.getElementById('welcomeText');
+        const expandButton = document.getElementById('expandButton');
+        const bookedSlotsContainer = document.getElementById('bookedSlotsContainer');
+        const bookedSlots = document.getElementById('bookedSlots');
+        const bookingInfoTitle = document.getElementById('bookingInfoTitle');
+        const previousBookingButton = document.getElementById('previousBookingButton');
+        const nextBookingButton = document.getElementById('nextBookingButton');
+        const currentBookingName = document.getElementById('currentBookingName');
+        const currentBookingDepartment = document.getElementById('currentBookingDepartment');
+        const currentBookingTime = document.getElementById('currentBookingTime');
+        const currentBookingDate = document.getElementById('currentBookingDate');
+        const ticker = document.getElementById('ticker');
+        // const tickerContent = document.getElementById('tickerContent');
+        const pastBookingsDate = document.getElementById('pastBookingsDate');
+        const pastBookingsDepartment = document.getElementById('pastBookingsDepartment');
+        const pastBookingsList = document.getElementById('pastBookingsList');
+        const signInButton = document.getElementById('signInButton');
+        const signUpButton = document.getElementById('signUpButton');
+        const signOutButton = document.getElementById('signOutButton');
+        const signInModal = document.getElementById('signInModal');
+        const signUpModal = document.getElementById('signUpModal');
+        const signInForm = document.getElementById('signInForm');
+        const signUpForm = document.getElementById('signUpForm');
+        const cancelSignIn = document.getElementById('cancelSignIn');
+        const cancelSignUp = document.getElementById('cancelSignUp');
+        const forgotPassword = document.getElementById('forgotPassword');
 
-      const calendar = document.getElementById('calendar');
-      const timeSlotContainer = document.getElementById('timeSlotContainer');
-      const timeSlots = document.getElementById('timeSlots');
-      const reserveButton = document.getElementById('reserveButton');
-      const currentMonthElement = document.getElementById('currentMonth');
-      const selectedDateElement = document.getElementById('selectedDate');
-      const prevMonthButton = document.getElementById('prevMonth');
-      const nextMonthButton = document.getElementById('nextMonth');
-      const bookingModal = document.getElementById('bookingModal');
-      const bookingForm = document.getElementById('bookingForm');
-      const cancelBookingButton = document.getElementById('cancelBooking');
-      const rescheduleModal = document.getElementById('rescheduleModal');
-      const rescheduleForm = document.getElementById('rescheduleForm');
-      const cancelRescheduleButton = document.getElementById('cancelReschedule');
-      const newTimeSelect = document.getElementById('newTime');
-      const newDateInput = document.getElementById('newDate');
+        const calendar = document.getElementById('calendar');
+        const timeSlotContainer = document.getElementById('timeSlotContainer');
+        const timeSlots = document.getElementById('timeSlots');
+        const reserveButton = document.getElementById('reserveButton');
+        const currentMonthElement = document.getElementById('currentMonth');
+        const selectedDateElement = document.getElementById('selectedDate');
+        const prevMonthButton = document.getElementById('prevMonth');
+        const nextMonthButton = document.getElementById('nextMonth');
+        const bookingModal = document.getElementById('bookingModal');
+        const bookingForm = document.getElementById('bookingForm');
+        const cancelBookingButton = document.getElementById('cancelBooking');
+        const rescheduleModal = document.getElementById('rescheduleModal');
+        const rescheduleForm = document.getElementById('rescheduleForm');
+        const cancelRescheduleButton = document.getElementById('cancelReschedule');
+        const newTimeSelect = document.getElementById('newTime');
+        const newDateInput = document.getElementById('newDate');
 
-      const lateBookingMessage = document.createElement('div');
-      lateBookingMessage.className = 'text-yellow-600 text-sm mb-4 hidden';
-      document.querySelector('.time-slots-container').appendChild(lateBookingMessage);
+        const lateBookingMessage = document.createElement('div');
+        lateBookingMessage.className = 'text-yellow-600 text-sm mb-4 hidden';
+        document.querySelector('.time-slots-container').appendChild(lateBookingMessage);
 
-      let allBookings = [];
-      let currentBookingIndex = 0;
-      let currentUser = null;
-      let bookedSlotsCache = new Map();
-      let renderingLock = false;
+        let allBookings = [];
+        let currentBookingIndex = 0;
+        let currentUser = null;
+        let bookedSlotsCache = new Map();
+        let renderingLock = false;
 
-      let currentDate = new Date();
-      let selectedDate = new Date();
-      let selectedTimeSlots = [];
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        let selectedTimeSlots = [];
 
-      const bookingSuccessMessage = document.createElement('p');
-      bookingSuccessMessage.className = 'text-green-600 text-sm mt-2 hidden';
-      document.querySelector('.bottom-buttons').appendChild(bookingSuccessMessage);
+        const bookingSuccessMessage = document.createElement('p');
+        bookingSuccessMessage.className = 'text-green-600 text-sm mt-2 hidden';
+        document.querySelector('.bottom-buttons').appendChild(bookingSuccessMessage);
 
-      function debounce(func, wait) {
-        let timeout;
-        return function (...args) {
-          clearTimeout(timeout);
-          timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-      }
-
-      onAuthStateChanged(auth, (user) => {
-        currentUser = user;
-        if (user) {
-          signInButton.classList.add('hidden');
-          signUpButton.classList.add('hidden');
-          signOutButton.classList.remove('hidden');
-          bookNowButton.classList.add('hidden');
-          welcomeMessage.classList.remove('hidden');
-          welcomeText.textContent = `Welcome ${user.displayName || 'User'}`;
-          homeScreen.style.display = 'none';
-          bookingScreen.style.display = 'block';
-          initializeBookingInterface();
-        } else {
-          signInButton.classList.remove('hidden');
-          signUpButton.classList.remove('hidden');
-          signOutButton.classList.add('hidden');
-          bookNowButton.classList.remove('hidden');
-          welcomeMessage.classList.add('hidden');
-          homeScreen.style.display = 'flex';
-          bookingScreen.style.display = 'none';
-          timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
-          bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
-          updateMeetingRoomBox(null);
-        }
-        // updateTicker();
-      });
-
-      bookNowButton.addEventListener('click', () => {
-        if (!currentUser) {
-          signInModal.style.display = 'flex';
-        }
-      });
-
-      expandButton.addEventListener('click', () => {
-        bookedSlotsContainer.classList.toggle('expanded');
-        expandButton.textContent = bookedSlotsContainer.classList.contains('expanded') ? 'Show less' : 'Show more';
-      });
-
-      signInButton.addEventListener('click', () => {
-        signInModal.style.display = 'flex';
-      });
-
-      signInForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('signInEmail').value.trim();
-        const password = document.getElementById('signInPassword').value.trim();
-
-        if (!email || !password) {
-          alert('Please enter both email and password.');
-          return;
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
         }
 
-        // Check if email ends with either @intersmart.in or @intersmartedutech.com
-        if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
-          alert('Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
-          return;
-        }
-
-        try {
-          await signInWithEmailAndPassword(auth, email, password);
-          signInModal.style.display = 'none';
-          signInForm.reset();
-        } catch (error) {
-          let errorMessage = 'Sign in failed. Please try again.';
-          switch (error.code) {
-            case 'auth/invalid-credential':
-              errorMessage = 'Invalid email or password.';
-              break;
-            case 'auth/user-not-found':
-              errorMessage = 'No account found with this email.';
-              break;
-            case 'auth/wrong-password':
-              errorMessage = 'Incorrect password.';
-              break;
-            case 'auth/too-many-requests':
-              errorMessage = 'Too many attempts. Please try again later.';
-              break;
-          }
-          alert(errorMessage);
-        }
-      });
-
-      cancelSignIn.addEventListener('click', () => {
-        signInModal.style.display = 'none';
-        signInForm.reset();
-      });
-
-      forgotPassword.addEventListener('click', (e) => {
-        e.preventDefault();
-        const email = prompt('Please enter your email address to reset your password:');
-        if (email) {
-          sendPasswordResetEmail(auth, email)
-            .then(() => alert('Password reset email sent. Check your inbox.'))
-            .catch((error) => alert('Failed to send reset email: ' + error.message));
-        }
-      });
-
-      signUpButton.addEventListener('click', () => {
-        signUpModal.style.display = 'flex';
-      });
-
-      signUpForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('signUpEmail').value;
-        const password = document.getElementById('signUpPassword').value;
-        const name = document.getElementById('signUpName').value;
-
-        // Check if email ends with either @intersmart.in or @intersmartedutech.com
-        if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
-          alert('Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
-          return;
-        }
-
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await updateProfile(userCredential.user, { displayName: name });
-          signUpModal.style.display = 'none';
-          signUpForm.reset();
-          alert('Signup successful!');
-        } catch (error) {
-          if (error.code === 'auth/email-already-in-use') {
-            alert('This email is already registered.');
-          } else {
-            alert('Signup failed: ' + error.message);
-          }
-        }
-      });
-
-      cancelSignUp.addEventListener('click', () => {
-        signUpModal.style.display = 'none';
-        signUpForm.reset();
-      });
-
-      document.getElementById('switchToSignUp').addEventListener('click', (e) => {
-        e.preventDefault();
-        signInModal.style.display = 'none';
-        signUpModal.style.display = 'flex';
-        signInForm.reset();
-      });
-
-      document.getElementById('switchToSignIn').addEventListener('click', (e) => {
-        e.preventDefault();
-        signUpModal.style.display = 'none';
-        signInModal.style.display = 'flex';
-        signUpForm.reset();
-      });
-
-      signOutButton.addEventListener('click', async () => {
-        try {
-          await signOut(auth);
-        } catch (error) {
-          alert('Sign out failed: ' + error.message);
-        }
-      });
-
-      function showSuccessMessage(message) {
-        bookingSuccessMessage.textContent = message;
-        bookingSuccessMessage.classList.remove('hidden');
-        setTimeout(() => bookingSuccessMessage.classList.add('hidden'), 5000);
-      }
-
-      async function initializeBookingInterface() {
-        if (!currentUser) return;
-        bookedSlotsCache.clear();
-        bookedSlots.innerHTML = '';
-        timeSlots.innerHTML = '';
-
-        currentDate = new Date();
-        selectedDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-        selectedDate.setHours(0, 0, 0, 0);
-
-        renderCalendar();
-        await fetchBookedSlots(selectedDate.toDateString());
-        selectDate(new Date());
-        await populatePastBookingsFilters();
-        await filterPastBookings();
-        await updateMeetingRoomBoxWithCurrentBooking();
-      }
-
-      function renderCalendar() {
-        if (!currentUser) return;
-        calendar.innerHTML = '';
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        const startingDay = firstDay.getDay();
-
-        const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-        days.forEach(day => {
-          const dayElement = document.createElement('p');
-          dayElement.className = 'text-[#0e141b] text-[13px] font-bold leading-normal tracking-[0.015em] flex h-12 w-full items-center justify-center pb-0.5';
-          dayElement.textContent = day;
-          calendar.appendChild(dayElement);
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                signInButton.classList.add('hidden');
+                signUpButton.classList.add('hidden');
+                signOutButton.classList.remove('hidden');
+                bookNowButton.classList.add('hidden');
+                welcomeMessage.classList.remove('hidden');
+                welcomeText.textContent = `Welcome ${user.displayName || 'User'}`;
+                homeScreen.style.display = 'none';
+                bookingScreen.style.display = 'block';
+                initializeBookingInterface();
+            } else {
+                signInButton.classList.remove('hidden');
+                signUpButton.classList.remove('hidden');
+                signOutButton.classList.add('hidden');
+                bookNowButton.classList.remove('hidden');
+                welcomeMessage.classList.add('hidden');
+                homeScreen.style.display = 'flex';
+                bookingScreen.style.display = 'none';
+                timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
+                bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
+                updateMeetingRoomBox(null);
+            }
+            // updateTicker();
         });
 
-        for (let i = 0; i < startingDay; i++) {
-          calendar.appendChild(document.createElement('div'));
-        }
-
-        for (let i = 1; i <= daysInMonth; i++) {
-          const dateToCheck = new Date(year, month, i);
-          const dayButton = document.createElement('button');
-          dayButton.className = 'h-12 w-full text-[#0e141b] text-sm font-medium leading-normal calendar-day';
-          dayButton.textContent = i;
-
-          if (dateToCheck < today) {
-            dayButton.classList.add('disabled');
-          } else {
-            dayButton.addEventListener('click', async () => {
-              const dateKey = new Date(year, month, i).toDateString();
-              await fetchBookedSlots(dateKey);
-              selectDate(new Date(year, month, i));
-              selectedTimeSlots = [];
-              reserveButton.disabled = true;
-              const selectedSlots = timeSlots.querySelectorAll('.selected');
-              selectedSlots.forEach(slot => slot.classList.remove('selected'));
-            });
-          }
-
-          if (selectedDate && selectedDate.getDate() === i && selectedDate.getMonth() === month && selectedDate.getFullYear() === year) {
-            dayButton.classList.add('selected');
-          }
-
-          calendar.appendChild(dayButton);
-        }
-
-        currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      }
-
-      async function selectDate(date) {
-        if (!currentUser) return;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        if (date < today) {
-          alert('Cannot select past dates.');
-          return;
-        }
-
-        const previouslySelected = document.querySelector('.calendar-day.selected');
-        if (previouslySelected) {
-          previouslySelected.classList.remove('selected');
-        }
-
-        selectedDate = date;
-        selectedDateElement.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        timeSlotContainer.classList.remove('hidden');
-        bookedSlotsContainer.classList.remove('hidden');
-
-        renderCalendar();
-        await renderTimeSlots();
-        await debouncedRenderBookedSlots();
-      }
-
-      const allTimeSlots = [
-        "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-        "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
-        "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM"
-      ];
-
-      async function fetchBookedSlots(dateKey) {
-        if (!currentUser) return;
-        try {
-          const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
-          const querySnapshot = await getDocs(q);
-          const bookedTimes = new Set(querySnapshot.docs.map(doc => doc.data().time));
-          bookedSlotsCache.set(dateKey, bookedTimes);
-        } catch (error) {
-          console.error('Error fetching booked slots:', error);
-          bookedSlotsCache.set(dateKey, new Set());
-        }
-      }
-
-      async function renderTimeSlots() {
-        if (!currentUser) {
-          timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
-          return;
-        }
-
-        if (renderingLock) return;
-        renderingLock = true;
-
-        try {
-          timeSlots.innerHTML = '';
-          const dateKey = selectedDate.toDateString();
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const isToday = dateKey === today.toDateString();
-          const now = new Date();
-          const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-
-          if (new Date(dateKey) < today) {
-            timeSlots.innerHTML = '<p class="no-slots-message">Cannot book past dates.</p>';
-            return;
-          }
-
-          if (!bookedSlotsCache.has(dateKey)) {
-            await fetchBookedSlots(dateKey);
-          }
-
-          const bookedSlots = bookedSlotsCache.get(dateKey) || new Set();
-          let availableSlots = 0;
-
-          allTimeSlots.forEach(slot => {
-            const slotButton = document.createElement('button');
-            slotButton.textContent = slot;
-            slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
-
-            const slotTimeInMinutes = parseTime(slot);
-            const slotEndTime = slotTimeInMinutes + 30;
-            const isPast = isToday && slotEndTime <= currentTimeInMinutes;
-            const isBooked = bookedSlots.has(slot);
-
-            if (isPast || isBooked) {
-              slotButton.classList.add('booked-slot');
-              slotButton.disabled = true;
-            } else {
-              slotButton.addEventListener('click', () => {
-                slotButton.classList.toggle('selected');
-                selectedTimeSlots = Array.from(timeSlots.querySelectorAll('.selected')).map(el => el.textContent);
-                reserveButton.disabled = !selectedTimeSlots.length;
-              });
-              availableSlots++;
+        bookNowButton.addEventListener('click', () => {
+            if (!currentUser) {
+                signInModal.style.display = 'flex';
             }
-            timeSlots.appendChild(slotButton);
-          });
+        });
 
-          if (availableSlots === 0) {
-            timeSlots.innerHTML = '<p class="no-slots-message">No slots available for this day | All slots booked</p>';
-          }
-        } finally {
-          renderingLock = false;
+        expandButton.addEventListener('click', () => {
+            bookedSlotsContainer.classList.toggle('expanded');
+            expandButton.textContent = bookedSlotsContainer.classList.contains('expanded') ?
+                'Show less' : 'Show more';
+        });
+
+        signInButton.addEventListener('click', () => {
+            signInModal.style.display = 'flex';
+        });
+
+        signInForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signInEmail').value.trim();
+            const password = document.getElementById('signInPassword').value.trim();
+
+            if (!email || !password) {
+                alert('Please enter both email and password.');
+                return;
+            }
+
+            // Check if email ends with either @intersmart.in or @intersmartedutech.com
+            if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
+                alert(
+                    'Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                signInModal.style.display = 'none';
+                signInForm.reset();
+            } catch (error) {
+                let errorMessage = 'Sign in failed. Please try again.';
+                switch (error.code) {
+                    case 'auth/invalid-credential':
+                        errorMessage = 'Invalid email or password.';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage = 'No account found with this email.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Incorrect password.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Too many attempts. Please try again later.';
+                        break;
+                }
+                alert(errorMessage);
+            }
+        });
+
+        cancelSignIn.addEventListener('click', () => {
+            signInModal.style.display = 'none';
+            signInForm.reset();
+        });
+
+        forgotPassword.addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = prompt('Please enter your email address to reset your password:');
+            if (email) {
+                sendPasswordResetEmail(auth, email)
+                    .then(() => alert('Password reset email sent. Check your inbox.'))
+                    .catch((error) => alert('Failed to send reset email: ' + error.message));
+            }
+        });
+
+        signUpButton.addEventListener('click', () => {
+            signUpModal.style.display = 'flex';
+        });
+
+        signUpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signUpEmail').value;
+            const password = document.getElementById('signUpPassword').value;
+            const name = document.getElementById('signUpName').value;
+
+            // Check if email ends with either @intersmart.in or @intersmartedutech.com
+            if (!email.endsWith('@intersmart.in') && !email.endsWith('@intersmartedutech.com')) {
+                alert(
+                    'Only emails ending with @intersmart.in or @intersmartedutech.com are allowed.');
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(userCredential.user, {
+                    displayName: name
+                });
+                signUpModal.style.display = 'none';
+                signUpForm.reset();
+                alert('Signup successful!');
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('This email is already registered.');
+                } else {
+                    alert('Signup failed: ' + error.message);
+                }
+            }
+        });
+
+        cancelSignUp.addEventListener('click', () => {
+            signUpModal.style.display = 'none';
+            signUpForm.reset();
+        });
+
+        document.getElementById('switchToSignUp').addEventListener('click', (e) => {
+            e.preventDefault();
+            signInModal.style.display = 'none';
+            signUpModal.style.display = 'flex';
+            signInForm.reset();
+        });
+
+        document.getElementById('switchToSignIn').addEventListener('click', (e) => {
+            e.preventDefault();
+            signUpModal.style.display = 'none';
+            signInModal.style.display = 'flex';
+            signUpForm.reset();
+        });
+
+        signOutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                alert('Sign out failed: ' + error.message);
+            }
+        });
+
+        function showSuccessMessage(message) {
+            bookingSuccessMessage.textContent = message;
+            bookingSuccessMessage.classList.remove('hidden');
+            setTimeout(() => bookingSuccessMessage.classList.add('hidden'), 5000);
         }
-      }
 
-      const debouncedRenderTimeSlots = debounce(renderTimeSlots, 100);
+        async function initializeBookingInterface() {
+            if (!currentUser) return;
+            bookedSlotsCache.clear();
+            bookedSlots.innerHTML = '';
+            timeSlots.innerHTML = '';
 
-      async function renderBookedSlots() {
-        if (!currentUser) {
-          bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
-          return;
+            currentDate = new Date();
+            selectedDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            renderCalendar();
+            await fetchBookedSlots(selectedDate.toDateString());
+            selectDate(new Date());
+            await populatePastBookingsFilters();
+            await filterPastBookings();
+            await updateMeetingRoomBoxWithCurrentBooking();
         }
 
-        bookedSlots.innerHTML = '';
-        const dateKey = selectedDate.toDateString();
-        const now = new Date();
-        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+        function renderCalendar() {
+            if (!currentUser) return;
+            calendar.innerHTML = '';
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDay = firstDay.getDay();
 
-        try {
-          const q = query(collection(db, 'bookings'), where('date', '==', dateKey), where('userId', '==', currentUser.uid));
-          const querySnapshot = await getDocs(q);
-          const bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          bookings.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            days.forEach(day => {
+                const dayElement = document.createElement('p');
+                dayElement.className =
+                    'text-[#0e141b] text-[13px] font-bold leading-normal tracking-[0.015em] flex h-12 w-full items-center justify-center pb-0.5';
+                dayElement.textContent = day;
+                calendar.appendChild(dayElement);
+            });
 
-          if (bookings.length === 0) {
-            bookedSlots.innerHTML = `
+            for (let i = 0; i < startingDay; i++) {
+                calendar.appendChild(document.createElement('div'));
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateToCheck = new Date(year, month, i);
+                const dayButton = document.createElement('button');
+                dayButton.className =
+                    'h-12 w-full text-[#0e141b] text-sm font-medium leading-normal calendar-day';
+                dayButton.textContent = i;
+
+                if (dateToCheck < today) {
+                    dayButton.classList.add('disabled');
+                } else {
+                    dayButton.addEventListener('click', async () => {
+                        const dateKey = new Date(year, month, i).toDateString();
+                        await fetchBookedSlots(dateKey);
+                        selectDate(new Date(year, month, i));
+                        selectedTimeSlots = [];
+                        reserveButton.disabled = true;
+                        const selectedSlots = timeSlots.querySelectorAll('.selected');
+                        selectedSlots.forEach(slot => slot.classList.remove('selected'));
+                    });
+                }
+
+                if (selectedDate && selectedDate.getDate() === i && selectedDate.getMonth() === month &&
+                    selectedDate.getFullYear() === year) {
+                    dayButton.classList.add('selected');
+                }
+
+                calendar.appendChild(dayButton);
+            }
+
+            currentMonthElement.textContent = currentDate.toLocaleDateString('en-US', {
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        async function selectDate(date) {
+            if (!currentUser) return;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (date < today) {
+                alert('Cannot select past dates.');
+                return;
+            }
+
+            selectedDate = date;
+            selectedDateElement.textContent = date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            // First update visual state
+            const previouslySelected = document.querySelector('.calendar-day.selected');
+            if (previouslySelected) {
+                previouslySelected.classList.remove('selected');
+            }
+
+            // Find and update the new selected day immediately
+            const dayButtons = document.querySelectorAll('.calendar-day');
+            dayButtons.forEach(button => {
+                if (parseInt(button.textContent) === date.getDate()) {
+                    button.classList.add('selected');
+                }
+            });
+
+            // Show containers immediately
+            timeSlotContainer.classList.remove('hidden');
+            bookedSlotsContainer.classList.remove('hidden');
+
+            // Then fetch data and render
+            await Promise.all([
+                fetchBookedSlots(date.toDateString()),
+                renderTimeSlots(),
+                debouncedRenderBookedSlots()
+            ]);
+        }
+
+        const allTimeSlots = [
+            "9:00 AM - 9:30 AM", "9:30 AM - 10:00 AM", "10:00 AM - 10:30 AM", "10:30 AM - 11:00 AM",
+            "11:00 AM - 11:30 AM", "11:30 AM - 12:00 PM",
+            "12:00 PM - 12:30 PM", "12:30 PM - 1:00 PM", "1:00 PM - 1:30 PM", "1:30 PM - 2:00 PM",
+            "2:00 PM - 2:30 PM", "2:30 PM - 3:00 PM",
+            "3:00 PM - 3:30 PM", "3:30 PM - 4:00 PM", "4:00 PM - 4:30 PM", "4:30 PM - 5:00 PM",
+            "5:00 PM - 5:30 PM", "5:30 PM - 6:00 PM", "6:00 PM - 6:30 PM"
+        ];
+
+        async function fetchBookedSlots(dateKey) {
+            if (!currentUser) return;
+            try {
+                const q = query(collection(db, 'bookings'), where('date', '==', dateKey));
+                const querySnapshot = await getDocs(q);
+                const bookedTimes = new Set(querySnapshot.docs.map(doc => doc.data().time));
+                bookedSlotsCache.set(dateKey, bookedTimes);
+            } catch (error) {
+                console.error('Error fetching booked slots:', error);
+                bookedSlotsCache.set(dateKey, new Set());
+            }
+        }
+
+        async function renderTimeSlots() {
+            if (!currentUser) {
+                timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
+                return;
+            }
+
+            if (renderingLock) return;
+            renderingLock = true;
+
+            try {
+                timeSlots.innerHTML = '';
+                const dateKey = selectedDate.toDateString();
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const isToday = dateKey === today.toDateString();
+                const now = new Date();
+                const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+
+                if (new Date(dateKey) < today) {
+                    timeSlots.innerHTML = '<p class="no-slots-message">Cannot book past dates.</p>';
+                    return;
+                }
+
+                if (!bookedSlotsCache.has(dateKey)) {
+                    await fetchBookedSlots(dateKey);
+                }
+
+                const bookedSlots = bookedSlotsCache.get(dateKey) || new Set();
+                let availableSlots = 0;
+
+                allTimeSlots.forEach(slot => {
+                    const slotButton = document.createElement('button');
+                    slotButton.textContent = slot;
+                    slotButton.className =
+                        'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
+
+                    const slotTimeInMinutes = parseTime(slot);
+                    const slotEndTime = slotTimeInMinutes + 30;
+                    const isPast = isToday && slotEndTime <= currentTimeInMinutes;
+                    const isBooked = bookedSlots.has(slot);
+
+                    if (isPast || isBooked) {
+                        slotButton.classList.add('booked-slot');
+                        slotButton.disabled = true;
+                    } else {
+                        slotButton.addEventListener('click', () => {
+                            slotButton.classList.toggle('selected');
+                            selectedTimeSlots = Array.from(timeSlots.querySelectorAll(
+                                '.selected')).map(el => el.textContent);
+                            reserveButton.disabled = !selectedTimeSlots.length;
+                        });
+                        availableSlots++;
+                    }
+                    timeSlots.appendChild(slotButton);
+                });
+
+                if (availableSlots === 0) {
+                    timeSlots.innerHTML =
+                        '<p class="no-slots-message">No slots available for this day | All slots booked</p>';
+                }
+            } finally {
+                renderingLock = false;
+            }
+        }
+
+        const debouncedRenderTimeSlots = debounce(renderTimeSlots, 100);
+
+        async function renderBookedSlots() {
+            if (!currentUser) {
+                bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
+                return;
+            }
+
+            bookedSlots.innerHTML = '';
+            const dateKey = selectedDate.toDateString();
+            const now = new Date();
+            const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+
+            try {
+                const q = query(collection(db, 'bookings'), where('date', '==', dateKey), where('userId',
+                    '==', currentUser.uid));
+                const querySnapshot = await getDocs(q);
+                const bookings = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                bookings.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+
+                if (bookings.length === 0) {
+                    bookedSlots.innerHTML = `
               <p class="text-[#4e7397] text-sm font-normal leading-normal">
                 You have no slots booked on ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.
               </p>`;
-            expandButton.classList.add('hidden');
-            return;
-          }
+                    expandButton.classList.add('hidden');
+                    return;
+                }
 
-          bookings.forEach((booking) => {
-            const bookingElement = document.createElement('div');
-            const slotTimeInMinutes = parseTime(booking.time);
-            const isStarted = dateKey === now.toDateString() && slotTimeInMinutes <= currentTimeInMinutes;
-            const isCompleted = dateKey === now.toDateString() && slotTimeInMinutes + 30 <= currentTimeInMinutes;
-            bookingElement.className = `booked-slot flex flex-col p-4 border-b border-[#e7edf3] ${isCompleted ? 'completed' : ''}`;
-            bookingElement.setAttribute('data-id', booking.id);
+                bookings.forEach((booking) => {
+                    const bookingElement = document.createElement('div');
+                    const slotTimeInMinutes = parseTime(booking.time);
+                    const isStarted = dateKey === now.toDateString() && slotTimeInMinutes <=
+                        currentTimeInMinutes;
+                    const isCompleted = dateKey === now.toDateString() && slotTimeInMinutes + 30 <=
+                        currentTimeInMinutes;
+                    bookingElement.className =
+                        `booked-slot flex flex-col p-4 border-b border-[#e7edf3] ${isCompleted ? 'completed' : ''}`;
+                    bookingElement.setAttribute('data-id', booking.id);
 
-            const showButtons = !isStarted;
-            const remainingMinutes = isStarted ? 0 : Math.max(0, slotTimeInMinutes - currentTimeInMinutes);
-            const userInitial = (booking.name || 'U')[0].toUpperCase();
+                    const showButtons = !isStarted;
+                    const remainingMinutes = isStarted ? 0 : Math.max(0, slotTimeInMinutes -
+                        currentTimeInMinutes);
+                    const userInitial = (booking.name || 'U')[0].toUpperCase();
 
-            bookingElement.innerHTML = `
+                    bookingElement.innerHTML = `
               <div class="flex items-center gap-4 w-full">
                 <div class="profile-pic">${userInitial}</div>
                 <div class="flex-1">
@@ -1634,534 +1995,608 @@
               </div>
             `;
 
-            bookedSlots.appendChild(bookingElement);
+                    bookedSlots.appendChild(bookingElement);
 
-            if (showButtons && remainingMinutes > 0 && remainingMinutes < 5 && dateKey === now.toDateString()) {
-              lateBookingMessage.classList.remove('hidden');
-              lateBookingMessage.textContent = `The booking time has already started. You will see the delete and reschedule buttons for only ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}.`;
-              setTimeout(() => {
-                lateBookingMessage.classList.add('hidden');
-                debouncedRenderBookedSlots();
-              }, remainingMinutes * 60000);
+                    if (showButtons && remainingMinutes > 0 && remainingMinutes < 5 && dateKey ===
+                        now.toDateString()) {
+                        lateBookingMessage.classList.remove('hidden');
+                        lateBookingMessage.textContent =
+                            `The booking time has already started. You will see the delete and reschedule buttons for only ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}.`;
+                        setTimeout(() => {
+                            lateBookingMessage.classList.add('hidden');
+                            debouncedRenderBookedSlots();
+                        }, remainingMinutes * 60000);
+                    }
+
+                    const detailsButton = bookingElement.querySelector('.details-button');
+                    detailsButton.addEventListener('click', () => {
+                        const detailsDiv = bookingElement.querySelector('.details');
+                        detailsDiv.classList.toggle('hidden');
+                        detailsButton.textContent = detailsDiv.classList.contains(
+                            'hidden') ? 'Details' : 'Hide Details';
+                    });
+
+                    if (showButtons) {
+                        const rescheduleButton = bookingElement.querySelector('.reschedule-button');
+                        rescheduleButton.addEventListener('click', () => {
+                            const bookingId = rescheduleButton.getAttribute('data-id');
+                            openRescheduleModal(bookingId, booking);
+                        });
+
+                        const deleteButton = bookingElement.querySelector('.delete-button');
+                        deleteButton.addEventListener('click', () => {
+                            const bookingId = deleteButton.getAttribute('data-id');
+                            deleteBooking(bookingId);
+                        });
+                    }
+                });
+
+                expandButton.classList.toggle('hidden', bookings.length <= 3);
+            } catch (error) {
+                console.error('Error rendering booked slots:', error);
+                bookedSlots.innerHTML = '<p class="text-red-600">Error loading booked slots.</p>';
+            }
+        }
+
+        const debouncedRenderBookedSlots = debounce(renderBookedSlots, 100);
+
+        function parseTime(timeStr) {
+            // Extract the start time from the range (e.g., "9-9:30 AM" -> "9")
+            const startTime = timeStr.split('-')[0].trim();
+            const [time, period] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            if (!minutes) minutes = 0; // Handle cases where minutes are not specified (e.g., "9")
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            return hours * 60 + minutes;
+        }
+
+        async function fetchAllBookings() {
+            try {
+                const q = query(collection(db, 'bookings'));
+                const querySnapshot = await getDocs(q);
+                allBookings = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                allBookings.sort((a, b) => {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
+                    return parseTime(a.time) - parseTime(b.time);
+                });
+            } catch (error) {
+                console.error('Error fetching all bookings:', error);
+                allBookings = [];
+            }
+        }
+
+        async function updateMeetingRoomBoxWithCurrentBooking() {
+            if (!currentUser) {
+                updateMeetingRoomBox(null);
+                return;
             }
 
-            const detailsButton = bookingElement.querySelector('.details-button');
-            detailsButton.addEventListener('click', () => {
-              const detailsDiv = bookingElement.querySelector('.details');
-              detailsDiv.classList.toggle('hidden');
-              detailsButton.textContent = detailsDiv.classList.contains('hidden') ? 'Details' : 'Hide Details';
+            await fetchAllBookings();
+            if (allBookings.length === 0) {
+                updateMeetingRoomBox(null);
+                return;
+            }
+
+            const now = new Date();
+            const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+            const currentDateStr = now.toDateString();
+
+            let currentBooking = null;
+            let newIndex = currentBookingIndex;
+
+            const ongoingBooking = allBookings.find((booking, index) => {
+                const bookingDate = new Date(booking.date);
+                const bookingTimeInMinutes = parseTime(booking.time);
+                const bookingEndTime = bookingTimeInMinutes + 30;
+                return (
+                    bookingDate.toDateString() === currentDateStr &&
+                    bookingTimeInMinutes <= currentTimeInMinutes &&
+                    currentTimeInMinutes < bookingEndTime
+                );
             });
 
-            if (showButtons) {
-              const rescheduleButton = bookingElement.querySelector('.reschedule-button');
-              rescheduleButton.addEventListener('click', () => {
-                const bookingId = rescheduleButton.getAttribute('data-id');
-                openRescheduleModal(bookingId, booking);
-              });
+            if (ongoingBooking) {
+                currentBooking = ongoingBooking;
+                newIndex = allBookings.indexOf(ongoingBooking);
+            } else {
+                const upcomingBooking = allBookings.find((booking, index) => {
+                    const bookingDate = new Date(booking.date);
+                    const bookingTimeInMinutes = parseTime(booking.time);
+                    return (
+                        (bookingDate > now || (bookingDate.toDateString() === currentDateStr &&
+                            bookingTimeInMinutes > currentTimeInMinutes))
+                    );
+                });
 
-              const deleteButton = bookingElement.querySelector('.delete-button');
-              deleteButton.addEventListener('click', () => {
-                const bookingId = deleteButton.getAttribute('data-id');
-                deleteBooking(bookingId);
-              });
+                if (upcomingBooking) {
+                    currentBooking = upcomingBooking;
+                    newIndex = allBookings.indexOf(upcomingBooking);
+                } else {
+                    const lastBooking = allBookings[allBookings.length - 1];
+                    if (lastBooking) {
+                        currentBooking = lastBooking;
+                        newIndex = allBookings.length - 1;
+                    }
+                }
             }
-          });
 
-          expandButton.classList.toggle('hidden', bookings.length <= 3);
-        } catch (error) {
-          console.error('Error rendering booked slots:', error);
-          bookedSlots.innerHTML = '<p class="text-red-600">Error loading booked slots.</p>';
-        }
-      }
-
-      const debouncedRenderBookedSlots = debounce(renderBookedSlots, 100);
-
-      function parseTime(timeStr) {
-        const [time, period] = timeStr.split(' ');
-        let [hours, minutes] = time.split(':').map(Number);
-        if (period === 'PM' && hours !== 12) hours += 12;
-        if (period === 'AM' && hours === 12) hours = 0;
-        return hours * 60 + minutes;
-      }
-
-      async function fetchAllBookings() {
-        try {
-          const q = query(collection(db, 'bookings'));
-          const querySnapshot = await getDocs(q);
-          allBookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          allBookings.sort((a, b) => {
-            const dateA = new Date(a.date);
-            const dateB = new Date(b.date);
-            if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
-            return parseTime(a.time) - parseTime(b.time);
-          });
-        } catch (error) {
-          console.error('Error fetching all bookings:', error);
-          allBookings = [];
-        }
-      }
-
-      async function updateMeetingRoomBoxWithCurrentBooking() {
-        if (!currentUser) {
-          updateMeetingRoomBox(null);
-          return;
+            currentBookingIndex = newIndex;
+            updateMeetingRoomBox(currentBooking);
+            updateNavigationButtons();
         }
 
-        await fetchAllBookings();
-        if (allBookings.length === 0) {
-          updateMeetingRoomBox(null);
-          return;
-        }
+        function updateMeetingRoomBox(booking) {
+            if (!booking) {
+                bookingInfoTitle.textContent = 'No Current Bookings';
+                currentBookingName.textContent = '';
+                currentBookingDepartment.textContent = '';
+                currentBookingTime.textContent = '';
+                currentBookingDate.textContent = '';
+                return;
+            }
 
-        const now = new Date();
-        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-        const currentDateStr = now.toDateString();
-
-        let currentBooking = null;
-        let newIndex = currentBookingIndex;
-
-        const ongoingBooking = allBookings.find((booking, index) => {
-          const bookingDate = new Date(booking.date);
-          const bookingTimeInMinutes = parseTime(booking.time);
-          const bookingEndTime = bookingTimeInMinutes + 30;
-          return (
-            bookingDate.toDateString() === currentDateStr &&
-            bookingTimeInMinutes <= currentTimeInMinutes &&
-            currentTimeInMinutes < bookingEndTime
-          );
-        });
-
-        if (ongoingBooking) {
-          currentBooking = ongoingBooking;
-          newIndex = allBookings.indexOf(ongoingBooking);
-        } else {
-          const upcomingBooking = allBookings.find((booking, index) => {
+            const now = new Date();
+            const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+            const currentDateStr = now.toDateString();
             const bookingDate = new Date(booking.date);
             const bookingTimeInMinutes = parseTime(booking.time);
-            return (
-              (bookingDate > now || (bookingDate.toDateString() === currentDateStr && bookingTimeInMinutes > currentTimeInMinutes))
-            );
-          });
+            const bookingEndTime = bookingTimeInMinutes + 30;
 
-          if (upcomingBooking) {
-            currentBooking = upcomingBooking;
-            newIndex = allBookings.indexOf(upcomingBooking);
-          } else {
-            const lastBooking = allBookings[allBookings.length - 1];
-            if (lastBooking) {
-              currentBooking = lastBooking;
-              newIndex = allBookings.length - 1;
+            let isOngoing = false;
+            if (bookingDate.toDateString() === currentDateStr) {
+                isOngoing = bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes <
+                    bookingEndTime;
             }
-          }
+            const isUpcoming = bookingDate > now || (bookingDate.toDateString() === currentDateStr &&
+                bookingTimeInMinutes > currentTimeInMinutes);
+
+            bookingInfoTitle.textContent = isOngoing ? 'Current Slot is Booked By' : (isUpcoming ?
+                'Next Booking' : 'Last Booking');
+
+            // Create a container for the booking info if it doesn't exist
+            let bookingInfoContainer = document.querySelector('.booking-info-container');
+            if (!bookingInfoContainer) {
+                bookingInfoContainer = document.createElement('div');
+                bookingInfoContainer.className = 'booking-info-container';
+                currentBookingName.parentNode.insertBefore(bookingInfoContainer, currentBookingName);
+            }
+
+            // Move the booking information elements into the container
+            bookingInfoContainer.innerHTML = `
+          <span class="name">${booking.name || 'Unknown'}</span>
+          <span class="role">${booking.role || 'N/A'}</span>
+          <span class="purpose">Purpose: ${booking.purpose || 'N/A'}</span>
+          <span class="time">${booking.time}</span>
+          <span class="date">${booking.date}</span>
+        `;
         }
 
-        currentBookingIndex = newIndex;
-        updateMeetingRoomBox(currentBooking);
-        updateNavigationButtons();
-      }
-
-      function updateMeetingRoomBox(booking) {
-        if (!booking) {
-          bookingInfoTitle.textContent = 'No Current Bookings';
-          currentBookingName.textContent = '';
-          currentBookingDepartment.textContent = '';
-          currentBookingTime.textContent = '';
-          currentBookingDate.textContent = '';
-          return;
+        function updateNavigationButtons() {
+            previousBookingButton.disabled = currentBookingIndex === 0;
+            nextBookingButton.disabled = currentBookingIndex === allBookings.length - 1;
         }
 
-        const now = new Date();
-        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-        const currentDateStr = now.toDateString();
-        const bookingDate = new Date(booking.date);
-        const bookingTimeInMinutes = parseTime(booking.time);
-        const bookingEndTime = bookingTimeInMinutes + 30;
+        previousBookingButton.addEventListener('click', () => {
+            if (currentBookingIndex > 0) {
+                currentBookingIndex--;
+                updateMeetingRoomBox(allBookings[currentBookingIndex]);
+                updateNavigationButtons();
+            }
+        });
 
-        // Determine if the booking is ongoing or upcoming
-        let isOngoing = false;
-        if (bookingDate.toDateString() === currentDateStr) {
-          isOngoing = bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingEndTime;
-        }
-        const isUpcoming = bookingDate > now || (bookingDate.toDateString() === currentDateStr && bookingTimeInMinutes > currentTimeInMinutes);
+        nextBookingButton.addEventListener('click', () => {
+            if (currentBookingIndex < allBookings.length - 1) {
+                currentBookingIndex++;
+                updateMeetingRoomBox(allBookings[currentBookingIndex]);
+                updateNavigationButtons();
+            }
+        });
 
-        // Set the title based on the booking status
-        bookingInfoTitle.textContent = isOngoing ? 'Current Slot is Booked By' : (isUpcoming ? 'Next Booking' : 'Last Booking');
-        currentBookingName.textContent = booking.name || 'Unknown';
-        currentBookingDepartment.textContent = booking.department || 'N/A';
-        currentBookingTime.textContent = booking.time;
-        currentBookingDate.textContent = booking.date;
-      }
+        reserveButton.addEventListener('click', () => {
+            if (selectedTimeSlots.length === 0) {
+                alert('Please select at least one time slot.');
+                return;
+            }
+            bookingModal.style.display = 'flex';
+        });
 
-      function updateNavigationButtons() {
-        previousBookingButton.disabled = currentBookingIndex === 0;
-        nextBookingButton.disabled = currentBookingIndex === allBookings.length - 1;
-      }
+        bookingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = bookingForm.querySelector('button[type="submit"]');
+            const loader = document.createElement('div');
+            loader.className = 'loader';
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+            submitButton.appendChild(loader);
 
-      previousBookingButton.addEventListener('click', () => {
-        if (currentBookingIndex > 0) {
-          currentBookingIndex--;
-          updateMeetingRoomBox(allBookings[currentBookingIndex]);
-          updateNavigationButtons();
-        }
-      });
+            const department = document.getElementById('department').value;
+            const role = document.getElementById('role').value;
+            const purpose = document.getElementById('purpose').value;
 
-      nextBookingButton.addEventListener('click', () => {
-        if (currentBookingIndex < allBookings.length - 1) {
-          currentBookingIndex++;
-          updateMeetingRoomBox(allBookings[currentBookingIndex]);
-          updateNavigationButtons();
-        }
-      });
+            try {
+                for (const time of selectedTimeSlots) {
+                    await addDoc(collection(db, 'bookings'), {
+                        userId: currentUser.uid,
+                        email: currentUser.email,
+                        name: currentUser.displayName,
+                        department,
+                        role,
+                        purpose,
+                        date: selectedDate.toDateString(),
+                        time,
+                        createdAt: new Date()
+                    });
+                }
 
-      reserveButton.addEventListener('click', () => {
-        if (selectedTimeSlots.length === 0) {
-          alert('Please select at least one time slot.');
-          return;
-        }
-        bookingModal.style.display = 'flex';
-      });
+                showSuccessMessage('Booking successful!');
+                bookedSlotsCache.delete(selectedDate.toDateString());
+                await fetchBookedSlots(selectedDate.toDateString());
+                await renderTimeSlots();
+                await debouncedRenderBookedSlots();
+                await updateMeetingRoomBoxWithCurrentBooking();
+                // await updateTicker();
+                selectedTimeSlots = [];
+                reserveButton.disabled = true;
+                const selectedSlots = timeSlots.querySelectorAll('.selected');
+                selectedSlots.forEach(slot => slot.classList.remove('selected'));
+                bookingModal.style.display = 'none';
+                bookingForm.reset();
+            } catch (error) {
+                console.error('Error booking slot:', error);
+                alert('Failed to book slot: ' + error.message);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit';
+                loader.remove();
+            }
+        });
 
-      bookingForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const submitButton = bookingForm.querySelector('button[type="submit"]');
-        const loader = document.createElement('div');
-        loader.className = 'loader';
-        submitButton.disabled = true;
-        submitButton.textContent = 'Submitting...';
-        submitButton.appendChild(loader);
+        cancelBookingButton.addEventListener('click', () => {
+            bookingModal.style.display = 'none';
+            bookingForm.reset();
+        });
 
-        const department = document.getElementById('department').value;
-        const role = document.getElementById('role').value;
-        const purpose = document.getElementById('purpose').value;
-
-        try {
-          for (const time of selectedTimeSlots) {
-            await addDoc(collection(db, 'bookings'), {
-              userId: currentUser.uid,
-              email: currentUser.email,
-              name: currentUser.displayName,
-              department,
-              role,
-              purpose,
-              date: selectedDate.toDateString(),
-              time,
-              createdAt: new Date()
-            });
-          }
-
-          showSuccessMessage('Booking successful!');
-          bookedSlotsCache.delete(selectedDate.toDateString());
-          await fetchBookedSlots(selectedDate.toDateString());
-          await renderTimeSlots();
-          await debouncedRenderBookedSlots();
-          await updateMeetingRoomBoxWithCurrentBooking();
-          // await updateTicker();
-          selectedTimeSlots = [];
-          reserveButton.disabled = true;
-          const selectedSlots = timeSlots.querySelectorAll('.selected');
-          selectedSlots.forEach(slot => slot.classList.remove('selected'));
-          bookingModal.style.display = 'none';
-          bookingForm.reset();
-        } catch (error) {
-          console.error('Error booking slot:', error);
-          alert('Failed to book slot: ' + error.message);
-        } finally {
-          submitButton.disabled = false;
-          submitButton.textContent = 'Submit';
-          loader.remove();
-        }
-      });
-
-      cancelBookingButton.addEventListener('click', () => {
-        bookingModal.style.display = 'none';
-        bookingForm.reset();
-      });
-
-      async function openRescheduleModal(bookingId, booking) {
-        rescheduleModal.style.display = 'flex';
-        newDateInput.value = '';
-        newTimeSelect.innerHTML = '<option value="">Select a date first</option>';
-        newTimeSelect.disabled = true;
-
-        newDateInput.addEventListener('change', async () => {
-          const newDate = new Date(newDateInput.value);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          if (newDate < today) {
-            alert('Cannot reschedule to a past date.');
+        async function openRescheduleModal(bookingId, booking) {
+            rescheduleModal.style.display = 'flex';
             newDateInput.value = '';
             newTimeSelect.innerHTML = '<option value="">Select a date first</option>';
             newTimeSelect.disabled = true;
-            return;
-          }
 
-          const dateKey = newDate.toDateString();
-          await fetchBookedSlots(dateKey);
-          const bookedSlots = bookedSlotsCache.get(dateKey) || new Set();
+            newDateInput.addEventListener('change', async () => {
+                const newDate = new Date(newDateInput.value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-          const isToday = dateKey === today.toDateString();
-          const now = new Date();
-          const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+                if (newDate < today) {
+                    alert('Cannot reschedule to a past date.');
+                    newDateInput.value = '';
+                    newTimeSelect.innerHTML = '<option value="">Select a date first</option>';
+                    newTimeSelect.disabled = true;
+                    return;
+                }
 
-          newTimeSelect.innerHTML = '<option value="">Select a time slot</option>';
-          allTimeSlots.forEach(slot => {
-            const slotTimeInMinutes = parseTime(slot);
-            const isPast = isToday && slotTimeInMinutes + 30 <= currentTimeInMinutes;
-            if (!bookedSlots.has(slot) && !isPast && !(slot === booking.time && dateKey === booking.date)) {
-              const option = document.createElement('option');
-              option.value = slot;
-              option.textContent = slot;
-              newTimeSelect.appendChild(option);
-            }
-          });
+                const dateKey = newDate.toDateString();
+                await fetchBookedSlots(dateKey);
+                const bookedSlots = bookedSlotsCache.get(dateKey) || new Set();
 
-          newTimeSelect.disabled = newTimeSelect.options.length === 1;
-          if (newTimeSelect.options.length === 1) {
-            newTimeSelect.innerHTML = '<option value="">No available slots</option>';
-          }
-        });
+                const isToday = dateKey === today.toDateString();
+                const now = new Date();
+                const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
 
-        rescheduleForm.onsubmit = async (e) => {
-          e.preventDefault();
-          const rescheduleButton = rescheduleForm.querySelector('button[type="submit"]');
-          const loader = document.createElement('div');
-          loader.className = 'loader';
-          rescheduleButton.disabled = true;
-          rescheduleButton.textContent = 'Rescheduling...';
-          rescheduleButton.appendChild(loader);
+                newTimeSelect.innerHTML = '<option value="">Select a time slot</option>';
+                allTimeSlots.forEach(slot => {
+                    const slotTimeInMinutes = parseTime(slot);
+                    const isPast = isToday && slotTimeInMinutes + 30 <=
+                        currentTimeInMinutes;
+                    if (!bookedSlots.has(slot) && !isPast && !(slot === booking.time &&
+                            dateKey === booking.date)) {
+                        const option = document.createElement('option');
+                        option.value = slot;
+                        option.textContent = slot;
+                        newTimeSelect.appendChild(option);
+                    }
+                });
 
-          const newDate = new Date(newDateInput.value);
-          const newTime = newTimeSelect.value;
-
-          if (!newDate || !newTime) {
-            alert('Please select a new date and time.');
-            return;
-          }
-
-          try {
-            const docRef = doc(db, 'bookings', bookingId);
-            await updateDoc(docRef, {
-              date: newDate.toDateString(),
-              time: newTime
+                newTimeSelect.disabled = newTimeSelect.options.length === 1;
+                if (newTimeSelect.options.length === 1) {
+                    newTimeSelect.innerHTML = '<option value="">No available slots</option>';
+                }
             });
 
-            showSuccessMessage('Booking rescheduled successfully!');
-            bookedSlotsCache.delete(selectedDate.toDateString());
-            bookedSlotsCache.delete(newDate.toDateString());
-            await fetchBookedSlots(selectedDate.toDateString());
-            await renderTimeSlots();
-            await debouncedRenderBookedSlots();
-            await updateMeetingRoomBoxWithCurrentBooking();
-            // await updateTicker();
+            rescheduleForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const rescheduleButton = rescheduleForm.querySelector('button[type="submit"]');
+                const loader = document.createElement('div');
+                loader.className = 'loader';
+                rescheduleButton.disabled = true;
+                rescheduleButton.textContent = 'Rescheduling...';
+                rescheduleButton.appendChild(loader);
+
+                const newDate = new Date(newDateInput.value);
+                const newTime = newTimeSelect.value;
+
+                if (!newDate || !newTime) {
+                    alert('Please select a new date and time.');
+                    return;
+                }
+
+                try {
+                    const docRef = doc(db, 'bookings', bookingId);
+                    await updateDoc(docRef, {
+                        date: newDate.toDateString(),
+                        time: newTime
+                    });
+
+                    showSuccessMessage('Booking rescheduled successfully!');
+                    bookedSlotsCache.delete(selectedDate.toDateString());
+                    bookedSlotsCache.delete(newDate.toDateString());
+                    await fetchBookedSlots(selectedDate.toDateString());
+                    await renderTimeSlots();
+                    await debouncedRenderBookedSlots();
+                    await updateMeetingRoomBoxWithCurrentBooking();
+                    // await updateTicker();
+                    rescheduleModal.style.display = 'none';
+                    rescheduleForm.reset();
+                } catch (error) {
+                    console.error('Error rescheduling booking:', error);
+                    alert('Failed to reschedule booking: ' + error.message);
+                } finally {
+                    rescheduleButton.disabled = false;
+                    rescheduleButton.textContent = 'Reschedule';
+                    loader.remove();
+                }
+            };
+        }
+
+        cancelRescheduleButton.addEventListener('click', () => {
             rescheduleModal.style.display = 'none';
             rescheduleForm.reset();
-          } catch (error) {
-            console.error('Error rescheduling booking:', error);
-            alert('Failed to reschedule booking: ' + error.message);
-          } finally {
-            rescheduleButton.disabled = false;
-            rescheduleButton.textContent = 'Reschedule';
-            loader.remove();
-          }
-        };
-      }
+        });
 
-      cancelRescheduleButton.addEventListener('click', () => {
-        rescheduleModal.style.display = 'none';
-        rescheduleForm.reset();
-      });
+        async function deleteBooking(bookingId) {
+            try {
+                const docRef = doc(db, 'bookings', bookingId);
+                const docSnap = await getDoc(docRef);
+                if (!docSnap.exists()) {
+                    alert('Booking not found.');
+                    return;
+                }
 
-      async function deleteBooking(bookingId) {
-        try {
-          const docRef = doc(db, 'bookings', bookingId);
-          const docSnap = await getDoc(docRef);
-          if (!docSnap.exists()) {
-            alert('Booking not found.');
-            return;
-          }
+                const bookingData = docSnap.data();
+                const bookingTimeInMinutes = parseTime(bookingData.time);
+                const now = new Date();
+                const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
 
-          const bookingData = docSnap.data();
-          const bookingTimeInMinutes = parseTime(bookingData.time);
-          const now = new Date();
-          const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+                if (bookingData.userId !== currentUser.uid) {
+                    alert('You can only delete your own bookings.');
+                    return;
+                }
 
-          if (bookingData.userId !== currentUser.uid) {
-            alert('You can only delete your own bookings.');
-            return;
-          }
+                if (bookingData.date === now.toDateString() && bookingTimeInMinutes <=
+                    currentTimeInMinutes) {
+                    alert('Cannot delete a booking that has already started.');
+                    return;
+                }
 
-          if (bookingData.date === now.toDateString() && bookingTimeInMinutes <= currentTimeInMinutes) {
-            alert('Cannot delete a booking that has already started.');
-            return;
-          }
-
-          await deleteDoc(docRef);
-          showSuccessMessage('Booking deleted successfully!');
-          bookedSlotsCache.delete(selectedDate.toDateString());
-          await fetchBookedSlots(selectedDate.toDateString());
-          await renderTimeSlots();
-          await debouncedRenderBookedSlots();
-          await updateMeetingRoomBoxWithCurrentBooking();
-          // await updateTicker();
-        } catch (error) {
-          console.error('Error deleting booking:', error);
-          alert('Failed to delete booking: ' + error.message);
-        }
-      }
-
-      // async function updateTicker() {
-      //   if (!currentUser) {
-      //     tickerContent.innerHTML = 'Please sign in to view booking status.';
-      //     return;
-      //   }
-
-      //   await fetchAllBookings();
-      //   if (allBookings.length === 0) {
-      //     tickerContent.innerHTML = 'No bookings available.';
-      //     return;
-      //   }
-
-      //   const now = new Date();
-      //   const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-      //   const currentDateStr = now.toDateString();
-
-      //   const tickerItems = allBookings.map(booking => {
-      //     const bookingDate = new Date(booking.date);
-      //     const bookingTimeInMinutes = parseTime(booking.time);
-      //     const bookingEndTime = bookingTimeInMinutes + 30;
-      //     let status = 'upcoming';
-      //     let statusClass = 'upcoming';
-
-      //     if (bookingDate.toDateString() === currentDateStr) {
-      //       if (bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingEndTime) {
-      //         status = 'ongoing';
-      //         statusClass = 'ongoing';
-      //       } else if (bookingEndTime <= currentTimeInMinutes) {
-      //         status = 'completed';
-      //         statusClass = 'completed';
-      //       }
-      //     } else if (bookingDate < now) {
-      //       status = 'completed';
-      //       statusClass = 'completed';
-      //     }
-
-      //     return `
-      //       <span>
-      //         <span>
-      //           ${booking.name || 'Unknown'} (${booking.department || 'N/A'}) - 
-      //           ${booking.date} ${booking.time} - 
-      //           <span class="status ${statusClass}">${status}</span>
-      //         </span>
-      //         <span class="ticker-separator"> | </span>
-      //       </span>
-      //     `;
-      //   }).join('');
-
-      //   tickerContent.innerHTML = tickerItems + tickerItems;
-      // }
-
-      async function populatePastBookingsFilters() {
-        if (!currentUser) return;
-
-        try {
-          const departments = new Set();
-          const q = query(collection(db, 'bookings'));
-          const querySnapshot = await getDocs(q);
-          querySnapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.department) departments.add(data.department);
-          });
-
-          pastBookingsDepartment.innerHTML = '<option value="">All Departments</option>';
-          departments.forEach(dept => {
-            const option = document.createElement('option');
-            option.value = dept;
-            option.textContent = dept;
-            pastBookingsDepartment.appendChild(option);
-          });
-
-          const today = new Date().toISOString().split('T')[0];
-          pastBookingsDate.value = today;
-        } catch (error) {
-          console.error('Error populating filters:', error);
-        }
-      }
-
-      async function filterPastBookings() {
-        if (!currentUser) {
-          pastBookingsList.innerHTML = '<p class="no-bookings">Please sign in to view bookings.</p>';
-          return;
+                await deleteDoc(docRef);
+                showSuccessMessage('Booking deleted successfully!');
+                bookedSlotsCache.delete(selectedDate.toDateString());
+                await fetchBookedSlots(selectedDate.toDateString());
+                await renderTimeSlots();
+                await debouncedRenderBookedSlots();
+                await updateMeetingRoomBoxWithCurrentBooking();
+                // await updateTicker();
+            } catch (error) {
+                console.error('Error deleting booking:', error);
+                alert('Failed to delete booking: ' + error.message);
+            }
         }
 
-        const selectedDate = pastBookingsDate.value;
-        const selectedDepartment = pastBookingsDepartment.value;
+        // async function updateTicker() {
+        //   if (!currentUser) {
+        //     tickerContent.innerHTML = 'Please sign in to view booking status.';
+        //     return;
+        //   }
 
-        try {
-          let q = query(collection(db, 'bookings'));
-          if (selectedDate) {
-            const dateStr = new Date(selectedDate).toDateString();
-            q = query(q, where('date', '==', dateStr));
-          }
-          if (selectedDepartment) {
-            q = query(q, where('department', '==', selectedDepartment));
-          }
+        //   await fetchAllBookings();
+        //   if (allBookings.length === 0) {
+        //     tickerContent.innerHTML = 'No bookings available.';
+        //     return;
+        //   }
 
-          const querySnapshot = await getDocs(q);
-          const bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        //   const now = new Date();
+        //   const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+        //   const currentDateStr = now.toDateString();
 
-          if (bookings.length === 0) {
-            pastBookingsList.innerHTML = '<p class="no-bookings">No bookings found for the selected filters.</p>';
-            return;
-          }
+        //   const tickerItems = allBookings.map(booking => {
+        //     const bookingDate = new Date(booking.date);
+        //     const bookingTimeInMinutes = parseTime(booking.time);
+        //     const bookingEndTime = bookingTimeInMinutes + 30;
+        //     let status = 'upcoming';
+        //     let statusClass = 'upcoming';
 
-          bookings.sort((a, b) => {
-            const dateA = new Date(a.date);
-            const dateB = new Date(b.date);
-            if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
-            return parseTime(a.time) - parseTime(b.time);
-          });
+        //     if (bookingDate.toDateString() === currentDateStr) {
+        //       if (bookingTimeInMinutes <= currentTimeInMinutes && currentTimeInMinutes < bookingEndTime) {
+        //         status = 'ongoing';
+        //         statusClass = 'ongoing';
+        //       } else if (bookingEndTime <= currentTimeInMinutes) {
+        //         status = 'completed';
+        //         statusClass = 'completed';
+        //       }
+        //     } else if (bookingDate < now) {
+        //       status = 'completed';
+        //       statusClass = 'completed';
+        //     }
 
-          pastBookingsList.innerHTML = bookings.map(booking => `
+        //     return `
+        //       <span>
+        //         <span>
+        //           ${booking.name || 'Unknown'} (${booking.department || 'N/A'}) - 
+        //           ${booking.date} ${booking.time} - 
+        //           <span class="status ${statusClass}">${status}</span>
+        //         </span>
+        //         <span class="ticker-separator"> | </span>
+        //       </span>
+        //     `;
+        //   }).join('');
+
+        //   tickerContent.innerHTML = tickerItems + tickerItems;
+        // }
+
+        async function populatePastBookingsFilters() {
+            if (!currentUser) return;
+
+            try {
+                const departments = new Set();
+                const q = query(collection(db, 'bookings'));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.department) departments.add(data.department);
+                });
+
+                pastBookingsDepartment.innerHTML = '<option value="">All Departments</option>';
+                departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept;
+                    option.textContent = dept;
+                    pastBookingsDepartment.appendChild(option);
+                });
+
+                const today = new Date().toISOString().split('T')[0];
+                pastBookingsDate.value = today;
+            } catch (error) {
+                console.error('Error populating filters:', error);
+            }
+        }
+
+        async function filterPastBookings() {
+            if (!currentUser) {
+                pastBookingsList.innerHTML = '<p class="no-bookings">Please sign in to view bookings.</p>';
+                return;
+            }
+
+            const selectedDate = pastBookingsDate.value;
+            const selectedDepartment = pastBookingsDepartment.value;
+
+            try {
+                let q = query(collection(db, 'bookings'));
+                if (selectedDate) {
+                    const dateStr = new Date(selectedDate).toDateString();
+                    q = query(q, where('date', '==', dateStr));
+                }
+                if (selectedDepartment) {
+                    q = query(q, where('department', '==', selectedDepartment));
+                }
+
+                const querySnapshot = await getDocs(q);
+                const bookings = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                if (bookings.length === 0) {
+                    pastBookingsList.innerHTML =
+                        '<p class="no-bookings">No bookings found for the selected filters.</p>';
+                    return;
+                }
+
+                bookings.sort((a, b) => {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
+                    return parseTime(a.time) - parseTime(b.time);
+                });
+
+                pastBookingsList.innerHTML = bookings.map(booking => `
             <div class="past-booking-entry">
               ${booking.name || 'Unknown'} (${booking.department || 'N/A'}) - 
               ${booking.date} ${booking.time} - 
               Purpose: ${booking.purpose || 'N/A'}
             </div>
           `).join('');
-        } catch (error) {
-          console.error('Error filtering bookings:', error);
-          pastBookingsList.innerHTML = '<p class="text-red-600">Error loading bookings.</p>';
+            } catch (error) {
+                console.error('Error filtering bookings:', error);
+                pastBookingsList.innerHTML = '<p class="text-red-600">Error loading bookings.</p>';
+            }
         }
-      }
 
-      pastBookingsDate.addEventListener('change', filterPastBookings);
-      pastBookingsDepartment.addEventListener('change', filterPastBookings);
+        pastBookingsDate.addEventListener('change', filterPastBookings);
+        pastBookingsDepartment.addEventListener('change', filterPastBookings);
 
-      prevMonthButton.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderCalendar();
-      });
+        prevMonthButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
 
-      nextMonthButton.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar();
-      });
+        nextMonthButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
 
-      setInterval(async () => {
-        if (currentUser) {
-          await updateMeetingRoomBoxWithCurrentBooking();
-          await debouncedRenderBookedSlots();
-          // await updateTicker();
-          await debouncedRenderTimeSlots();
+        setInterval(async () => {
+            if (currentUser) {
+                await updateMeetingRoomBoxWithCurrentBooking();
+                await debouncedRenderBookedSlots();
+                // await updateTicker();
+                await debouncedRenderTimeSlots();
+            }
+        }, 60000);
+
+        window.addEventListener('resize', () => {
+            renderCalendar();
+        });
+
+        // Menu navigation functionality
+        const menuButtons = document.querySelectorAll('.menu-nav button');
+        const sections = document.querySelectorAll('.section');
+
+        menuButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetSection = document.querySelector(`.${button.dataset.section}`);
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Update active menu item based on scroll position
+        function updateActiveMenuItem() {
+            const scrollPosition = window.scrollY;
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                const sectionClass = section.classList[0];
+
+                if (scrollPosition >= sectionTop - 100 && scrollPosition < sectionTop + sectionHeight -
+                    100) {
+                    menuButtons.forEach(button => {
+                        button.classList.remove('active');
+                        if (button.dataset.section === sectionClass) {
+                            button.classList.add('active');
+                        }
+                    });
+                }
+            });
         }
-      }, 60000);
 
-      window.addEventListener('resize', () => {
-        renderCalendar();
-      });
+        // Add scroll event listener
+        window.addEventListener('scroll', debounce(updateActiveMenuItem, 100));
+
+        // Initial call to set active menu item
+        updateActiveMenuItem();
     });
-  </script>
+    </script>
 </body>
 
 </html>
+
