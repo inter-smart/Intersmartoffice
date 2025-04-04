@@ -648,14 +648,16 @@
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         padding: 20px;
-        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        position: relative;
     }
 
     .time-slots-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 20px;
         padding-bottom: 15px;
         border-bottom: 1px solid #e7edf3;
     }
@@ -672,15 +674,48 @@
         font-size: 16px;
         font-weight: 500;
         margin: 0;
-        padding: 0;
+    }
+
+    .reserve-button-container {
+        display: flex;
+        justify-content: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #e7edf3;
+    }
+
+    .reserve-button {
+        min-width: 200px;
+        height: 44px;
+        padding: 0 24px;
+        background-color: #5A6268;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .reserve-button:hover:not(:disabled) {
+        background-color: #4a5156;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .reserve-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     .time-slots {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 15px;
-        margin-bottom: 20px;
-        padding: 15px;
+        padding: 15px 0;
+        max-height: 500px;
+        overflow-y: auto;
     }
 
     .time-slots button {
@@ -987,7 +1022,7 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         padding: 20px;
         height: fit-content;
-        max-height: 600px;
+        max-height: 500px;
         overflow-y: auto;
     }
 
@@ -1074,6 +1109,69 @@
 
     .booked-slot .flex-1 p {
       margin: 4px 0;
+    }
+
+    /* Scrollbar styling */
+    .time-slots::-webkit-scrollbar,
+    #bookedSlots::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .time-slots::-webkit-scrollbar-track,
+    #bookedSlots::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .time-slots::-webkit-scrollbar-thumb,
+    #bookedSlots::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+
+    .time-slots::-webkit-scrollbar-thumb:hover,
+    #bookedSlots::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    @media (max-width: 768px) {
+        .time-slots-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+            padding-bottom: 100px;
+        }
+
+        .time-slots-header {
+            order: 1;
+        }
+
+        .time-slots {
+            order: 2;
+            max-height: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .reserve-button-container {
+            order: 3;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 16px;
+            border-top: 1px solid #e7edf3;
+            border-bottom: none;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            margin: 0;
+        }
+
+        .reserve-button {
+            width: 90%;
+            max-width: 400px;
+        }
     }
     </style>
     <script>
@@ -1259,16 +1357,17 @@
                                         <h3>Available Time Slots</h3>
                                         <p id="selectedDate"></p>
                                     </div>
+                                    <div class="reserve-button-container">
+                                        <button id="reserveButton" class="reserve-button" disabled>
+                                            Reserve Selected Slots
+                                        </button>
+                                    </div>
                                     <div id="timeSlots" class="time-slots"></div>
                                 </div>
                             </div>
                             <div class="reserve-button-section section">
                                 <div class="flex justify-center px-4 py-3 gap-4 bottom-buttons">
-                                    <button id="reserveButton"
-                                        class="reserve-button flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#5A6268] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled>
-                                        <span class="truncate">Reserve Selected Slots</span>
-                                    </button>
+                                    
                                 </div>
                             </div>
 
@@ -1558,8 +1657,13 @@
                 bookNowButton.classList.add('hidden');
                 welcomeMessage.classList.remove('hidden');
                 welcomeText.textContent = `Welcome ${user.displayName || 'User'}`;
+                
+                // Hide home screen and show booking screen
                 homeScreen.style.display = 'none';
                 bookingScreen.style.display = 'block';
+                bookingScreen.classList.remove('hidden');
+                
+                // Initialize the booking interface
                 initializeBookingInterface();
             } else {
                 signInButton.classList.remove('hidden');
@@ -1567,13 +1671,17 @@
                 signOutButton.classList.add('hidden');
                 bookNowButton.classList.remove('hidden');
                 welcomeMessage.classList.add('hidden');
+                
+                // Show home screen and hide booking screen
                 homeScreen.style.display = 'flex';
                 bookingScreen.style.display = 'none';
-                timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
-                bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
+                bookingScreen.classList.add('hidden');
+                
+                // Clear booking data
+                if (timeSlots) timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
+                if (bookedSlots) bookedSlots.innerHTML = '<p>Please sign in to view booked slots.</p>';
                 updateMeetingRoomBox(null);
             }
-            // updateTicker();
         });
 
         bookNowButton.addEventListener('click', () => {
@@ -2599,4 +2707,3 @@
 </body>
 
 </html>
-
