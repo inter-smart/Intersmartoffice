@@ -651,7 +651,6 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
-        position: relative;
     }
 
     .time-slots-header {
@@ -714,8 +713,6 @@
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 15px;
         padding: 15px 0;
-        max-height: 500px;
-        overflow-y: auto;
     }
 
     .time-slots button {
@@ -763,14 +760,15 @@
 
     .no-slots-message {
         grid-column: 1 / -1;
-        color: red;
-        padding: 10px;
+        color: #e25c69;
+        padding: 20px;
         text-align: center;
         font-size: 14px;
         line-height: 1.5;
         background-color: #fff;
-        border-radius: 4px;
+        border-radius: 8px;
         margin: 0;
+        border: 1px solid #e7edf3;
     }
 
     button {
@@ -1069,10 +1067,41 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
       min-height: 28px;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 60px;
     }
 
     .delete-button:hover {
       background-color: #c82333;
+    }
+
+    .delete-button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .button-loader {
+      width: 12px;
+      height: 12px;
+      border: 2px solid #ffffff;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+      margin-left: 6px;
+    }
+
+    @keyframes rotation {
+      0% {
+          transform: rotate(0deg);
+      }
+      100% {
+          transform: rotate(360deg);
+      }
     }
 
     .buttons-container {
@@ -1138,8 +1167,7 @@
         .time-slots-container {
             display: flex;
             flex-direction: column;
-            min-height: 600px;
-            padding-bottom: 100px;
+            padding-bottom: 20px;
         }
 
         .time-slots-header {
@@ -1148,24 +1176,17 @@
 
         .time-slots {
             order: 2;
-            max-height: none;
-            flex: 1;
-            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
         }
 
         .reserve-button-container {
             order: 3;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
+            margin-top: auto;
             padding: 16px;
             border-top: 1px solid #e7edf3;
             border-bottom: none;
-            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            margin: 0;
         }
 
         .reserve-button {
@@ -1290,7 +1311,7 @@
                 <div class="menu-header">
                     <nav class="menu-nav">
                         <button data-section="calendar-container">Calendar</button>
-                        <button data-section="reserve-button-section">Booking Section</button>
+                        <button data-section="reserve-button-section">Booked Slots</button>
                     </nav>
                 </div>
                 <div class="px-30 flex flex-1 justify-center py-5">
@@ -1970,6 +1991,7 @@
         async function renderTimeSlots() {
             if (!currentUser) {
                 timeSlots.innerHTML = '<p>Please sign in to view available time slots.</p>';
+                document.querySelector('.reserve-button-container').style.display = 'none';
                 return;
             }
 
@@ -1987,6 +2009,7 @@
 
                 if (new Date(dateKey) < today) {
                     timeSlots.innerHTML = '<p class="no-slots-message">Cannot book past dates.</p>';
+                    document.querySelector('.reserve-button-container').style.display = 'none';
                     return;
                 }
 
@@ -2000,8 +2023,7 @@
                 allTimeSlots.forEach(slot => {
                     const slotButton = document.createElement('button');
                     slotButton.textContent = slot;
-                    slotButton.className =
-                        'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
+                    slotButton.className = 'p-2 border rounded text-[#0e141b] text-sm font-medium leading-normal';
 
                     const slotTimeInMinutes = parseTime(slot);
                     const slotEndTime = slotTimeInMinutes + 30;
@@ -2014,8 +2036,7 @@
                     } else {
                         slotButton.addEventListener('click', () => {
                             slotButton.classList.toggle('selected');
-                            selectedTimeSlots = Array.from(timeSlots.querySelectorAll(
-                                '.selected')).map(el => el.textContent);
+                            selectedTimeSlots = Array.from(timeSlots.querySelectorAll('.selected')).map(el => el.textContent);
                             reserveButton.disabled = !selectedTimeSlots.length;
                         });
                         availableSlots++;
@@ -2023,9 +2044,13 @@
                     timeSlots.appendChild(slotButton);
                 });
 
+                // Show/hide reserve button container based on available slots
+                const reserveButtonContainer = document.querySelector('.reserve-button-container');
                 if (availableSlots === 0) {
-                    timeSlots.innerHTML =
-                        '<p class="no-slots-message">No slots available for this day | All slots booked</p>';
+                    timeSlots.innerHTML = '<p class="no-slots-message">No slots available for this day | All slots booked</p>';
+                    reserveButtonContainer.style.display = 'none';
+                } else {
+                    reserveButtonContainer.style.display = 'flex';
                 }
             } finally {
                 renderingLock = false;
@@ -2468,7 +2493,15 @@
         });
 
         async function deleteBooking(bookingId) {
+            const deleteButton = document.querySelector(`.delete-button[data-id="${bookingId}"]`);
+            if (!deleteButton) return;
+
             try {
+                // Disable button and show loader
+                deleteButton.disabled = true;
+                const originalText = deleteButton.textContent;
+                deleteButton.innerHTML = 'Deleting<span class="button-loader"></span>';
+
                 const docRef = doc(db, 'bookings', bookingId);
                 const docSnap = await getDoc(docRef);
                 if (!docSnap.exists()) {
@@ -2486,8 +2519,7 @@
                     return;
                 }
 
-                if (bookingData.date === now.toDateString() && bookingTimeInMinutes <=
-                    currentTimeInMinutes) {
+                if (bookingData.date === now.toDateString() && bookingTimeInMinutes <= currentTimeInMinutes) {
                     alert('Cannot delete a booking that has already started.');
                     return;
                 }
@@ -2499,10 +2531,14 @@
                 await renderTimeSlots();
                 await debouncedRenderBookedSlots();
                 await updateMeetingRoomBoxWithCurrentBooking();
-                // await updateTicker();
             } catch (error) {
                 console.error('Error deleting booking:', error);
                 alert('Failed to delete booking: ' + error.message);
+                // Reset button state on error
+                if (deleteButton) {
+                    deleteButton.disabled = false;
+                    deleteButton.innerHTML = originalText;
+                }
             }
         }
 
